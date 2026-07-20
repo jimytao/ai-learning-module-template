@@ -86,46 +86,80 @@ Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典
 
 ---
 
-## 6. 交互组件（与 tech_spec 一致）
+## 6. 交互组件与自动保存机制 (Interactive Elements & Autosave)
 
-前端需解析并持久化：
+前端必须能够解析 Markdown 正文中的交互元素，在浏览器中渲染为 HTML 交互控件，且在用户操作（输入/勾选）时实时、自动地将答案写回源 Markdown 文件中。
 
-- `___` / `__已填__` 填空  
-- `**[Your Answer]**` 文本框  
-- `- [ ]` / `- [x]`（含 MCQ、T/F）  
-- 批改用 `details.feedback-panel` 与 `span.err|fix|warn`  
+### 6.1 交互元素解析与渲染规则
 
-用户作答写回 md 或并行 answer store 均可，但**刷新后不得丢答**。
+| 元素类型 | Markdown 语法 | HTML 渲染形式 | 解析与写回逻辑 |
+| :--- | :--- | :--- | :--- |
+| **空格填空** | `___` (3个及以上下划线) | `<input type="text" class="interactive-blank" data-index="N" />` | **解析**：将连续下划线替换为输入框。<br>**写回**：当输入框发生变化，前端将内存中 Markdown 的第 N 个 `___` 替换为 `__用户答案__`（注意是双下划线包裹答案）。 |
+| **已填填空** | `__已填内容__` (双下划线包裹) | `<input type="text" class="interactive-blank" data-index="N" value="已填内容" />` | **解析**：解析双下划线包裹的文本，渲染为带默认值的输入框。<br>**写回**：当用户修改输入，更新双下划线内的内容为 `__新内容__`。若用户清空，则退化回三个下划线 `___`。 |
+| **主观问答** | `**[Your Answer]**` 或 `**[Your Answer]**: (答案)` | `<textarea class="interactive-textarea" data-index="N">答案</textarea>` | **解析**：匹配行首或列表项中的 `**[Your Answer]**` 标记。若冒号后或括号内有答案，则作为 textarea 初始值。<br>**写回**：用户输入时，在 Markdown 对应行的 `**[Your Answer]**:` 后面更新为 `(用户答案)` 或紧跟 `用户答案`，保持 Markdown 语法结构。 |
+| **单选/多选/判断** | `- [ ]` 或 `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **解析**：标准的 Markdown 任务列表语法，渲染为可勾选的 checkbox。<br>**写回**：用户勾选/取消勾选时，将内存中 Markdown 对应位置的 `[ ]` 切换为 `[x]`，反之亦然。 |
 
----
+### 6.2 自动保存信息流 (Autosave Flow)
 
-## 7. 多文档项目的精细规则
-
-```
-打开浏览器
-  → 拉取 content 列表（仅 magazines + units）
-  → 按 sortOrder 展示
-  → 用户点开 file A
-       → 渲染 A
-       → applyAnnotations( notes.filter(n => n.file === A) )
-       → Notes Tab 只显示 A（除非 showAll）
-  → 用户点开 file B
-       → 同上切换；A 的注释仍留在 notes.json，互不覆盖
-```
-
-Smart merge（服务端）：保存 notes 时保留已有 `aiReview` 与 `content_summary`，避免前端保存冲掉 AI 批改。
+1. **内存副本维护**：前端加载 Markdown 后，在内存中保留一份 raw Markdown 字符串副本。
+2. **事件监听与防抖**：监听所有交互控件的 `input` 或 `change` 事件。当用户输入时，利用 **防抖函数 (Debounce，建议 500ms - 1000ms)**，避免频繁向后台发送请求。
+3. **全量写回**：防抖触发后，前端运行替换算法更新内存中的 Markdown 字符串，然后发起 `POST /api/save` 接口。
+4. **接口契约**：
+   * **请求路径**：`/api/save`
+   * **Payload**：`{ path: "content/units/unit01.md", content: "更新后的全量Markdown文本..." }`
+   * **后端行为**：后端接收到请求后，校验 `path` 安全性，直接覆盖写入对应的源文件。
+5. **批改面板渲染**：
+   * 批改结果使用 `details.feedback-panel`（折叠反馈面板）包裹。
+   * 文本错误标注使用 `<span class="err">错误词</span>` (红色中划线/背景) 与 `<span class="fix">修改词</span>` (绿色下划线/背景) 渲染，前端需要对这些特定的 HTML 标签予以保留和渲染。
 
 ---
 
-## 8. 迁入来源建议
+## 7. 多文档项目的精细规则与通用阅读器融合
 
-| 能力 | 优先参考 |
-| :--- | :--- |
-| 多期杂志列表 + 排序 + Notes 按期过滤 | `Melbourne culture magazine/index.html` + `server.js` |
-| Week 分组课本 + 填空/[Your Answer] + 批改面板 | `English learning for Melbourne/scripts/preview.html` |
-| imageQuery 下载 | 本仓库 `scripts/download_images.py` |
+新项目初始化时，前端必须将**杂志模式 (Magazines)** 和**课本模式 (Units)** 融合进一个统一的单页阅读器（Universal Reader）中。
 
-迁入后把路径改为 `content/magazines` 与 `content/units`，并实现本文件验收清单。
+### 7.1 通用版面布局 (Layout)
+
+```
++-----------------------------------------------------------------------+
+|  LOGO  [通用阅读器]                [当前期/单元标题]          [保存/导出/主题] |
++------------------------------------+----------------------------------+
+| Sidebar (左侧栏)                   | Main Viewport (主阅读区)         |
+|                                    |                                  |
+| +--------------------------------+ | +------------------------------+ |
+| | Tab 1: Contents (目录树)        | | |                              | |
+| | - Magazines (杂志列表，新->旧)  | | |   Markdown 渲染内容          | |
+| | - Units (课本单元，按Week分组) | | |   (填空、选择、问答交互控件)    | |
+| +--------------------------------+ | |                              | |
+| | Tab 2: Concepts (词汇与概念)    | | |   Mermaid 图表 / SVG 可视化  | |
+| +--------------------------------+ | |                              | |
+| | Tab 3: Notes (高亮注释与批改)    | | +------------------------------+ |
+| +--------------------------------+ |                                  |
++------------------------------------+----------------------------------+
+```
+
+### 7.2 核心融合交互契约
+
+1. **侧栏多模态目录展示**：
+   * 前端通过 `/api/files` (或 `/api/issues`) 接口获取所有可用文件。
+   * 必须在 **Contents** 侧栏中清晰分组展示：`content/magazines/` 下的杂志列表与 `content/units/` 下的课本列表。
+   * 支持通过按钮在 `localStorage` 中持久化记录排序规则（`desc` / `asc`）。
+2. **注释隔离与 Smart Merge**：
+   * `notes.json` 存储所有的用户高亮及 AI 批复。
+   * 打开 A 文件时，正文仅应用 `file === 'content/magazines/A.md'` 的高亮，Notes Tab 默认也只展示当前文件的注释。
+   * **Smart Merge (后端核心细节)**：当用户在前端添加或修改注释并保存 `notes.json` 时，后端在写入前必须读取已有的 `notes.json`，**合并**新旧数据，绝对不能覆盖或冲掉 AI 已经在 `aiReview` 字段中写入的批改和反馈信息。
+
+---
+
+## 8. 迁入与开发参考建议
+
+当我们在 Phase 0 之后正式开发或迁入浏览器前端时，请遵循以下模块进行整合：
+
+1. **服务器与路由基础**：参考 `Melbourne culture magazine/server.js`，保留其静态文件托管、`/api/save` 全量保存以及 `notes.json` 的 Smart Merge 逻辑。
+2. **多期目录与注释跳转**：参考 `Melbourne culture magazine/index.html` 中的 Notes 高亮创建、Floating Panel 浮层编辑、基于 `context` + `contextOffset` 的精确定位逻辑。
+3. **课本交互控件与作答渲染**：参考 `English learning for Melbourne/scripts/preview.html` 中将 `___`、`- [ ]`、`**[Your Answer]**` 动态转换为交互 DOM 并在发生变化时触发自动保存的 Javascript 逻辑。
+4. **可视化模块**：引入 `scripts/viz.css` 以保证工程框图、SVG 和 Mermaid 样式全局统一，且不被 Markdown 渲染引擎破坏。
+
 
 ---
 

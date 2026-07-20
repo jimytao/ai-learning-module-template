@@ -35,7 +35,10 @@ Follow AGENT.md and run Phase 0 / bootstrap.
 
 (Chinese also works: `按 AGENT.md 做 Phase 0 / 初始化。`)
 
-3. After you confirm the profile and modality: say “schedule” → “generate” → study / highlight → “grade my work”.
+3. After you confirm the profile and modality and set up your browser server files:
+   * Run the root **`start.bat`** script to launch the local web server with one click.
+   * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"** (or `执行 protocols/cleanup_template.md 清理`). The AI will automatically clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
+4. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
 
 ### Learning modality presets
 
@@ -63,9 +66,10 @@ See [`protocols/project_lifecycle.md`](protocols/project_lifecycle.md).
 ## Repository layout
 
 ```
-AGENT.md                 # Sole AI router / entrypoint
+AGENT.md                 # Sole AI router / entrypoint (Bootstrap post-cleanup removes setup guides)
+start.bat                # One-click Windows batch file to start the web server (node)
 DESIGN.md                # Design rationale
-protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec…
+protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec, cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / modalities
 state/                   # log / gaps / warehouse
 content/magazines/       # Long-form rich input
@@ -79,8 +83,9 @@ review.md                # Grading retrospectives archive
 | Path | Role |
 | :--- | :--- |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 intake confirmation checklist |
+| [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | One-time post-initialization cleanup instructions (deletes itself) |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | Hard syntax for flow / tree / blocks / SVG-lite… |
-| [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | Reader acceptance (sort order, Notes jump, viz render) |
+| [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | Universal Reader specs (blanks/textarea autosaves, Notes jump, viz render) |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | Interactive Markdown validation |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave image download (`BRAVE_API_KEY`) |
 
@@ -89,6 +94,9 @@ review.md                # Grading retrospectives archive
 ## Scripts
 
 ```bash
+# Start the server (once browser server files are created)
+start.bat
+
 # Validate interactive markdown + visual headers under content/
 node scripts/validate_content.js
 
@@ -101,10 +109,11 @@ python scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## Not included yet
 
-The browser preview reader is not shipped in this repo. When you add one, implement against [`protocols/frontend_spec.md`](protocols/frontend_spec.md) (directory sort, Notes sidebar, sentence-level `context` positioning, Mermaid / viz rendering, etc.).
+The browser HTML/JS implementation files are not shipped in this repository. When building or copying your own browser viewer and server, refer to [`protocols/frontend_spec.md`](protocols/frontend_spec.md). It documents the complete merged specifications for both Textbook mode (inputs, textareas, checkboxes autosaved back to markdown) and Magazine mode (concept jumps, context-aware annotations with smart merge, and a visual layout).
 
 ---
 
 ## License
 
 [MIT](LICENSE) — free to use, modify, and redistribute.
+

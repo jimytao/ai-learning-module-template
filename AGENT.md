@@ -35,6 +35,7 @@
 
 ---
 
+<!-- TEMPLATE_BOOTSTRAP_START -->
 ## Bootstrap 后改造（空白模板 → 本科目学习项目）
 
 > Phase 0 用户确认卡通过后，AI **必须**改写本 `AGENT.md`（及下列清理），让仓库从「通用模板」变成「该科目的学习项目」。  
@@ -49,6 +50,9 @@
 | 开篇说明 | 删除「空白模板」套话；改为本科目一句话目标（来自 profile） |
 | 文件地图中的 content 说明 | 可注明本科目主模态（例如「以 Magazine 为主」） |
 | 黄金规则第 8 条 | 模板态的「不得预填个人信息」改为：「画像以 profile 为准；勿编造未提供信息」 |
+
+> [!IMPORTANT]
+> **自动清理步骤**：在 Phase 0 确认卡通过、浏览器与服务器生成完毕且 `start.bat` 配置好后，AI **必须**主动加载并读取 `protocols/cleanup_template.md`，执行其定义的模板精简与文件清理程序，使项目彻底转为科目专属态，并在完成后**自我删除**该清理协议文件。
 
 ### 可以精简 / 归档的部分
 
@@ -73,7 +77,9 @@
 - [ ] 状态区无「未设定」  
 - [ ] 模态预设已写  
 - [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
+- [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（该清理文件已被自动删除）  
 - [ ] 下一步指向 Phase 1  
+<!-- TEMPLATE_BOOTSTRAP_END -->
 
 ---
 
@@ -81,10 +87,12 @@
 
 ```
 AGENT.md                          ← 入口路由（本文件；Bootstrap 后会改写）
+start.bat                         ← 浏览器与本地服务器一键启动脚本
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0：采集确认清单（强制）
 │   ├── p0_bootstrap.md           ← Phase0：写入与 AGENT 改造流程
+│   ├── cleanup_template.md       ← Phase0：一次性模板清理与精简协议（执行后自毁）
 │   ├── project_lifecycle.md      ← 复制新科目 / 归档 / 母模板升级
 │   ├── p1_propose.md
 │   ├── p2_generate.md

@@ -34,7 +34,10 @@
 
 （英文也可以：`Follow AGENT.md and run Phase 0 / bootstrap.`）
 
-3. 确认画像与模态后，说「排期」→「开始生成」→ 学习 / 高亮 →「帮我批改」。
+3. 在确认画像与模态并创建好浏览器服务器文件后：
+   * 双击运行根目录下的 **`start.bat`** 启动脚本，一键运行本地 web 服务器。
+   * 对 AI 说：**「执行 protocols/cleanup_template.md 清理」**（或英文 `execute cleanup using protocols/cleanup_template.md`）。AI 会自动根据 HTML 注释锚点彻底清除 `AGENT.md` 中的初始化模板套话，并将清理协议文件自身删除。
+4. 正式开始学习：说「排期」→「开始生成」→ 学习 / 高亮 →「帮我批改」。
 
 ### 学习模态预设
 
@@ -62,9 +65,10 @@
 ## 仓库结构
 
 ```
-AGENT.md                 # AI 唯一入口路由
+AGENT.md                 # AI 唯一入口路由 (初始化清理后会自动移除模板说明)
+start.bat                # Windows 一键启动 Node 服务器脚本
 DESIGN.md                # 设计逻辑
-protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec…
+protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec、cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / 模态预设
 state/                   # log / gaps / warehouse
 content/magazines/       # 长文富输入
@@ -78,8 +82,9 @@ review.md                # 批改复盘存档
 | 路径 | 作用 |
 | :--- | :--- |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 采集确认清单 |
+| [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | 一次性初始化后模板清理与精简协议（执行后自毁） |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | 流程/树/框图/SVG 等硬语法 |
-| [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | 阅读器验收（排序、Notes 跳转、图示渲染） |
+| [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | 通用阅读器验收规范（含填空/问答自动写回、Notes 跳转、图示渲染） |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | 交互 Markdown 校验 |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave 图片下载（需 `BRAVE_API_KEY`） |
 
@@ -88,6 +93,9 @@ review.md                # 批改复盘存档
 ## 工具脚本
 
 ```bash
+# 启动本地服务器 (创建浏览器服务端文件后可用)
+start.bat
+
 # 校验 content 下交互格式与图示声明头
 node scripts/validate_content.js
 
@@ -100,10 +108,11 @@ python scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## 尚未包含
 
-预览前端（浏览器阅读器）未整包迁入；迁入时按 [`protocols/frontend_spec.md`](protocols/frontend_spec.md) 验收（目录排序、侧栏 Notes、整句 context 定位、Mermaid / viz 渲染等）。
+本仓库目前不直接包含网页端/浏览器的 HTML/JS 实现代码。在后续迁入或开发您的阅读器和服务器时，请严格参考 [`protocols/frontend_spec.md`](protocols/frontend_spec.md)。该文档制定了 Textbook 模式（填空、选择、文本框输入实时回写保存至源文件）与 Magazine 模式（目录排序、基于 context 定位的高亮标注、Smart Merge 智能合并）相融合的完整规范。
 
 ---
 
 ## License
 
 [MIT](LICENSE) — 可自由使用、修改、分发。
+
