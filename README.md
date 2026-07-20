@@ -102,4 +102,4 @@ python scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## License
 
-Personal learning template — 默认私有备份。若你 fork 后公开使用，请自行补充 License。
+MIT License — 可自由使用、修改、分发本模板。见 [`LICENSE`](LICENSE)。
