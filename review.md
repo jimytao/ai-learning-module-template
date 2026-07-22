@@ -1,29 +1,29 @@
-# AI 批改历史存档 (review.md)
+# AI Grading History Archive (review.md)
 
-> 与 `notes.json` 的逐条 `aiReview` 互补：本文件按期/按单元存**可读的复盘长文**，方便日后检索，不依赖前端。  
-> Phase 3 结束时追加章节；**不要**删旧章。
-
----
-
-## 使用规则
-
-1. 每完成一次 Phase 3，在文件末尾追加一节。  
-2. 标题格式：`## Magazine.NN: 标题` 或 `## Unit.NN: 标题` + 日期。  
-3. 须含：掌握度（若有）/ 再认层与产出层分报 / 关键错点 / 已写入 gaps 的 ID / 是否询问过加练及用户答复。  
-4. 详细逐词批注仍以 `notes.json` 为准；本文件写总结，避免把整段 HTML 贴进来。
+> Complements per-item `aiReview` in `notes.json`: this file stores **readable long retrospectives** per issue/unit for later search, without depending on the frontend.  
+> Append a section at the end of Phase 3; **do not** delete old chapters.
 
 ---
 
-## 章节模板
+## Usage rules
+
+1. After each Phase 3, append one section at the end of the file.  
+2. Title format: `## Magazine.NN: Title` or `## Unit.NN: Title` + date.  
+3. Must include: mastery (if any) / recognition vs production split / critical mistakes / gap IDs written / whether extra drills were asked and the user’s reply.  
+4. Word-level detail stays in `notes.json`; this file is summary — avoid pasting whole HTML panels.
+
+---
+
+## Section template
 
 ```markdown
-## Unit.01: [标题] — YYYY-MM-DD
+## Unit.01: [title] — YYYY-MM-DD
 
 ### Overall
-- 再认层：MCQ x/y · T/F x/y
-- 产出层：…
-- 注释掌握度：…%（A/B/C/N = …）
-- 加练：已询问 → 用户 [同意/拒绝/未答]
+- Recognition: MCQ x/y · T/F x/y
+- Production: …
+- Annotation mastery: …% (A/B/C/N = …)
+- Extra drills: asked → user [agreed / declined / no reply]
 
 ### Key corrections
 1. …
@@ -38,4 +38,4 @@
 
 ---
 
-（尚无条目 — Phase 3 后由 AI 追加）
+(No entries yet — AI appends after Phase 3)

@@ -1,238 +1,237 @@
-# 阅读器 / 前端规范 (frontend_spec.md)
+# Reader / Frontend Spec (frontend_spec.md)
 
-> 从 English Learning 预览器与 Culture Magazine 阅读器提炼的**必须保留的产品细节**。  
-> 本仓库当前以 Markdown + 协议为主；迁入或重做前端时，**按本文件验收**，不得丢行为。
+> Must-keep product details distilled from the English Learning previewer and Culture Magazine reader.  
+> This repo is Markdown + protocols first; when migrating or rebuilding the frontend, **accept against this file** — do not drop behaviors.
 
 ---
 
-## 1. 内容来源与隔离（防搞混）
+## 1. Content sources & isolation (anti-mix)
 
-| 规则 | 说明 |
+| Rule | Note |
 | :--- | :--- |
-| 只列出学习内容 | 侧边栏「目录」只显示 `content/magazines/*.md` 与 `content/units/*.md` |
-| 禁止露出内部文件 | 不得把 `protocols/` `knowledge/` `state/` `scripts/` `DESIGN.md` `AGENT.md` 放进阅读目录 |
-| 分组清晰 | 建议两组：`Magazines` / `Units`（或按编号）；打开一份时高亮当前项 |
-| 注释按文件隔离 | `notes.json` 每条必须有 `file`（或兼容字段 `issue`）指向**那一篇** md |
-| 默认只看当前篇注释 | Notes 侧栏默认 `showAll = false`，只渲染 `file === 当前打开路径` 的条目 |
-| 可切换「全部注释」 | 提供开关查看跨文档注释，但默认关闭，避免杂志多期搞混 |
-| 批改也按文件过滤 | Phase 3 / 前端展示 AI 批注时，同样按当前 `file` 过滤 |
+| Learning content only | Sidebar TOC lists only `content/magazines/*.md` and `content/units/*.md` |
+| Hide internal files | Never put `protocols/` `knowledge/` `state/` `scripts/` `DESIGN.md` `AGENT.md` in the reading TOC |
+| Clear grouping | Suggest two groups: `Magazines` / `Units` (or by number); highlight the open item |
+| Notes isolated per file | Every `notes.json` entry must have `file` (or compatible `issue`) pointing to **that** md |
+| Default: current-file notes only | Notes sidebar default `showAll = false`; render only `file === current path` |
+| Optional “all notes” | Provide a toggle for cross-doc notes; default off to avoid multi-issue mixups |
+| Grading filtered by file | Phase 3 / frontend AI annotations also filter by current `file` |
 
-路径一经生成不要随便改名；若必须重命名，同步改 `notes.json` 里所有对应 `file`。
+Once generated, do not casually rename paths; if you must, sync every matching `file` in `notes.json`.
 
 ---
 
-## 2. 目录排序（新到旧 / 旧到新）
+## 2. TOC sort (newest first / oldest first)
 
-| 规则 | 说明 |
+| Rule | Note |
 | :--- | :--- |
-| 可切换 | 侧栏提供排序按钮：`旧 → 新` / `新 → 旧` |
-| 默认 | **新 → 旧**（`desc`），方便续读最新一期/单元 |
-| 持久化 | 写入 `localStorage`（键名建议：`ltm_sort_order`） |
-| 排序键 | 优先按文件名中的编号 `magazineNN` / `unitNN`；否则按 mtime |
+| Toggleable | Sidebar sort button: `old → new` / `new → old` |
+| Default | **new → old** (`desc`) for continuing the latest issue/unit |
+| Persist | `localStorage` (suggested key: `ltm_sort_order`) |
+| Sort key | Prefer `magazineNN` / `unitNN` in filename; else mtime |
 
-Textbook 源项目与 Magazine 源项目均已实现该切换；迁入时保留同一交互。
+Both source projects implemented this toggle; keep the same interaction on migrate.
 
 ---
 
-## 3. 侧边栏结构（建议三 Tab）
+## 3. Sidebar structure (suggested three tabs)
 
-| Tab | 内容 | 行为 |
+| Tab | Content | Behavior |
 | :--- | :--- | :--- |
-| **Contents** | Magazines + Units 列表 | 点击打开对应 md；当前项 active |
-| **Concepts** | 从当期或 `log.md` Concept Ledger 解析的概念 | 点击跳到文内对应标题 / 锚点 |
-| **Notes** | 当前文件（或全部）的高亮与注释 | 点击跳转到正文中的标注处并打开编辑浮层 |
+| **Contents** | Magazines + Units list | Click opens md; current item active |
+| **Concepts** | Concepts from current piece or `log.md` Concept Ledger | Click jumps to in-doc heading / anchor |
+| **Notes** | Highlights & notes for current file (or all) | Click jumps to annotation in body and opens edit float |
 
-- 做了新注释 → **立即出现在 Notes Tab**（保存 `notes.json` 后刷新列表）。  
-- Concepts / Notes 的跳转必须稳定：依赖文内标题格式与标注 span，生成内容时遵守 `tech_spec.md`。
+- New note created → **appears immediately in Notes Tab** (refresh list after saving `notes.json`).  
+- Concepts / Notes jumps must be stable: depend on heading format and annotation spans; generators follow `tech_spec.md`.
 
 ---
 
-## 4. 注释：创建上下文定位（强制）
+## 4. Annotations: create with context (mandatory)
 
-> 仅存 `word` 不够：一词多处出现时无法精确定位，批改也失去语境。
+> Storing `word` alone is not enough: the same word may appear many times; grading also loses context.
 
-创建时前端必须静默写入：
+On create, the frontend must silently write:
 
-| 字段 | 含义 |
+| Field | Meaning |
 | :--- | :--- |
-| `word` | 用户选中的连续文本（单块内，无换行） |
-| `context` | **所在完整句子或当前块级段落**（推荐：整句；至少是所在 `<p>`/`<li>` 文本） |
-| `contextOffset` | `word` 在 `context` 内的起始字符偏移 |
-| `file` | 当前文档相对路径 |
-| `userNoteRaw` / `note` | 用户注释（AI 不覆盖 raw） |
+| `word` | Contiguous selected text (within one block, no newlines) |
+| `context` | **Full sentence or current block paragraph** (prefer whole sentence; at least the `<p>`/`<li>` text) |
+| `contextOffset` | Start char offset of `word` inside `context` |
+| `file` | Relative path of current doc |
+| `userNoteRaw` / `note` | User note (AI never overwrites raw) |
 
-定位算法优先级：
+Locate priority:
 
-1. 在当前文档 DOM 中找 `blockText === context` 的块，再在块内用 `word` + `contextOffset` 定位  
-2. 若无 `context`（老数据）：退化为全文搜 `word`（可能歧义，应避免新数据缺失 context）  
-3. Notes 列表排序：优先按正文物理顺序；否则按时间
+1. Find DOM block where `blockText === context`, then locate with `word` + `contextOffset`  
+2. If no `context` (legacy): fall back to full-doc search on `word` (ambiguous — avoid missing context on new data)  
+3. Notes list order: prefer document physical order; else by time
 
-**生成内容时的规避**（与源项目一致）：
+**Generation avoidances** (same as source projects):
 
-- 不要让关键术语只出现在代码块 / 跨 sticky-note 边界（会导致无法高亮）  
-- `word` 禁止跨段落  
+- Do not put critical terms only inside code fences / across sticky-note boundaries (cannot highlight)  
+- `word` must not cross paragraphs  
 
-Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典。
+Phase 3 grading: **must use `context` for situated explanation** — no dictionary dumps.
 
 ---
 
-## 5. 点击跳转体验体验
+## 5. Click-to-jump experience
 
-| 场景 | 期望 |
+| Scene | Expectation |
 | :--- | :--- |
-| Notes 列表点一条 | 滚动到正文标注 → 短暂高亮闪烁 → 打开编辑浮层（若有） |
-| Concepts 点一条 | 滚动到概念标题（Unit 的 `### N. 名称` 或 Mag 的 Key Ideas 锚点） |
-| 目录点一篇 | 加载该 md；Notes/Concepts 切换为该文件数据；不清空其它文件的 `notes.json` |
+| Click a Notes item | Scroll to body annotation → brief highlight flash → open edit float (if any) |
+| Click a Concepts item | Scroll to concept heading (Unit `### N. Name` or Mag Key Ideas anchor) |
+| Click a TOC item | Load that md; Notes/Concepts switch to that file’s data; never clear other files’ `notes.json` |
 
 ---
 
-## 6. 交互组件与自动保存机制 (Interactive Elements & Autosave)
+## 6. Interactive elements & autosave
 
-前端必须能够解析 Markdown 正文中的交互元素，在浏览器中渲染为 HTML 交互控件，且在用户操作（输入/勾选）时实时、自动地将答案写回源 Markdown 文件中。
+The frontend must parse interactive Markdown elements, render HTML controls, and on user input/check **realtime autosave answers back into the source Markdown**.
 
-### 6.1 交互元素解析与渲染规则
+### 6.1 Parse & render rules
 
-| 元素类型 | Markdown 语法 | HTML 渲染形式 | 解析与写回逻辑 |
+| Element | Markdown | HTML render | Parse / write-back |
 | :--- | :--- | :--- | :--- |
-| **空格填空** | `___` (3个及以上下划线) | `<input type="text" class="interactive-blank" data-index="N" />` | **解析**：将连续下划线替换为输入框。<br>**写回**：当输入框发生变化，前端将内存中 Markdown 的第 N 个 `___` 替换为 `__用户答案__`（注意是双下划线包裹答案）。 |
-| **已填填空** | `__已填内容__` (双下划线包裹) | `<input type="text" class="interactive-blank" data-index="N" value="已填内容" />` | **解析**：解析双下划线包裹的文本，渲染为带默认值的输入框。<br>**写回**：当用户修改输入，更新双下划线内的内容为 `__新内容__`。若用户清空，则退化回三个下划线 `___`。 |
-| **主观问答** | `**[Your Answer]**` 或 `**[Your Answer]**: (答案)` | `<textarea class="interactive-textarea" data-index="N">答案</textarea>` | **解析**：匹配行首或列表项中的 `**[Your Answer]**` 标记。若冒号后或括号内有答案，则作为 textarea 初始值。<br>**写回**：用户输入时，在 Markdown 对应行的 `**[Your Answer]**:` 后面更新为 `(用户答案)` 或紧跟 `用户答案`，保持 Markdown 语法结构。 |
-| **单选/多选/判断** | `- [ ]` 或 `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **解析**：标准的 Markdown 任务列表语法，渲染为可勾选的 checkbox。<br>**写回**：用户勾选/取消勾选时，将内存中 Markdown 对应位置的 `[ ]` 切换为 `[x]`，反之亦然。 |
+| **Empty blank** | `___` (≥3 underscores) | `<input type="text" class="interactive-blank" data-index="N" />` | **Parse**: replace underscore runs with inputs.<br>**Write-back**: on change, replace N-th `___` in memory Markdown with `__user answer__` (double underscores wrap the answer). |
+| **Filled blank** | `__filled content__` | `<input type="text" class="interactive-blank" data-index="N" value="filled content" />` | **Parse**: double-underscore wraps → input with default value.<br>**Write-back**: update to `__new content__`; if cleared, degrade back to `___`. |
+| **Open answer** | `**[Your Answer]**` or `**[Your Answer]**: (answer)` | `<textarea class="interactive-textarea" data-index="N">answer</textarea>` | **Parse**: match `**[Your Answer]**` at line start or list item; text after colon/in parens is initial value.<br>**Write-back**: update after `**[Your Answer]**:` to `(user answer)` or trailing answer, keeping Markdown structure. |
+| **Choice / T-F** | `- [ ]` or `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **Parse**: standard Markdown task list → checkbox.<br>**Write-back**: toggle `[ ]` ↔ `[x]` at the matching position. |
 
-### 6.2 自动保存信息流 (Autosave Flow)
+### 6.2 Autosave flow
 
-1. **内存副本维护**：前端加载 Markdown 后，在内存中保留一份 raw Markdown 字符串副本。
-2. **事件监听与防抖**：监听所有交互控件的 `input` 或 `change` 事件。当用户输入时，利用 **防抖函数 (Debounce，建议 500ms - 1000ms)**，避免频繁向后台发送请求。
-3. **全量写回**：防抖触发后，前端运行替换算法更新内存中的 Markdown 字符串，然后发起 `POST /api/save` 接口。
-4. **接口契约**：
-   * **请求路径**：`/api/save`
-   * **Payload**：`{ path: "content/units/unit01.md", content: "更新后的全量Markdown文本..." }`
-   * **后端行为**：后端接收到请求后，校验 `path` 安全性，直接覆盖写入对应的源文件。
-5. **批改面板渲染**：
-   * 批改结果使用 `details.feedback-panel`（折叠反馈面板）包裹。
-   * 文本错误标注使用 `<span class="err">错误词</span>` (红色中划线/背景) 与 `<span class="fix">修改词</span>` (绿色下划线/背景) 渲染，前端需要对这些特定的 HTML 标签予以保留和渲染。
+1. **In-memory copy**: after loading Markdown, keep a raw Markdown string in memory.  
+2. **Listen + debounce**: listen to `input` / `change` on all interactive controls. Use **debounce (suggested 500–1000ms)** to avoid flooding the backend.  
+3. **Full write-back**: on debounce fire, run replace algorithm on the in-memory string, then `POST /api/save`.  
+4. **API contract**:
+   * **Path**: `/api/save`
+   * **Payload**: `{ path: "content/units/unit01.md", content: "full updated Markdown…" }`
+   * **Backend**: validate `path` safety, then overwrite the source file.
+5. **Grading panel render**:
+   * Results wrap in `details.feedback-panel`.
+   * Errors use `<span class="err">wrong</span>` and `<span class="fix">fix</span>`; frontend must preserve and render these tags.
 
 ---
 
-## 7. 多文档项目的精细规则与通用阅读器融合
+## 7. Multi-doc rules & Universal Reader fusion
 
-新项目初始化时，前端必须将**杂志模式 (Magazines)** 和**课本模式 (Units)** 融合进一个统一的单页阅读器（Universal Reader）中。
+On new-project init, the frontend must fuse **Magazine mode** and **Unit mode** into one Universal Reader SPA.
 
-### 7.1 通用版面布局 (Layout)
+### 7.1 Layout
 
 ```
 +-----------------------------------------------------------------------+
-|  LOGO  [通用阅读器]                [当前期/单元标题]          [保存/导出/主题] |
+|  LOGO  [Universal Reader]          [current issue/unit title]  [save/export/theme] |
 +------------------------------------+----------------------------------+
-| Sidebar (左侧栏)                   | Main Viewport (主阅读区)         |
+| Sidebar                            | Main Viewport                    |
 |                                    |                                  |
 | +--------------------------------+ | +------------------------------+ |
-| | Tab 1: Contents (目录树)        | | |                              | |
-| | - Magazines (杂志列表，新->旧)  | | |   Markdown 渲染内容          | |
-| | - Units (课本单元，按Week分组) | | |   (填空、选择、问答交互控件)    | |
+| | Tab 1: Contents                | | |                              | |
+| | - Magazines (newest→oldest)    | | |   Rendered Markdown          | |
+| | - Units (optional week groups) | | |   (blanks, choices, answers) | |
 | +--------------------------------+ | |                              | |
-| | Tab 2: Concepts (词汇与概念)    | | |   Mermaid 图表 / SVG 可视化  | |
+| | Tab 2: Concepts                | | |   Mermaid / SVG visuals      | |
 | +--------------------------------+ | |                              | |
-| | Tab 3: Notes (高亮注释与批改)    | | +------------------------------+ |
+| | Tab 3: Notes                   | | +------------------------------+ |
 | +--------------------------------+ |                                  |
 +------------------------------------+----------------------------------+
 ```
 
-### 7.2 核心融合交互契约
+### 7.2 Core fusion contracts
 
-1. **侧栏多模态目录展示**：
-   * 前端通过 `/api/files` (或 `/api/issues`) 接口获取所有可用文件。
-   * 必须在 **Contents** 侧栏中清晰分组展示：`content/magazines/` 下的杂志列表与 `content/units/` 下的课本列表。
-   * 支持通过按钮在 `localStorage` 中持久化记录排序规则（`desc` / `asc`）。
-2. **注释隔离与 Smart Merge**：
-   * `notes.json` 存储所有的用户高亮及 AI 批复。
-   * 打开 A 文件时，正文仅应用 `file === 'content/magazines/A.md'` 的高亮，Notes Tab 默认也只展示当前文件的注释。
-   * **Smart Merge (后端核心细节)**：当用户在前端添加或修改注释并保存 `notes.json` 时，后端在写入前必须读取已有的 `notes.json`，**合并**新旧数据，绝对不能覆盖或冲掉 AI 已经在 `aiReview` 字段中写入的批改和反馈信息。
-
----
-
-## 8. 迁入与开发参考建议
-
-当我们在 Phase 0 之后正式开发或迁入浏览器前端时，请遵循以下模块进行整合：
-
-1. **服务器与路由基础**：参考 `Melbourne culture magazine/server.js`，保留其静态文件托管、`/api/save` 全量保存以及 `notes.json` 的 Smart Merge 逻辑。
-2. **多期目录与注释跳转**：参考 `Melbourne culture magazine/index.html` 中的 Notes 高亮创建、Floating Panel 浮层编辑、基于 `context` + `contextOffset` 的精确定位逻辑。
-3. **课本交互控件与作答渲染**：参考 `English learning for Melbourne/scripts/preview.html` 中将 `___`、`- [ ]`、`**[Your Answer]**` 动态转换为交互 DOM 并在发生变化时触发自动保存的 Javascript 逻辑。
-4. **可视化模块**：引入 `scripts/viz.css` 以保证工程框图、SVG 和 Mermaid 样式全局统一，且不被 Markdown 渲染引擎破坏。
-
+1. **Multi-mode TOC**:
+   * Fetch via `/api/files` (or `/api/issues`).
+   * Contents tab must group `content/magazines/` and `content/units/` clearly.
+   * Persist sort (`desc` / `asc`) in `localStorage` via a button.
+2. **Note isolation & Smart Merge**:
+   * `notes.json` stores all user highlights and AI reviews.
+   * Opening file A applies only `file === 'content/magazines/A.md'` highlights; Notes Tab defaults to current file only.
+   * **Smart Merge (backend)**: before writing `notes.json`, read existing file and **merge** — never wipe AI `aiReview` already written.
 
 ---
 
-## 9. 验收清单（前端 Ready 的定义）
+## 8. Migration & build references
 
-- [ ] 目录可 **新到旧 / 旧到新** 切换且持久化  
-- [ ] 内部 md 不出现在阅读目录  
-- [ ] Magazines 与 Units 分组、多文件不串注释  
-- [ ] 注释写入 `context` + `contextOffset`  
-- [ ] Notes 点击可跳转并打开编辑  
-- [ ] 新注释立即出现在侧栏  
-- [ ] 保存 notes 不丢 `aiReview`（Smart Merge）  
-- [ ] 填空 / 问答 / MCQ / T-F 可作答并回看  
-- [ ] TOC：每次正文重渲染后重建；点击用 `getElementById` 动态寻址（防 orphan DOM）  
-- [ ] 选词自动对齐到单词边界（避免漏选字母导致匹配失败）  
-- [ ] 标题内可高亮；代码块/`pre` 内不可高亮（与源项目一致）
+When building or migrating the browser frontend after Phase 0, integrate by module:
+
+1. **Server & routes**: reference `Melbourne culture magazine/server.js` — static hosting, `/api/save` full save, Smart Merge for `notes.json`.  
+2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset`.  
+3. **Textbook interactive controls**: reference `English learning for Melbourne/scripts/preview.html` — convert `___`, `- [ ]`, `**[Your Answer]**` to interactive DOM with autosave.  
+4. **Visual module**: import `scripts/viz.css` so blocks/SVG/Mermaid styles stay global and survive Markdown rendering.
 
 ---
 
-## 10. 渲染生命周期（迁自杂志 tech_spec）
+## 9. Acceptance checklist (frontend Ready)
 
-1. 修改标注会重写正文 `innerHTML` → 旧 DOM 引用全部失效。  
-2. 每次 `renderActiveFile()` 结束后必须立刻 `generateTOC()`。  
-3. TOC 点击不得缓存旧标题节点，必须按 id 现查现滚。
+- [ ] TOC toggles **newest/oldest** and persists  
+- [ ] Internal md never appears in reading TOC  
+- [ ] Magazines vs Units grouped; notes never cross files  
+- [ ] Notes write `context` + `contextOffset`  
+- [ ] Notes click jumps and opens edit  
+- [ ] New notes appear in sidebar immediately  
+- [ ] Saving notes never loses `aiReview` (Smart Merge)  
+- [ ] Blanks / open / MCQ / T-F answerable and reviewable  
+- [ ] TOC: rebuild after every body re-render; click uses `getElementById` live lookup (no orphan DOM)  
+- [ ] Selection snaps to word boundaries (avoid partial-letter match failures)  
+- [ ] Highlights allowed in headings; not inside code/`pre` (same as source projects)
 
 ---
 
-## 11. 可视化武器渲染契约（Visual Arsenal）
+## 10. Render lifecycle (from magazine tech_spec)
 
-> 权威语法见 `protocols/visual_arsenal.md`。此处只定**浏览器必须如何表现**，保证「怎么写就怎么显示、不崩、各期长得一样」。
+1. Editing annotations rewrites body `innerHTML` → all old DOM refs die.  
+2. After every `renderActiveFile()`, immediately `generateTOC()`.  
+3. TOC clicks must not cache old heading nodes — look up by id and scroll.
 
-### 11.1 依赖
+---
 
-| 能力 | 要求 |
+## 11. Visual Arsenal render contract
+
+> Authoritative syntax: `protocols/visual_arsenal.md`. Here only **how the browser must behave** so “write once, display consistently, never crash”.
+
+### 11.1 Dependencies
+
+| Capability | Requirement |
 | :--- | :--- |
-| Mermaid | 固定 CDN/本地版本（建议 ≥10）；**全局统一 theme**（如 `neutral` 或项目 CSS 变量映射）；禁止文档内 `init` 覆盖主题 |
-| marked | 代码块语言为 `mermaid` 时**不要**当普通 code 用 hljs 高亮；交给 Mermaid |
-| 消毒 | 正文 HTML 白名单含：`div.viz-*`、`sticky-note` 变体、svg 子集（见 arsenal §4.7） |
+| Mermaid | Fixed CDN/local version (suggest ≥10); **one global theme** (e.g. `neutral` or CSS-var map); no in-doc `init` theme overrides |
+| marked | `mermaid` code fences must **not** go through hljs as normal code; hand to Mermaid |
+| Sanitize | Body HTML whitelist includes: `div.viz-*`, sticky-note variants, SVG subset (arsenal §4.7) |
 
-### 11.2 渲染流程（每次打开/刷新文档）
+### 11.2 Render pipeline (each open/refresh)
 
 ```
 markdown → marked HTML
-  → 找到 .viz-blocks / .viz-svg / .viz-steps / .viz-formula / .sticky-note → 已是最终 DOM
-  → 找到 pre code.language-mermaid（或约定容器）
-       → 逐个 mermaid.render
-       → try/catch：失败则显示「图示渲染失败」+ 可展开源码，**绝不中断全文**
-  → 再 applyAnnotations / TOC
+  → find .viz-blocks / .viz-svg / .viz-steps / .viz-formula / .sticky-note → already final DOM
+  → find pre code.language-mermaid (or agreed container)
+       → mermaid.render each
+       → try/catch: on fail show “diagram render failed” + expandable source; **never abort the whole page**
+  → then applyAnnotations / TOC
 ```
 
-### 11.3 必须提供的 CSS class（名称锁定，禁止改名）
+### 11.3 Locked CSS class names (do not rename)
 
-| class | 作用 |
+| class | Role |
 | :--- | :--- |
-| `.viz-blocks` `.viz-blocks-row` `.viz-block` `.viz-block-accent` `.viz-arrow` `.viz-caption` | 工程框图 |
-| `.viz-block-title` `.viz-block-body` | 框图内文 |
-| `.viz-svg` `.viz-svg-node` `.viz-svg-edge` `.viz-svg-label` `.viz-svg-muted` | SVG 着色 |
-| `.viz-steps` | 步骤块 |
-| `.viz-formula` `.viz-formula-main` `.viz-formula-note` | 公式块 |
-| `.sticky-note.warn-note` `.sticky-note.formula-note` | 便利贴变体 |
+| `.viz-blocks` `.viz-blocks-row` `.viz-block` `.viz-block-accent` `.viz-arrow` `.viz-caption` | Engineering blocks |
+| `.viz-block-title` `.viz-block-body` | Block text |
+| `.viz-svg` `.viz-svg-node` `.viz-svg-edge` `.viz-svg-label` `.viz-svg-muted` | SVG coloring |
+| `.viz-steps` | Step blocks |
+| `.viz-formula` `.viz-formula-main` `.viz-formula-note` | Formula blocks |
+| `.sticky-note.warn-note` `.sticky-note.formula-note` | Sticky variants |
 
-参考样式可放 `scripts/viz.css`（迁入前端时引入）。小屏：`viz-blocks-row` 允许折行；mermaid 图 `max-width:100%`。
+Reference styles may live in `scripts/viz.css` (import on migrate). Small screens: `viz-blocks-row` may wrap; mermaid `max-width:100%`.
 
-### 11.4 一致性验收（防「每次长得不一样」）
+### 11.4 Consistency acceptance (anti “looks different every time”)
 
-- [ ] 所有 flowchart 同一 Mermaid theme  
-- [ ] 所有 `viz-block` 同一边框/圆角/字号  
-- [ ] caption 字号与正文 secondary 文本一致  
-- [ ] 失败图有统一错误 UI，不是空白或整页白屏  
-- [ ] 图示容器内点击不触发「新建填空」等误交互  
+- [ ] All flowcharts share one Mermaid theme  
+- [ ] All `viz-block` share border/radius/type size  
+- [ ] caption size matches body secondary text  
+- [ ] Failed diagrams have a unified error UI — not blank / white screen  
+- [ ] Clicks inside diagram containers do not trigger “new blank” etc.  
 
-### 11.5 与注释系统
+### 11.5 With the annotation system
 
-- Mermaid 渲染后的 SVG 内文字：**默认不可高亮标注**（与 code 块同等排除），避免 DOM 被 Mermaid 重写后定位失败。  
-- `viz-caption`、`viz-block-body` 内普通文本：**允许**标注。  
-- `viz-svg` 内 `<text>`：建议排除标注。
+- Text inside Mermaid-rendered SVG: **not highlightable by default** (same exclusion as code) — avoids locate failure after Mermaid rewrite.  
+- Ordinary text in `viz-caption`, `viz-block-body`: **allowed**.  
+- `<text>` inside `viz-svg`: suggest exclude from annotations.

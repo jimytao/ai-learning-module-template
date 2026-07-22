@@ -1,138 +1,138 @@
-# Phase 0 采集确认清单 (intake_checklist.md)
+# Phase 0 Intake Confirmation Checklist (intake_checklist.md)
 
-> **给 AI 用的强制访谈单。** Phase 0 开始时必须加载本文件。  
-> 目标：在生成任何科目内容之前，把学习者与学习方式问清楚，并让用户**逐项确认**。  
-> 禁止凭猜测填满画像。
-
----
-
-## 使用方式
-
-1. AI 按下方 **A→G** 向用户提问（可合并成一次提问，但槽位不得省略）。  
-2. 用户回答后，AI 填写「确认卡」回显，请用户说「确认」或指出修改。  
-3. **仅在用户确认后**，才写入 `profile.md` / `desire.md` / `gaps.md` / `domain_map.md` / `calendar.md`，并执行 `AGENT.md` 的「Bootstrap 后改造」。  
-4. 未确认前：可以讨论、给建议，但**禁止**生成 Magazine/Unit 正文。
+> **Mandatory interview sheet for the AI.** Load this file at the start of Phase 0.  
+> Goal: before any subject content is generated, clarify the learner and learning style, and get the user to **confirm item by item**.  
+> Do not fill the profile by guessing.
 
 ---
 
-## A. 科目与目标
+## How to use
 
-| # | 必问 | 示例提示 | 写入 |
+1. AI asks A→G below (may combine into one ask, but no slots omitted).  
+2. After answers, AI fills the “confirmation card” echo and asks the user to say “confirm” or point out edits.  
+3. **Only after user confirmation** write `profile.md` / `desire.md` / `gaps.md` / `domain_map.md` / `calendar.md`, then run `AGENT.md` “Post-Bootstrap rewrite”.  
+4. Before confirmation: discussion and advice are fine, but **do not** generate Magazine/Unit body content.
+
+---
+
+## A. Subject & goals
+
+| # | Must ask | Example prompt | Write to |
 | :--- | :--- | :--- | :--- |
-| A1 | 要学什么？ | 单科名，或领域总称（如 Digital Health）+ 是否多轨道 | profile + domain_map |
-| A1b | 若多轨道：初始轨道有哪些？相近课是否放同一项目？ | 见 `project_lifecycle` 形态②；不相近才建议复制文件夹 | domain_map Tracks + profile |
-| A2 | 学完要能做什么？（可检验） | 能分析和弦进行 / 能读某类论文摘要 / 能过某考试… | profile §目标 |
-| A3 | 时间地平线 | 4 周冲刺 / 一学期 / 长期慢学 | profile |
+| A1 | What will you study? | Single subject name, or domain label (e.g. Digital Health) + whether multi-track | profile + domain_map |
+| A1b | If multi-track: initial tracks? Keep related courses in one project? | See `project_lifecycle` form ②; far-apart subjects → copy folder | domain_map Tracks + profile |
+| A2 | What should you be able to do when done? (testable) | Analyze chord progressions / read certain abstracts / pass an exam… | profile §Goals |
+| A3 | Time horizon | 4-week sprint / one semester / long slow study | profile |
 
-- [ ] 用户已回答  
-- [ ] 已写入（仅确认后勾）
+- [ ] User answered  
+- [ ] Written (check only after confirm)
 
 ---
 
-## B. 水平与已知
+## B. Level & known
 
-| # | 必问 | 示例提示 | 写入 |
+| # | Must ask | Example prompt | Write to |
 | :--- | :--- | :--- | :--- |
-| B1 | 总体阶段 | 新手 / 有基础 / 进阶 | profile §水平 |
-| B2 | 被动理解 vs 主动产出差在哪 | 「能听懂但不会做」「会背定义不会用」 | profile |
-| B3 | 已经不弱 / 已学过的部分 | 列 3–10 个点 | profile §已知 → domain_map Covered |
-| B4 | 相关先修或成绩（可无） | 课程名、自学经历；没有就写「无」 | profile |
+| B1 | Overall stage | Beginner / some foundation / advanced | profile §Level |
+| B2 | Gap between passive understanding and active production | “I get it when I hear it but can’t do it” / “I can recite definitions but can’t use them” | profile |
+| B3 | Already strong / already learned | List 3–10 points | profile §Known → domain_map Covered |
+| B4 | Related prior courses or scores (optional) | Course names, self-study; write “none” if none | profile |
 
-- [ ] 用户已回答  
-- [ ] 已写入（仅确认后勾）
+- [ ] User answered  
+- [ ] Written (check only after confirm)
 
 ---
 
-## C. 弱项与卡点
+## C. Weak spots & blockers
 
-| # | 必问 | 示例提示 | 写入 |
+| # | Must ask | Example prompt | Write to |
 | :--- | :--- | :--- | :--- |
-| C1 | 最怕 / 最混的点 | 至少 2 条 | gaps.md |
-| C2 | 曾经学砸或反复忘的点 | 可与 C1 合并 | gaps.md |
-| C3 | 近期最想先补的 1 件事 | 用于 Wave A 的 P0 | calendar 前瞻 |
+| C1 | Most feared / most confused points | At least 2 | gaps.md |
+| C2 | Things you learned poorly or keep forgetting | May merge with C1 | gaps.md |
+| C3 | One thing you most want to fix soon | Used as Wave A P0 | calendar forward queue |
 
-- [ ] 用户已回答  
-- [ ] 已写入（仅确认后勾）
+- [ ] User answered  
+- [ ] Written (check only after confirm)
 
 ---
 
-## D. 兴趣与动机
+## D. Interests & motivation
 
-| # | 必问 | 示例提示 | 写入 |
+| # | Must ask | Example prompt | Write to |
 | :--- | :--- | :--- | :--- |
-| D1 | 特别想深入的方向 | 风格、作曲家、应用场景、研究议题… | desire.md |
-| D2 | 完全不感兴趣、想避开的 | 避免排期踩雷 | profile 备注 / desire 标注「避」 |
-| D3 | 喜欢的案例类型 | 历史故事 / 公式推导 / 临床病例 / 作品分析… | profile §偏好 |
+| D1 | Directions you especially want to go deep | Style, composer, application scene, research topic… | desire.md |
+| D2 | Things you have zero interest in / want to avoid | Avoid scheduling landmines | profile notes / desire mark “avoid” |
+| D3 | Preferred case types | History stories / formula derivation / clinical cases / work analysis… | profile §Preferences |
 
-- [ ] 用户已回答  
-- [ ] 已写入（仅确认后勾）
+- [ ] User answered  
+- [ ] Written (check only after confirm)
 
 ---
 
-## E. 时间与约束
+## E. Time & constraints
 
-| # | 必问 | 示例提示 | 写入 |
+| # | Must ask | Example prompt | Write to |
 | :--- | :--- | :--- | :--- |
-| E1 | 每周可投入时长 | 例如 3h / 8h | profile |
-| E2 | 单次学习窗口 | 例如 45–90 分钟一块 | profile → 影响 Unit/Mag 体量建议 |
-| E3 | 内容语言 | 中文 / 英文 / 双语 | profile |
-| E4 | 其它约束 | 设备、是否需要无障碍、截止日期 | profile |
+| E1 | Weekly time budget | e.g. 3h / 8h | profile |
+| E2 | Single study window | e.g. 45–90 min block | profile → affects Unit/Mag size advice |
+| E3 | Content language | Chinese / English / bilingual | profile |
+| E4 | Other constraints | Device, accessibility, deadlines | profile |
 
-- [ ] 用户已回答  
-- [ ] 已写入（仅确认后勾）
+- [ ] User answered  
+- [ ] Written (check only after confirm)
 
 ---
 
-## F. 学习模态预设（必选其一，可日后改）
+## F. Learning modality preset (pick one; changeable later)
 
-> 完整定义见 `knowledge/modality_presets.md`。此处只做选择确认。
+> Full definitions: `knowledge/modality_presets.md`. Here only confirm the choice.
 
-| 代号 | 名称 | 一句话 | 何时选 |
+| Code | Name | One-liner | When to pick |
 | :--- | :--- | :--- | :--- |
-| **T** | Textbook-first | 短文、节奏快、练习密、查漏补缺强 | 要刷概念、备考、技能操练 |
-| **M** | Magazine-first | 长文、节奏慢、像科普/科研阅读 | 要建立直觉、现状、机制叙事 |
-| **H** | Hybrid（默认推荐） | Magazine 扛大主题，Unit 挂练习 | 大多数专业化学习 |
-| **C** | Custom | 用户自定配比（须写下规则） | 有明确特殊需求时 |
+| **T** | Textbook-first | Short, fast, drill-dense, strong gap-fill | Concept drills, exam prep, skill practice |
+| **M** | Magazine-first | Long, slow, popular-science / research reading | Build intuition, landscape, mechanism narrative |
+| **H** | Hybrid (recommended default) | Magazine carries big themes; Unit carries drills | Most professional learning |
+| **C** | Custom | User-defined mix (must write rules) | Clear special needs |
 
-用户选择：`T / M / H / C` → ______
+User choice: `T / M / H / C` → ______
 
-- [ ] 用户已明确选择（或接受 AI 推荐并确认）  
-- [ ] 已写入 `profile.md` §学习模态  
+- [ ] User explicitly chose (or accepted AI recommendation and confirmed)  
+- [ ] Written to `profile.md` §Learning modality  
 
-**切换规则**：日后用户说「改成更偏 textbook / magazine」→ 更新 profile + 在 `AGENT.md` 当前状态区注明新预设；**不必重跑完整 Phase 0**，但下一轮 Phase 1 起按新预设提案。
+**Switch rule**: later, if user says “make it more textbook / magazine” → update profile + note new preset in `AGENT.md` status area; **no full Phase 0 rerun**, but Phase 1 proposals follow the new preset from the next round.
 
 ---
 
-## G. 前端与阅读习惯（可选，但建议问）
+## G. Frontend & reading habits (optional, recommended)
 
-| # | 问什么 | 默认 | 写入 |
+| # | Ask | Default | Write to |
 | :--- | :--- | :--- | :--- |
-| G1 | 目录默认排序 | **新到旧**（可切到旧到新） | profile §阅读器偏好 |
-| G2 | 侧边栏 Notes 默认 | 只显示**当前打开文档**的注释（可切「全部」） | 同上 |
-| G3 | 批改语言风格 | 简洁 / 详细 | 同上 |
+| G1 | TOC default sort | **Newest first** (switchable to oldest first) | profile §Reader prefs |
+| G2 | Notes sidebar default | Only notes for the **currently open doc** (switchable to “all”) | same |
+| G3 | Grading tone | Concise / detailed | same |
 
-详见 `protocols/frontend_spec.md`。前端未迁入前，这些偏好仍写入 profile，供将来启用。
+See `protocols/frontend_spec.md`. Before the frontend is migrated, still write these prefs into profile for later use.
 
 ---
 
-## 确认卡模板（AI 必须输出，等用户说「确认」）
+## Confirmation card template (AI must output; wait for “confirm”)
 
 ```markdown
-## Phase 0 确认卡 — 请核对
+## Phase 0 Confirmation Card — please verify
 
-**科目**：…  
-**组织**：单科 / 同项目多轨道 / …  
-**Tracks**：…（若有）  
-**目标（可检验）**：…  
-**水平**：…｜已知：…  
-**弱项（将进 gaps）**：1.… 2.…  
-**兴趣**：…  
-**时间**：每周 …｜单次 …  
-**语言**：…  
-**学习模态预设**：T / M / H / C = …  
-**阅读器偏好**：排序…｜Notes 范围…  
+**Subject**: …  
+**Organization**: single subject / multi-track in one project / …  
+**Tracks**: … (if any)  
+**Goals (testable)**: …  
+**Level**: …｜Known: …  
+**Gaps (will enter gaps)**: 1.… 2.…  
+**Interests**: …  
+**Time**: weekly …｜session …  
+**Language**: …  
+**Learning modality preset**: T / M / H / C = …  
+**Reader prefs**: sort…｜Notes scope…  
 
-待确认 / TBD：…  
+Pending / TBD: …  
 ```
 
-用户回复「确认」后 → 执行写入 + `p0_bootstrap.md` 后续步骤 + **AGENT 改造**（见 `AGENT.md`「Bootstrap 后改造」）。
+After user says “confirm” → write + continue `p0_bootstrap.md` + **AGENT rewrite** (see `AGENT.md` “Post-Bootstrap rewrite”).

@@ -1,163 +1,163 @@
-# Phase 3：批改、注释、订正与再出题 (p3_review.md)
+# Phase 3: Grading, Annotations, Remediation & Extra Drills (p3_review.md)
 
-> **触发**：「帮我批改」「解释高亮」「订正」「再出几道题」。  
-> **必须加载**：本文件 + `protocols/tech_spec.md` + 当期内容文件 + `notes.json`  
-> **按需**：`state/log.md` / `state/gaps.md` / `knowledge/coach_reference.md`
-
----
-
-## Step 1：Pre-flight
-
-1. 确认当期文件路径（magazine 或 unit）。  
-2. 从 `notes.json` 筛出匹配该文件的全部标注；读取 `context` 做语境批注。  
-3. 读取用户在正文中的填空 / `[Your Answer]` / MCQ / T-F 作答。  
-4. 读取 `log.md` Hard Points 与 `gaps.md` 现行条目，避免重复废话、对齐掌握判定。
+> **Trigger**: “grade my work”, “explain highlights”, “correct this”, “give me more drills”.  
+> **Must load**: this file + `protocols/tech_spec.md` + current content file + `notes.json`  
+> **On demand**: `state/log.md` / `state/gaps.md` / `knowledge/coach_reference.md`
 
 ---
 
-## Step 2：批改标准
+## Step 1: Pre-flight
 
-### 2.0 严谨评估（强制）
+1. Confirm current file path (magazine or unit).  
+2. Filter `notes.json` to all annotations for that file; read `context` for situated feedback.  
+3. Read user answers in blanks / `[Your Answer]` / MCQ / T-F.  
+4. Read `log.md` Hard Points and current `gaps.md` items — avoid repetitive fluff; align mastery judgment.
 
-- 禁止无依据吹捧。  
-- **MCQ / T-F 全对** → 只可记为「再认 / 辨别通过」，不可记为「已能讲解或应用」。  
-- **有模板提示下写对** → 总结中注明「受提示辅助，不计入独立掌握」。  
-- 开放题与填空才是主动产出的主证据。
+---
 
-### 2.1 按题型
+## Step 2: Grading standards
 
-| 题型 | 批改动作 |
+### 2.0 Rigorous assessment (mandatory)
+
+- No baseless praise.  
+- **All MCQ / T-F correct** → record only as “recognition / discrimination pass”, never “can explain or apply”.  
+- **Correct under heavy template prompts** → note in summary “prompt-assisted; does not count as independent mastery”.  
+- Open answers and blanks are the main evidence of active production.
+
+### 2.1 By exercise type
+
+| Type | Grading action |
 | :--- | :--- |
-| 填空 / 开放题 | 标出每一个实质错误；给 Model Answer；评分（如 3/5） |
-| MCQ | 对/错；若错：为何干扰项诱人 + 正确项依据（绑定正文概念） |
-| T/F | 对/错；若 False：指出错在哪一个限定词 / 因果 / 范围 |
-| 高亮 / 注释 | 见 §2.2 |
+| Blank / open | Mark every substantive error; give Model Answer; score (e.g. 3/5) |
+| MCQ | Right/wrong; if wrong: why distractors tempt + evidence for correct option (bind to body concepts) |
+| T/F | Right/wrong; if False: which qualifier / causality / scope is wrong |
+| Highlight / note | see §2.2 |
 
-### 2.2 注释解答（notes.json）
+### 2.2 Annotation answers (notes.json)
 
-对每条标注写 **语境化** 讲解（禁止只甩词典定义）：
+For each annotation write a **context-bound** explanation (never a dictionary dump):
 
-1. 先回应用户注释（对 / 偏 / 错 / 纯高亮）  
-2. 结合 `context` 说明在本句中的角色  
-3. 给记忆锚点（词源 / 类比 / 对比 / 图像）  
-4. 给 1 句可迁移的新例句或应用提示  
+1. Respond to the user’s note (correct / partial / wrong / highlight-only)  
+2. Use `context` to explain the role in this sentence  
+3. Give a memory hook (etymology / analogy / contrast / image)  
+4. Give one transferable example sentence or application tip  
 
-**写入规则**：只写 tech_spec 允许的字段（推荐统一写 `aiReview`；保留用户 `note` / `userNoteRaw` 不被覆盖）。
+**Write rules**: only fields allowed by tech_spec (prefer unified `aiReview`; never overwrite user `note` / `userNoteRaw`).
 
-等级建议：
+Grade guide:
 
-| 等级 | 条件 |
+| Grade | Condition |
 | :--- | :--- |
-| A | 注释与语境完全契合 |
-| B | 大意对但不精确 / 带 `?` |
-| C | 错误或严重误导 |
-| N | 仅高亮无注释 |
+| A | Note fully fits the context |
+| B | Roughly right but imprecise / with `?` |
+| C | Wrong or seriously misleading |
+| N | Highlight only, no note |
 
-掌握度（可选）：\((A + 0.5B) / (A+B+C)\)
+Mastery (optional): \((A + 0.5B) / (A+B+C)\)
 
-### 2.3 订正后讲解
+### 2.3 Post-error explanation
 
-若用户答错：
+If the user was wrong:
 
-1. Inline 反馈面板写清错误原因 + 正确思路（不只给答案）。  
-2. 将该点写入 / 更新 `gaps.md`（Target = 未来 1–3 期内复现）。  
-3. 在聊天摘要里用「一句话规律」总结，避免只改词不改思维。
+1. Inline feedback panel: error cause + correct reasoning (not just the answer).  
+2. Write / update `gaps.md` (Target = recur in next 1–3 issues).  
+3. Summarize in chat with a “one-line rule” — fix thinking, not only wording.
 
-### 2.4 订正后再出题（硬性：必须先询问）
+### 2.4 Extra drills after correction (hard: must ask first)
 
-> ⚠️ **强制规则（不得违反）**  
-> 批改 / 订正讲解结束后，**禁止**直接生成加练题、Remediation Drill、变形题或任何「再出一套」。  
-> **必须先询问**用户是否需要针对错点继续出题，并**等待用户明确同意**后才能生成。  
-> 即使用户错误很多、或 AI 认为很有必要加练，也只能「提议并询问」，不能自行开写。
+> ⚠️ **Hard rule (do not violate)**  
+> After grading / remediation explanation, **do not** immediately generate extra drills, Remediation Drills, variant sets, or any “another round”.  
+> **Must ask first** whether the user wants more drills on the mistakes, and **wait for clear consent** before generating.  
+> Even if errors are many or the AI thinks drills are needed, you may only “propose and ask” — never start writing unilaterally.
 
-**允许进入出题的唯一条件（满足其一即可）：**
+**Only enter drill generation when one of these is true:**
 
-1. 批改收尾时 AI 已提问（例：「需要我针对这次的错点再出几道加练吗？」），且用户明确回复同意（如「要」「再出题」「出几道」）；或  
-2. 用户主动说「再出题」/「加练」/「出几道针对错点的题」。
+1. At wrap-up the AI asked (e.g. “Want a few remediation drills on these mistakes?”) and the user clearly agreed (“yes”, “more drills”, “give me some”); or  
+2. The user initiates “more drills” / “remediation” / “drills on the mistakes”.
 
-**禁止：**
+**Banned:**
 
-- 错误 ≥ N 就自动出题  
-- 在同一条回复里「先问一句」然后立刻附上整套新题（问了也必须停，等下一轮确认）  
-- 把加练题偷偷写进批改总结或 inline 面板而不经询问  
+- Auto-generate drills when errors ≥ N  
+- In the same reply, ask once then immediately append a full new set (asking still requires stopping for the next turn)  
+- Slip drills into the grading summary or inline panels without asking  
 
-**用户同意后**，才生成 **微型补丁练习**（写入当期文件末尾 `## Remediation Drill` 或新 `unitXX_remediation.md`）：
+**After user consent**, generate a **mini remediation patch** (append `## Remediation Drill` to the current file, or new `unitXX_remediation.md`):
 
-- 针对本次错点：2 道 MCQ + 1 道 T/F + 1 道短问答  
-- 变换表面情境，考同一机制  
-- 做完可再次触发 Phase 3（只批补丁区）；批完补丁后若还要继续出题，**再次先询问**
+- On this round’s mistakes: 2 MCQ + 1 T/F + 1 short open  
+- Change surface scenario; test the same mechanism  
+- Completing it may re-trigger Phase 3 (grade the patch only); if more drills are wanted after that, **ask again first**
 ---
 
-## Step 3：写入格式
+## Step 3: Write format
 
-### 3.1 题目下方 Inline 反馈
+### 3.1 Inline feedback under the item
 
 ```html
 <details class="feedback-panel fp-warn" open>
-<summary>⚠️ AI Coach：3/5 — 简要问题列表</summary>
+<summary>⚠️ AI Coach: 3/5 — brief issue list</summary>
 <div class="feedback-body">
 
-**带标记的原文：**
+**Marked original:**
 <div class="grading-section">
-… <span class="err" title="原因">错误片段</span> …
+… <span class="err" title="reason">wrong span</span> …
 </div>
 
-**✅ 订正版：**
+**✅ Corrected:**
 <div class="correction-line">
-… <span class="fix">修正</span> …
+… <span class="fix">fix</span> …
 </div>
 
 </div>
 </details>
 ```
 
-| 情况 | class | open |
+| Case | class | open |
 | :--- | :--- | :--- |
-| 有错 | `fp-warn` / `fp-fail` | 加 `open` |
-| 全对 | `fp-pass` | 不加 `open` |
+| Has errors | `fp-warn` / `fp-fail` | add `open` |
+| All correct | `fp-pass` | no `open` |
 
-### 3.2 文末总结
+### 3.2 End-of-file summary
 
 ```markdown
-## AI Coach 批改总结 — YYYY-MM-DD
-- 客观题：MCQ x/y · T/F x/y（再认层）
-- 产出题：要点 …
-- 注释：A/B/C/N 计数与掌握度
-- 新写入 gaps：…
-- 建议下一期复现：…
+## AI Coach Grading Summary — YYYY-MM-DD
+- Objective: MCQ x/y · T/F x/y (recognition layer)
+- Production: key points …
+- Annotations: A/B/C/N counts and mastery
+- New gaps written: …
+- Suggested next recurrence: …
 ```
 
-### 3.3 聊天框摘要
+### 3.3 Chat summary
 
-每题一行分数 + 1 个要点；列出新 Hard Points；提示刷新预览查看完整批注。
+One score line + one takeaway per item; list new Hard Points; remind to refresh preview for full annotations.
 
 ---
 
-## Step 4：Post-Correction Commit（不得跳过）
+## Step 4: Post-Correction Commit (do not skip)
 
-1. 回写 `notes.json` 的 `aiReview`（及协议允许字段）。  
-2. 追加 `review.md` 当期章节（见该文件模板）。  
-3. 更新 `state/log.md`：进度 Status、Retro、Hard Points 新行、Concept Ledger 如需。  
-4. 更新 `state/gaps.md`：状态流转（见 gaps 文件内掌握标准）。  
-5. 更新 `knowledge/calendar.md`：该期 Status → Read / Reviewed。  
-6. 若 desire 中主题已实质覆盖：勾选或注明「已覆盖于 Mag/Unit NN」。  
-7. 运行 `node scripts/validate_content.js`（确保批改 HTML 未破坏交互格式）。  
-8. 更新 `AGENT.md` 顶部为 `Phase 3 完成`，下一步指向 Phase 1。
+1. Write back `notes.json` `aiReview` (and other protocol-allowed fields).  
+2. Append a section to `review.md` for this round (see that file’s template).  
+3. Update `state/log.md`: progress Status, Retro, new Hard Points rows, Concept Ledger if needed.  
+4. Update `state/gaps.md`: status transitions (see mastery rules in gaps).  
+5. Update `knowledge/calendar.md`: that issue Status → Read / Reviewed.  
+6. If a desire topic is substantially covered: check it or note “covered in Mag/Unit NN”.  
+7. Run `node scripts/validate_content.js` (ensure grading HTML did not break interactive format).  
+8. Update `AGENT.md` top to `Phase 3 complete`, next step → Phase 1.
 
 ---
 
-## 对话框收尾提示模板
+## Chat wrap-up prompt template
 
 ```
-批改完成。
-- 再认层：MCQ … · T/F …
-- 产出层：…
-- 注释掌握度：…%
+Grading complete.
+- Recognition: MCQ … · T/F …
+- Production: …
+- Annotation mastery: …%
 
-是否需要我针对这次的错点再出几道加练题？
-（要的话直接说「要」或「再出题」；不要我也会把弱项记入 gaps，后续排期复现。）
+Want a few remediation drills on these mistakes?
+(Say “yes” or “more drills” if so; otherwise I’ll still log weaknesses in gaps for later scheduling.)
 
-下一轮排期请说「今天学什么」。
+For the next schedule, say “what should I study today”.
 ```
 
-> 上面「是否需要…」是**询问句**，本回合到此结束。未获同意前不得附带新题。
+> The “Want…” line is a **question**. End the turn here. Do not attach new drills until consent.

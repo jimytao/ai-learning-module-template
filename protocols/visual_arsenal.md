@@ -1,89 +1,89 @@
-# 可视化武器库 (visual_arsenal.md)
+# Visual Arsenal (visual_arsenal.md)
 
-> Phase 2 生成正文时**必须**按需加载本文件。  
-> 目标：除「搜图插入」和「表格」之外，提供**有限、可渲染、格式统一**的图示手段；AI 可灵活选用，但**不得自创未登记语法**（否则浏览器渲染会崩或每期长得不一样）。
-
----
-
-## 0. 核心原则
-
-1. **只准用登记过的武器**：下表 Type ID 以外的写法一律禁止（含随意 HTML、任意 SVG、未约定的 mermaid 方言）。  
-2. **先选武器再写内容**：每个图示前必须写声明注释（见 §2）。  
-3. **一种图一种写法**：同类型图示全项目同一套 fence / class，禁止「这期用 ASCII、下期用 SVG」。  
-4. **能表则表、能图则图**：对比用矩阵表；过程用流程图；层级用树；结构关系用框图；实景才用照片。  
-5. **前端契约优先**：本文件 + `frontend_spec.md` §Visual 是验收标准；迁入阅读器时必须实现全部 Tier A/B。
+> **Must** load on demand when Phase 2 generates body content.  
+> Goal: beyond “search-and-insert photos” and “tables”, provide a **finite, renderable, format-unified** diagram toolkit. The AI may choose freely among registered types, but **must not invent unregistered syntax** (otherwise the browser breaks or every issue looks different).
 
 ---
 
-## 1. 武器总表（按场景选用）
+## 0. Core principles
 
-| Type ID | 名称 | 最适合解释什么 | Tier | 语法载体 |
+1. **Registered weapons only**: anything outside the Type IDs below is banned (arbitrary HTML, arbitrary SVG, unagreed Mermaid dialects).  
+2. **Pick the weapon before writing**: every diagram needs a declaration comment first (see §2).  
+3. **One type, one syntax**: same diagram type uses the same fence / class across the project — no “ASCII this week, SVG next week”.  
+4. **Table when contrast; diagram when structure**: contrasts → matrix tables; process → flow; hierarchy → tree; structural relations → blocks; real scenes → photos.  
+5. **Frontend contract wins**: this file + `frontend_spec.md` §Visual are the acceptance standard; readers must implement all Tier A/B.
+
+---
+
+## 1. Weapon table (pick by scenario)
+
+| Type ID | Name | Best for explaining | Tier | Carrier |
 | :--- | :--- | :--- | :--- | :--- |
-| `photo` | 实景/实物照片 | 真实物体、场景、仪器外观 | A | `imageQuery` + `<img>` |
-| `table` | 对比/参数表 | 并排对比、参数、分类清单 | A | GFM 表格 |
-| `steps` | 有序步骤 | 操作顺序、算法步骤（无分支） | A | 有序列表 + 可选 `div.viz-steps` |
-| `callout` | 便利贴/提示盒 | 警告、数据、公式要点、误区 | A | `div.sticky-note` 变体 |
-| `flow` | 流程图 | 过程、分支、决策、管道 | B | ` ```mermaid ` flowchart |
-| `tree` | 树状图 | 分类层级、知识树、解剖层级 | B | ` ```mermaid ` flowchart TD / mindmap |
-| `seq` | 时序图 | A 与 B 谁先谁后、协议往返 | B | ` ```mermaid ` sequenceDiagram |
-| `state` | 状态图 | 状态机、生命周期 | B | ` ```mermaid ` stateDiagram-v2 |
-| `blocks` | 工程框图 | 模块/接口/数据流（方框+箭头） | A | `div.viz-blocks` 固定 HTML |
-| `svg-lite` | 轻量工程图 | 简单示意（杠杆、电路块、解剖示意轮廓） | B | `div.viz-svg` + **白名单 SVG** |
-| `formula` | 公式块 | 方程、比例、记谱式文字转写 | A | `div.viz-formula` 或行内 `$…$`（若前端启用） |
+| `photo` | Real / object photo | Real objects, scenes, instrument appearance | A | `imageQuery` + `<img>` |
+| `table` | Contrast / parameter table | Side-by-side contrast, params, classification lists | A | GFM table |
+| `steps` | Ordered steps | Operation order, algorithm steps (no branches) | A | Ordered list + optional `div.viz-steps` |
+| `callout` | Sticky / tip box | Warnings, data, formula points, pitfalls | A | `div.sticky-note` variants |
+| `flow` | Flowchart | Process, branches, decisions, pipelines | B | \`\`\`mermaid flowchart |
+| `tree` | Tree | Classification hierarchy, knowledge tree, anatomy layers | B | \`\`\`mermaid flowchart TD / mindmap |
+| `seq` | Sequence | Who acts when, protocol round-trips | B | \`\`\`mermaid sequenceDiagram |
+| `state` | State | State machines, lifecycles | B | \`\`\`mermaid stateDiagram-v2 |
+| `blocks` | Engineering block diagram | Modules / interfaces / data flow (boxes + arrows) | A | Fixed HTML `div.viz-blocks` |
+| `svg-lite` | Lightweight engineering sketch | Simple sketches (lever, circuit block, anatomy outline) | B | `div.viz-svg` + **whitelisted SVG** |
+| `formula` | Formula block | Equations, ratios, notation as text | A | `div.viz-formula` or inline `$…$` (if frontend enables) |
 
-**Tier A**：仅需现有 Markdown/HTML 白名单即可渲染。  
-**Tier B**：阅读器必须加载约定库（Mermaid）或实现 SVG 沙箱；未实现前 AI **仍按本规范写入**，并在文首注明「需 Tier B 阅读器」。
+**Tier A**: Existing Markdown/HTML whitelist is enough.  
+**Tier B**: Reader must load agreed libraries (Mermaid) or SVG sandbox; before that, AI **still writes to this spec** and notes at the top “requires Tier B reader”.
 
 ---
 
-## 2. 强制声明头（每个图示前一行）
+## 2. Mandatory declaration header (one line before each diagram)
 
 ```markdown
-<!-- visual: flow | id: F01 | title: 诊断分流 | purpose: 说明何时走路径A/B -->
+<!-- visual: flow | id: F01 | title: Diagnostic triage | purpose: when to take path A/B -->
 ```
 
-| 字段 | 规则 |
+| Field | Rule |
 | :--- | :--- |
-| `visual` | 必须是 §1 的 Type ID |
-| `id` | 本篇内唯一，如 `F01` `T02` `B01` |
-| `title` | 短标题，与下方可见标题一致 |
-| `purpose` | 一句话：这图在教什么 |
+| `visual` | Must be a §1 Type ID |
+| `id` | Unique in this piece, e.g. `F01` `T02` `B01` |
+| `title` | Short title, matches the visible title below |
+| `purpose` | One sentence: what this diagram teaches |
 
-无声明头的图示 = 不合格（`validate_content.js` 可检测 mermaid/viz 块）。
-
----
-
-## 3. 选用决策树（给 AI）
-
-```
-要解释的东西是什么？
-├─ 两个以上概念并排对比？ → table
-├─ 纯线性步骤、无分支？ → steps
-├─ 有分支/循环/判断？ → flow
-├─ 上下级分类/组成？ → tree
-├─ 多方随时间交互？ → seq
-├─ 对象有几种状态来回切？ → state
-├─ 系统由模块+接口组成？ → blocks（优先）或 flow
-├─ 需要近似真实的几何/结构示意？ → svg-lite（保持极简）或 photo
-├─ 需要实物照片？ → photo
-└─ 只要强调一句要点/数据/误区？ → callout
-```
-
-**禁止**：用 `photo` 硬凑「概念关系」；用大段散文代替本该用的 `flow`/`tree`。
+Diagrams without a declaration header = fail (`validate_content.js` can detect mermaid/viz blocks).
 
 ---
 
-## 4. 各武器严格写法
+## 3. Selection decision tree (for AI)
 
-### 4.1 `photo`（已有，重申）
+```
+What are you explaining?
+├─ Two+ concepts side by side? → table
+├─ Pure linear steps, no branches? → steps
+├─ Branches / loops / decisions? → flow
+├─ Parent/child classification / composition? → tree
+├─ Multiple parties over time? → seq
+├─ Object switches among states? → state
+├─ System of modules + interfaces? → blocks (prefer) or flow
+├─ Need approximate geometry / structure? → svg-lite (keep minimal) or photo
+├─ Need a real photo? → photo
+└─ Just emphasize one tip / data / pitfall? → callout
+```
+
+**Banned**: using `photo` to fake “concept relations”; using long prose where `flow`/`tree` belongs.
+
+---
+
+## 4. Strict syntax per weapon
+
+### 4.1 `photo` (existing, restated)
 
 ```markdown
 <!-- visual: photo | id: P01 | title: … | purpose: … -->
 <!-- imageQuery: "person + action + object 3-6 words" | target: "slug.jpg" -->
-<img src="images/slug.jpg" height="150" alt="简短alt" />
+<img src="images/slug.jpg" height="150" alt="short alt" />
 ```
 
-- 概念图不够时：优先改用 `blocks`/`flow`，不要狂搜抽象图。
+- If a concept diagram is insufficient: prefer `blocks`/`flow` over flooding abstract photo searches.
 
 ### 4.2 `table`
 
@@ -91,7 +91,7 @@
 <!-- visual: table | id: T01 | title: A vs B | purpose: … -->
 
 #### A vs B
-| 维度 | A | B |
+| Dimension | A | B |
 | :--- | :--- | :--- |
 | … | … | … |
 ```
@@ -99,144 +99,144 @@
 ### 4.3 `steps`
 
 ```markdown
-<!-- visual: steps | id: S01 | title: 操作顺序 | purpose: … -->
+<!-- visual: steps | id: S01 | title: Operation order | purpose: … -->
 <div class="viz-steps" data-viz-id="S01">
 <ol>
-  <li><strong>Step 1 — 名称</strong>：一句话</li>
-  <li><strong>Step 2 — 名称</strong>：一句话</li>
+  <li><strong>Step 1 — Name</strong>: one sentence</li>
+  <li><strong>Step 2 — Name</strong>: one sentence</li>
 </ol>
 </div>
 ```
 
-### 4.4 `callout`（sticky 变体）
+### 4.4 `callout` (sticky variants)
 
-| class | 用途 |
+| class | Use |
 | :--- | :--- |
-| `sticky-note` | 一般提示 |
-| `sticky-note science-note` | 数据 / 文献 / 证据 |
-| `sticky-note warn-note` | 误区 / 危险操作 |
-| `sticky-note formula-note` | 公式要点 |
+| `sticky-note` | General tip |
+| `sticky-note science-note` | Data / literature / evidence |
+| `sticky-note warn-note` | Pitfall / dangerous action |
+| `sticky-note formula-note` | Formula key points |
 
 ```html
 <!-- visual: callout | id: C01 | title: … | purpose: … -->
 <div class="sticky-note warn-note">
-  <h4>标题</h4>
-  <p>短内容。可 <strong>强调</strong>。禁止 ___、MCQ、嵌套 sticky。</p>
+  <h4>Title</h4>
+  <p>Short content. May <strong>emphasize</strong>. No ___, MCQ, nested sticky.</p>
 </div>
 ```
 
-### 4.5 `flow` / `tree` / `seq` / `state`（Mermaid — 唯一允许的图代码方言）
+### 4.5 `flow` / `tree` / `seq` / `state` (Mermaid — only allowed diagram code dialect)
 
-**硬性约束：**
+**Hard constraints:**
 
-- 必须用围栏：\`\`\`mermaid … \`\`\`  
-- 第一行声明图种类（`flowchart` / `sequenceDiagram` / `stateDiagram-v2` / `mindmap`）  
-- 节点 ID：`[A-Za-z][A-Za-z0-9_]*`，短标签  
-- **禁止**：`click`、`javascript`、HTML 注入、`init:` 主题覆盖、超过 **20** 个节点（太大就拆成两图）  
-- 方向：流程图默认 `TD`（上→下）或 `LR`（左→右）；树状分类优先 `TD`  
-- 中文标签允许，但避免特殊字符破坏解析：不用 `"` 嵌套，少用 `()` 冲突时改用 `[]`
+- Must use fence: \`\`\`mermaid … \`\`\`  
+- First line declares kind (`flowchart` / `sequenceDiagram` / `stateDiagram-v2` / `mindmap`)  
+- Node IDs: `[A-Za-z][A-Za-z0-9_]*`, short labels  
+- **Banned**: `click`, `javascript`, HTML injection, `init:` theme overrides, more than **20** nodes (split if larger)  
+- Direction: flowcharts default `TD` (top→bottom) or `LR` (left→right); classification trees prefer `TD`  
+- Non-English labels are allowed, but avoid special chars that break parsing: no nested `"`, prefer `[]` when `()` conflicts
 
-**流程图示例：**
+**Flowchart example:**
 
 ````markdown
-<!-- visual: flow | id: F01 | title: 分流 | purpose: … -->
+<!-- visual: flow | id: F01 | title: Triage | purpose: … -->
 ```mermaid
 flowchart TD
-  Start[开始] --> Check{条件成立?}
-  Check -->|是| PathA[路径A]
-  Check -->|否| PathB[路径B]
-  PathA --> End[结束]
+  Start[Start] --> Check{Condition met?}
+  Check -->|Yes| PathA[Path A]
+  Check -->|No| PathB[Path B]
+  PathA --> End[End]
   PathB --> End
 ```
 ````
 
-**树状图（用 flowchart 模拟，兼容性最好）：**
+**Tree (flowchart simulation — best compatibility):**
 
 ````markdown
-<!-- visual: tree | id: R01 | title: 分类树 | purpose: … -->
+<!-- visual: tree | id: R01 | title: Classification tree | purpose: … -->
 ```mermaid
 flowchart TD
-  Root[根概念] --> A[子类A]
-  Root --> B[子类B]
-  A --> A1[细分A1]
-  A --> A2[细分A2]
-  B --> B1[细分B1]
+  Root[Root concept] --> A[Subclass A]
+  Root --> B[Subclass B]
+  A --> A1[Detail A1]
+  A --> A2[Detail A2]
+  B --> B1[Detail B1]
 ```
 ````
 
-> 可选：`mindmap`（若前端 Mermaid 版本支持）。不支持时退回 flowchart TD。
+> Optional: `mindmap` (if frontend Mermaid supports it). Fall back to flowchart TD if not.
 
-**时序图：**
+**Sequence:**
 
 ````markdown
-<!-- visual: seq | id: Q01 | title: 交互顺序 | purpose: … -->
+<!-- visual: seq | id: Q01 | title: Interaction order | purpose: … -->
 ```mermaid
 sequenceDiagram
-  participant U as 用户
-  participant S as 系统
-  U->>S: 请求
-  S-->>U: 响应
+  participant U as User
+  participant S as System
+  U->>S: Request
+  S-->>U: Response
 ```
 ````
 
-### 4.6 `blocks`（工程框图 — 不依赖 Mermaid）
+### 4.6 `blocks` (engineering block diagram — no Mermaid)
 
-用于「模块 + 箭头 + 接口」类工程图，**固定 HTML 结构**，禁止改 class 名。
+For “module + arrow + interface” engineering diagrams. **Fixed HTML structure**; do not rename classes.
 
 ```html
-<!-- visual: blocks | id: B01 | title: 系统框图 | purpose: … -->
+<!-- visual: blocks | id: B01 | title: System block diagram | purpose: … -->
 <div class="viz-blocks" data-viz-id="B01" data-orientation="LR">
   <div class="viz-blocks-row">
     <div class="viz-block">
-      <div class="viz-block-title">模块A</div>
-      <div class="viz-block-body">职责一句话</div>
+      <div class="viz-block-title">Module A</div>
+      <div class="viz-block-body">One-line duty</div>
     </div>
     <div class="viz-arrow" aria-hidden="true">→</div>
     <div class="viz-block viz-block-accent">
-      <div class="viz-block-title">模块B</div>
-      <div class="viz-block-body">职责一句话</div>
+      <div class="viz-block-title">Module B</div>
+      <div class="viz-block-body">One-line duty</div>
     </div>
     <div class="viz-arrow" aria-hidden="true">→</div>
     <div class="viz-block">
-      <div class="viz-block-title">输出</div>
-      <div class="viz-block-body">结果</div>
+      <div class="viz-block-title">Output</div>
+      <div class="viz-block-body">Result</div>
     </div>
   </div>
-  <p class="viz-caption">图 B01：一句话读图说明</p>
+  <p class="viz-caption">Figure B01: one-line reading guide</p>
 </div>
 ```
 
-| 规则 | 说明 |
+| Rule | Note |
 | :--- | :--- |
-| 单行模块数 | ≤ 5；更多则拆第二行 `viz-blocks-row` |
-| 允许 class | 仅 `viz-blocks` / `viz-blocks-row` / `viz-block` / `viz-block-accent` / `viz-arrow` / `viz-caption` / `viz-block-title` / `viz-block-body` |
-| 禁止 | 内联 `style=`、嵌套 `viz-blocks`、在 block 内放填空/MCQ |
+| Modules per row | ≤ 5; more → second `viz-blocks-row` |
+| Allowed classes | Only `viz-blocks` / `viz-blocks-row` / `viz-block` / `viz-block-accent` / `viz-arrow` / `viz-caption` / `viz-block-title` / `viz-block-body` |
+| Banned | Inline `style=`, nested `viz-blocks`, blanks/MCQ inside blocks |
 
-`data-orientation`：`LR`（默认）或 `TD`（前端用 CSS 换纵向）。
+`data-orientation`: `LR` (default) or `TD` (frontend CSS for vertical).
 
-### 4.7 `svg-lite`（轻量工程示意）
+### 4.7 `svg-lite` (lightweight engineering sketch)
 
-仅当 `blocks`/`flow` 表达不了几何关系时使用。
+Only when `blocks`/`flow` cannot express geometry.
 
 ```html
 <!-- visual: svg-lite | id: V01 | title: … | purpose: … -->
 <div class="viz-svg" data-viz-id="V01">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="100%" height="auto" role="img" aria-label="…">
-    <!-- 仅允许: svg,g,line,polyline,polygon,rect,circle,ellipse,path,text,title -->
+    <!-- Allowed only: svg,g,line,polyline,polygon,rect,circle,ellipse,path,text,title -->
     <rect x="20" y="60" width="80" height="40" rx="4" class="viz-svg-node"/>
     <line x1="100" y1="80" x2="160" y2="80" class="viz-svg-edge"/>
     <text x="40" y="85" class="viz-svg-label">A</text>
   </svg>
-  <p class="viz-caption">图 V01：…</p>
+  <p class="viz-caption">Figure V01: …</p>
 </div>
 ```
 
-**SVG 白名单（强制）：**
+**SVG whitelist (mandatory):**
 
-- 允许标签：`svg, g, line, polyline, polygon, rect, circle, ellipse, path, text, title, desc`  
-- 允许属性：几何类 + `class` + `viewBox` + `xmlns` + `role` + `aria-label`  
-- **禁止**：`<script>`、`onclick`、`foreignObject`、外部 URL、`xlink:href` 除 `#` 锚点、任意 `style` 属性（用 class：`viz-svg-node|edge|label|muted`）  
-- path 复杂度：单个 path 的 `d` 建议 < 500 字符；整图元素 < 40  
+- Allowed tags: `svg, g, line, polyline, polygon, rect, circle, ellipse, path, text, title, desc`  
+- Allowed attrs: geometry + `class` + `viewBox` + `xmlns` + `role` + `aria-label`  
+- **Banned**: `<script>`, `onclick`, `foreignObject`, external URLs, `xlink:href` except `#` anchors, arbitrary `style` (use classes: `viz-svg-node|edge|label|muted`)  
+- Path complexity: single path `d` preferably < 500 chars; whole diagram < 40 elements  
 
 ### 4.8 `formula`
 
@@ -244,51 +244,51 @@ sequenceDiagram
 <!-- visual: formula | id: M01 | title: … | purpose: … -->
 <div class="viz-formula" data-viz-id="M01">
   <div class="viz-formula-main">a² + b² = c²</div>
-  <div class="viz-formula-note">用白话：…</div>
+  <div class="viz-formula-note">In plain words: …</div>
 </div>
 ```
 
-若前端启用 KaTeX/MathJax，可额外支持行内 `$...$` / 块 `$$...$$`；**未启用前**只用 `viz-formula` 纯文本，避免裸 `$` 造成半渲染。
+If frontend enables KaTeX/MathJax, inline `$...$` / block `$$...$$` may also be supported; **before that**, use plain-text `viz-formula` only — bare `$` causes half-renders.
 
 ---
 
-## 5. 密度与排版纪律
+## 5. Density & layout discipline
 
-| 规则 | 值 |
+| Rule | Value |
 | :--- | :--- |
-| 单篇 Magazine 单篇正文图示 | 建议 1–3 个；全期合计 ≤ 10 |
-| 单 Unit | 建议 2–5 个 |
-| 连续两个 mermaid | 中间必须有一段说明文字 |
-| 图下说明 | `blocks`/`svg-lite`/`photo` 建议有 `viz-caption` 或 alt |
-| 与练习隔离 | 图示容器内禁止 `___`、`[Your Answer]`、MCQ |
+| Diagrams per Magazine article | Suggest 1–3; whole issue ≤ 10 |
+| Per Unit | Suggest 2–5 |
+| Two consecutive mermaid | Must have explanatory prose between |
+| Captions | `blocks`/`svg-lite`/`photo` should have `viz-caption` or alt |
+| Isolate from exercises | No `___`, `[Your Answer]`, MCQ inside diagram containers |
 
 ---
 
-## 6. 阅读器渲染契约（写入 frontend_spec 的摘要）
+## 6. Reader render contract (summary for frontend_spec)
 
-| Type | 前端必须做什么 |
+| Type | Frontend must |
 | :--- | :--- |
-| mermaid 围栏 | 用 Mermaid 渲染；统一主题（禁止作者改 `init`）；失败时显示源码+错误，不空白崩页 |
-| viz-blocks | CSS 实现横/纵向；小屏自动换行 |
-| viz-svg | 保留 SVG；class 着色；沙箱去掉非法标签 |
-| sticky 变体 | warn-note / formula-note 有独立样式 |
-| viz-steps / viz-formula | 固定排版 |
+| mermaid fence | Render with Mermaid; unified theme (authors must not override via `init`); on failure show source + error — never blank crash |
+| viz-blocks | CSS horizontal/vertical; wrap on small screens |
+| viz-svg | Keep SVG; class coloring; sandbox strips illegal tags |
+| sticky variants | Distinct styles for warn-note / formula-note |
+| viz-steps / viz-formula | Fixed layout |
 
-**崩溃防护：**
+**Crash protection:**
 
-- Mermaid 渲染包在 try/catch；单图失败不影响全文  
-- 非法 HTML 标签在消毒阶段剥离  
-- 不执行用户/模型写入的任何脚本  
+- Mermaid render in try/catch; one failed diagram must not break the page  
+- Illegal HTML stripped at sanitize time  
+- Never execute scripts written by user/model  
 
 ---
 
-## 7. Phase 2 自检（生成后）
+## 7. Phase 2 self-check (after generation)
 
 ```
-[ ] 每个图示都有 <!-- visual: ... --> 声明头
-[ ] Type ID 均在武器表内
-[ ] mermaid 节点 ≤20，无 click/script
-[ ] blocks/svg 只用白名单 class/标签
-[ ] 图示内无填空/MCQ
-[ ] 选型符合 §3 决策树（不是全用 photo）
+[ ] Every diagram has <!-- visual: ... --> declaration
+[ ] All Type IDs are in the weapon table
+[ ] mermaid nodes ≤20, no click/script
+[ ] blocks/svg use only whitelisted classes/tags
+[ ] No blanks/MCQ inside diagrams
+[ ] Selection matches §3 decision tree (not all photo)
 ```

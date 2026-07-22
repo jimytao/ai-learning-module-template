@@ -1,55 +1,54 @@
-# 模板清理协议 (cleanup_template.md)
+# Template Cleanup Protocol (cleanup_template.md)
 
-> **注意**：本文件是**一次性协议**。当项目第一次初始化（Phase 0）完成、用户画像（profile）写入完毕、浏览器前后端及启动脚本全部就绪后，由用户或 AI 触发执行。
-> 执行完成后，**本文件必须自我删除**。
-
----
-
-## 1. 触发时机与条件
-
-当且仅当满足以下条件时，方可读取本文件并执行清理：
-1. **Phase 0 确认卡已通过**：用户确认画像，且画像数据已写入 `knowledge/profile.md`、`knowledge/desire.md` 等文件。
-2. **浏览器程序已构建**：根目录下已创建好可用的 `server.js` 和 `index.html`（或相应的前后端运行文件）。
-3. **启动脚本可运行**：`start.bat` 已调整并测试可用。
-4. **用户或 AI 发出指令**：「读取 `cleanup_template.md` 执行清理」或「清理模板冗余信息」。
+> **Note**: This file is a **one-shot protocol**. After first initialization (Phase 0) completes, the user profile is written, and browser frontend/backend plus start scripts are ready, the user or AI triggers execution.  
+> After execution, **this file must delete itself**.
 
 ---
 
-## 2. 清理执行步骤
+## 1. When to trigger
 
-AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号定位**。
+Read and run this file only when **all** of the following are true:
+1. **Phase 0 confirmation card passed**: user confirmed the profile, and data is written to `knowledge/profile.md`, `knowledge/desire.md`, etc.
+2. **Browser app built**: usable `server.js` and `index.html` (or equivalent runtime files) exist at repo root.
+3. **Start script works**: `start.bat` adjusted and tested.
+4. **User or AI issues the command**: “run cleanup via `cleanup_template.md`” or “clean up template boilerplate”.
 
-### 2.1 改写入口路由 `AGENT.md`（高安全定位）
+---
 
-为了防止用户修改文档后内容发生行号偏移，AI 必须使用以下语义和锚点安全地改写 `AGENT.md`：
+## 2. Cleanup steps
 
-1. **利用 HTML 注释锚点删除初始化引导区**：
-   * 在 `AGENT.md` 中定位由 `<!-- TEMPLATE_BOOTSTRAP_START -->` 和 `<!-- TEMPLATE_BOOTSTRAP_END -->` 包裹的块。
-   * 将该包裹块（包括这两个 HTML 注释行本身）**彻底删除**，以清除所有的初始化改造指令与说明。
-2. **状态栏更新**：
-   * 移除顶部状态栏中所有的 `_(未设定)_` 或 `_(未选)_` 占位符，更新为真实的科目名、选定模态与 `Phase 1 就绪` 状态。
-3. **精准匹配清理文件地图**：
-   * 搜索字符串 `├── protocols/` 并定位其下的文件树列表。
-   * 精确删除含有 `cleanup_template.md` 的整行内容。
-4. **精准替换黄金规则**：
-   * 搜索并匹配第 8 条规则的字面内容（含有“*空白模板纪律（仅模板态）*”字样）。
-   * 将其整体替换为：“*8. **画像纪律**：画像以 profile 为准，不编造用户未提供的信息。*”
-5. **精简文档职责边界**：
-   * 确保职责表格中只包含本科目正在使用的活动文件，移除所有与 Phase 0 相关的临时字段描述。
+AI must strictly perform the edits and deletes below. **Never locate by absolute line numbers.**
 
-### 2.2 清理并删除模板自身文件
-1. **删除本协议文件**：
+### 2.1 Rewrite entry router `AGENT.md` (safe semantic anchors)
+
+To avoid line-number drift after edits, rewrite `AGENT.md` using semantics and anchors:
+
+1. **Delete the bootstrap guidance block via HTML comment anchors**:
+   * Locate the block wrapped by `<!-- TEMPLATE_BOOTSTRAP_START -->` and `<!-- TEMPLATE_BOOTSTRAP_END -->` in `AGENT.md`.
+   * **Fully delete** that wrapped block (including the two HTML comment lines themselves) to remove all bootstrap rewrite instructions.
+2. **Update the status bar**:
+   * Remove all `_(unset)_` or `_(not chosen)_` placeholders; set real subject name, chosen modality, and `Phase 1 ready`.
+3. **Precisely clean the file map**:
+   * Search for `├── protocols/` and find the tree list under it.
+   * Delete the entire line that contains `cleanup_template.md`.
+4. **Precisely replace golden rule #8**:
+   * Match the literal text of rule 8 (containing “*Blank-template discipline (template mode only)*”).
+   * Replace the whole rule with: “*8. **Profile discipline**: Treat `profile` as authoritative; do not invent information the user did not provide.*”
+5. **Slim document responsibility boundaries**:
+   * Keep only active files for this subject in the responsibility table; remove temporary Phase 0 field descriptions.
+
+### 2.2 Clean and delete template files
+1. **Delete this protocol file**:
    * **[DELETE]** `protocols/cleanup_template.md`
-2. **清理或归档引导文件**：
-   * `protocols/p0_bootstrap.md` 可视科目需要选择删除或归档至 `archive/`。
-   * `protocols/intake_checklist.md` 建议予以保留（以便日后更新画像），但在完成首期配置后，AI 须将其中所有的模板提示词清除。
+2. **Clean or archive guidance files**:
+   * `protocols/p0_bootstrap.md` may be deleted or moved to `archive/` depending on the subject.
+   * Keep `protocols/intake_checklist.md` (for later profile updates), but after first setup clear remaining template prompt wording inside it.
 
 ---
 
-## 3. 清理结果确认与交接
+## 3. Cleanup report & handoff
 
-清理完成后，AI 必须向用户输出一份简洁的“项目整洁度报告”，包含：
-1. **已删除的文件列表**（必须包含 `cleanup_template.md` 自身）。
-2. **已简化的 AGENT.md 状态预览**。
-3. **下一步行动指引**：提示用户运行 `start.bat` 启动浏览器，并说「今天学什么」或「排期」正式进入 Phase 1。
-
+After cleanup, AI must give a short “project cleanliness report” including:
+1. **Deleted files list** (must include `cleanup_template.md` itself).
+2. **Preview of the simplified AGENT.md status**.
+3. **Next actions**: run `start.bat` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.

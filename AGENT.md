@@ -1,109 +1,109 @@
-# AI Learning Coach — 入口路由 (AGENT.md)
+# AI Learning Coach — Entry Router (AGENT.md)
 
-> **唯一入口**。任何任务开始前先读本文件，按路由表决定加载哪些文件。  
-> **禁止**在未确认任务类型前全量加载 `knowledge/` 下的大文件。  
+> **Sole entrypoint**. Before any task, read this file and use the routing table to decide which files to load.  
+> **Do not** bulk-load large files under `knowledge/` before the task type is confirmed.  
 >  
-> **生命周期**：本文件有两种形态——  
-> 1. **空白模板态**（当前）：指导 Phase 0 采集与改造。  
-> 2. **科目项目态**（Phase 0 确认后）：由 AI 按下方「Bootstrap 后改造」改写本文件，去掉模板套话，写入本科目路由与状态。
+> **Lifecycle**: this file has two forms —  
+> 1. **Blank template mode** (current): guides Phase 0 intake and conversion.  
+> 2. **Subject project mode** (after Phase 0 confirm): AI rewrites this file per “Post-Bootstrap rewrite” below, removes template boilerplate, and writes subject routing + status.
 
 ---
 
-## 当前项目状态（每次 Phase 结束后必须更新）
+## Current project status (must update after every Phase)
 
-**当前状态**: `Phase 0 就绪 — 等待科目引导` | Subject: _(未设定)_ | 模态预设: _(未选)_ | YYYY-MM-DD
-> 下一步: 用户说「初始化 / 我要学…」→ 加载 `protocols/intake_checklist.md` 做确认采集  
-> 完成后: 执行「Bootstrap 后改造」→ 说「今天学什么」进入 **Phase 1**
+**Current status**: `Phase 0 ready — awaiting subject intake` | Subject: _(unset)_ | Modality preset: _(not chosen)_ | YYYY-MM-DD
+> Next: user says “bootstrap / I want to learn…” → load `protocols/intake_checklist.md` for confirmed intake  
+> After that: run “Post-Bootstrap rewrite” → say “what should I study today” to enter **Phase 1**
 
 ---
 
-## 任务路由表
+## Task routing table
 
-| 用户指令关键词 | 触发 Phase | 必须加载 | 按需加载 |
+| User command keywords | Triggers Phase | Must load | On demand |
 | :--- | :--- | :--- | :--- |
-| "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
-| "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
-| "改成 textbook / magazine / 混合" / "改模态" | **模态切换** | `knowledge/modality_presets.md` + `knowledge/profile.md` + 本文件状态区 | — |
-| "开新科目" / "复制模板" / "新增轨道" / "怎么归档" | **Lifecycle** | `protocols/project_lifecycle.md` + 必要时 `domain_map.md` | `intake_checklist`（只补新轨道槽） |
-| "查知识地图" / "这个概念" / "我弱项有哪些" | **Knowledge Query** | 对应 `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
-| "今天学什么" / "排期" / "下一单元提案" / "下一期" | **Phase 1** | `protocols/p1_propose.md` + `knowledge/calendar.md` + `knowledge/desire.md` + `knowledge/modality_presets.md` + `state/log.md` + `state/gaps.md` + `notes.json` | `profile` / `warehouse` / `domain_map` |
-| "生成杂志" / "写长文" / "生成单元" / "写课本" / 确认提案后 | **Phase 2** | `protocols/p2_generate.md` + `protocols/tech_spec.md` + **`protocols/visual_arsenal.md`** + `knowledge/calendar.md` + `knowledge/modality_presets.md` | `profile` / `coach_reference` / `warehouse` / `templates/*` |
-| "批改" / "解释高亮" / "订正" | **Phase 3** | `protocols/p3_review.md` + `protocols/tech_spec.md` + 当期内容文件 + `notes.json` | `log` / `gaps` / `coach_reference` |
-| "再出题" / "加练" / "要"（仅在批改后被询问且用户同意时） | **Phase 3 · 加练** | 同上；**必须已获用户明确同意**，禁止批改后自动出题 | 当期错点 / `gaps` |
-| "调试" / "图片broken" / "渲染出错" / "侧栏/跳转/注释定位" | **Tech Debug** | `protocols/tech_spec.md` + `protocols/frontend_spec.md` | 错误信息 |
-| "查看进度" / "我掌握了什么" / "日历" | **Progress Check** | `knowledge/calendar.md` + `state/log.md` + `state/gaps.md` | `desire` |
+| “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
+| “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
+| “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
+| “new subject” / “copy template” / “add track” / “how to archive” | **Lifecycle** | `protocols/project_lifecycle.md` + `domain_map.md` if needed | `intake_checklist` (new-track slots only) |
+| “check knowledge map” / “this concept” / “what are my gaps” | **Knowledge Query** | matching `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
+| “what should I study today” / “schedule” / “next unit proposal” / “next issue” | **Phase 1** | `protocols/p1_propose.md` + `knowledge/calendar.md` + `knowledge/desire.md` + `knowledge/modality_presets.md` + `state/log.md` + `state/gaps.md` + `notes.json` | `profile` / `warehouse` / `domain_map` |
+| “generate magazine” / “write long-form” / “generate unit” / “write textbook” / after confirming a proposal | **Phase 2** | `protocols/p2_generate.md` + `protocols/tech_spec.md` + **`protocols/visual_arsenal.md`** + `knowledge/calendar.md` + `knowledge/modality_presets.md` | `profile` / `coach_reference` / `warehouse` / `templates/*` |
+| “grade” / “explain highlights” / “correct this” | **Phase 3** | `protocols/p3_review.md` + `protocols/tech_spec.md` + current content file + `notes.json` | `log` / `gaps` / `coach_reference` |
+| “more drills” / “extra practice” / “yes” (only when asked after grading and user agrees) | **Phase 3 · extra drills** | same as above; **must already have clear user consent** — never auto-generate drills after grading | current mistakes / `gaps` |
+| “debug” / “broken images” / “render error” / “sidebar / jump / note locate” | **Tech Debug** | `protocols/tech_spec.md` + `protocols/frontend_spec.md` | error messages |
+| “check progress” / “what have I mastered” / “calendar” | **Progress Check** | `knowledge/calendar.md` + `state/log.md` + `state/gaps.md` | `desire` |
 
 ---
 
 <!-- TEMPLATE_BOOTSTRAP_START -->
-## Bootstrap 后改造（空白模板 → 本科目学习项目）
+## Post-Bootstrap rewrite (blank template → this subject’s learning project)
 
-> Phase 0 用户确认卡通过后，AI **必须**改写本 `AGENT.md`（及下列清理），让仓库从「通用模板」变成「该科目的学习项目」。  
-> 改造完成前，不得进入 Phase 2 生成正文。
+> After the Phase 0 confirmation card passes, the AI **must** rewrite this `AGENT.md` (and the cleanup below) so the repo becomes “this subject’s learning project” instead of a generic template.  
+> Do not enter Phase 2 body generation until the rewrite is done.
 
-### 必须改写的部分
+### Must rewrite
 
-| 位置 | 改成什么 |
+| Location | Change to |
 | :--- | :--- |
-| 标题 H1 | `AI Learning Coach — [科目名]` |
-| 顶部「当前状态」 | Subject、模态预设（T/M/H/C）、Phase 1 就绪、日期 |
-| 开篇说明 | 删除「空白模板」套话；改为本科目一句话目标（来自 profile） |
-| 文件地图中的 content 说明 | 可注明本科目主模态（例如「以 Magazine 为主」） |
-| 黄金规则第 8 条 | 模板态的「不得预填个人信息」改为：「画像以 profile 为准；勿编造未提供信息」 |
+| H1 title | `AI Learning Coach — [Subject name]` |
+| Top “Current status” | Subject, modality preset (T/M/H/C), Phase 1 ready, date |
+| Opening blurb | Remove “blank template” boilerplate; one-line subject goal from profile |
+| content note in file map | May note primary modality (e.g. “Magazine-primary”) |
+| Golden rule #8 | Replace template-mode “do not prefill personal info” with: “Profile is authoritative; do not invent unprovided info” |
 
 > [!IMPORTANT]
-> **自动清理步骤**：在 Phase 0 确认卡通过、浏览器与服务器生成完毕且 `start.bat` 配置好后，AI **必须**主动加载并读取 `protocols/cleanup_template.md`，执行其定义的模板精简与文件清理程序，使项目彻底转为科目专属态，并在完成后**自我删除**该清理协议文件。
+> **Auto cleanup**: after the Phase 0 confirmation card passes, browser/server files are generated, and `start.bat` is configured, the AI **must** load and read `protocols/cleanup_template.md`, run its template cleanup, fully convert the project to subject-owned mode, and **self-delete** that cleanup protocol file when done.
 
-### 可以精简 / 归档的部分
+### May slim / archive
 
-| 动作 | 说明 |
+| Action | Note |
 | :--- | :--- |
-| 保留 `intake_checklist.md` | 以后「补问槽位 / 重做画像」仍可用；但路由表可把 Phase 0 标为「仅补全 TBD 时」 |
-| 保留 `modality_presets.md` | 切换模态仍依赖 |
-| 保留 `DESIGN.md` | 设计说明；**不要**放进阅读器目录 |
-| 不必删除 protocols | 规则层继续用；若某科目永不使用 Magazine，可在状态区注明「本科目禁用 Mag」，而不是删文件 |
-| `templates/` | 保留作生成骨架 |
+| Keep `intake_checklist.md` | Still useful for “fill slots / redo profile”; routing may mark Phase 0 as “only when filling TBD” |
+| Keep `modality_presets.md` | Still needed for modality switches |
+| Keep `DESIGN.md` | Design notes; **do not** put in the reader TOC |
+| Do not delete protocols | Rules layer stays; if a subject never uses Magazine, note “Mag disabled” in status — don’t delete files |
+| `templates/` | Keep as generation skeletons |
 
-### 改造后路由表建议形态
+### Suggested routing shape after rewrite
 
-- Phase 0 行改为：仅当 profile 有 `TBD` 或用户说「更新画像」时触发。  
-- 默认欢迎语 / 下一步：指向 Phase 1。  
-- 若模态为 **T**：Phase 1 说明默认提案 Unit。  
-- 若模态为 **M**：Phase 1 说明默认提案 Magazine。  
+- Phase 0 row: only when profile has `TBD` or user says “update profile”.  
+- Default welcome / next step: Phase 1.  
+- If modality is **T**: Phase 1 notes default Unit proposals.  
+- If modality is **M**: Phase 1 notes default Magazine proposals.  
 
-### 改造完成检查
+### Rewrite done checklist
 
-- [ ] 标题含科目名  
-- [ ] 状态区无「未设定」  
-- [ ] 模态预设已写  
-- [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
-- [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（该清理文件已被自动删除）  
-- [ ] 下一步指向 Phase 1  
+- [ ] Title includes subject name  
+- [ ] Status area has no “unset”  
+- [ ] Modality preset written  
+- [ ] Confirmation card left traces (profile / desire / gaps / calendar / domain_map no longer all TBD)  
+- [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (cleanup file auto-deleted)  
+- [ ] Next step points to Phase 1  
 <!-- TEMPLATE_BOOTSTRAP_END -->
 
 ---
 
-## 项目文件地图
+## Project file map
 
 ```
-AGENT.md                          ← 入口路由（本文件；Bootstrap 后会改写）
-start.bat                         ← 浏览器与本地服务器一键启动脚本
+AGENT.md                          ← entry router (this file; rewritten after Bootstrap)
+start.bat                         ← one-click browser + local server start
 │
 ├── protocols/
-│   ├── intake_checklist.md       ← Phase0：采集确认清单（强制）
-│   ├── p0_bootstrap.md           ← Phase0：写入与 AGENT 改造流程
-│   ├── cleanup_template.md       ← Phase0：一次性模板清理与精简协议（执行后自毁）
-│   ├── project_lifecycle.md      ← 复制新科目 / 归档 / 母模板升级
+│   ├── intake_checklist.md       ← Phase0: intake confirmation checklist (mandatory)
+│   ├── p0_bootstrap.md           ← Phase0: write + AGENT rewrite flow
+│   ├── cleanup_template.md       ← Phase0: one-shot template cleanup (self-deletes)
+│   ├── project_lifecycle.md      ← copy new subject / archive / mother-template upgrade
 │   ├── p1_propose.md
 │   ├── p2_generate.md
 │   ├── p3_review.md
-│   ├── tech_spec.md              ← md / 题型 / notes 字段
-│   ├── visual_arsenal.md         ← 图示武器库（流程/树/框图/SVG…）硬语法
-│   └── frontend_spec.md          ← 阅读器：排序 / 侧栏 / 注释 / 图示渲染契约
+│   ├── tech_spec.md              ← md / exercise types / notes fields
+│   ├── visual_arsenal.md         ← visual arsenal (flow/tree/blocks/SVG…) hard syntax
+│   └── frontend_spec.md          ← reader: sort / sidebar / notes / diagram render contract
 │
 ├── knowledge/
 │   ├── profile.md
-│   ├── modality_presets.md       ← T / M / H / C 预设（可切换）
+│   ├── modality_presets.md       ← T / M / H / C presets (switchable)
 │   ├── desire.md
 │   ├── calendar.md
 │   ├── domain_map.md
@@ -115,74 +115,74 @@ start.bat                         ← 浏览器与本地服务器一键启动脚
 ├── scripts/        download_images.py …
 ├── templates/      magazine_skeleton · unit_skeleton
 ├── notes.json
-├── review.md                     ← Phase3 复盘长文存档（按期追加）
+├── review.md                     ← Phase3 long retrospective archive (append per issue)
 ├── DESIGN.md
 └── README.md
 ```
 
 ---
 
-## 文档职责边界（搞混 = 错误排期）
+## Document responsibility boundaries (mixing these = bad scheduling)
 
-| 文档 | 一句话职责 | 权威级别 |
+| Document | One-line duty | Authority |
 | :--- | :--- | :--- |
-| **`protocols/intake_checklist.md`** | Phase 0 必须问什么、如何确认 | 采集权威 |
-| **`knowledge/modality_presets.md`** | T/M/H/C 学习节奏与配比 | 模态权威 |
-| **`knowledge/calendar.md`** | 已生成内容 + 指针 + 前瞻队列 | 进度权威 |
-| **`knowledge/desire.md`** | 想学什么 | 意愿权威 |
-| **`knowledge/profile.md`** | 水平 / 目标 / 约束 / 当前模态 | 画像权威 |
-| **`knowledge/domain_map.md`** | 学科树 | 结构权威 |
-| **`state/gaps.md`** | 弱项复现 | 弱项权威 |
-| **`state/log.md`** | 复盘与概念台账 | 复盘权威 |
-| **`notes.json`** | 标注 + AI 批注（含 context） | 微观信号 |
-| **`protocols/frontend_spec.md`** | 阅读器行为验收 | 前端权威 |
+| **`protocols/intake_checklist.md`** | What Phase 0 must ask and how to confirm | Intake authority |
+| **`knowledge/modality_presets.md`** | T/M/H/C learning pace and mix | Modality authority |
+| **`knowledge/calendar.md`** | Generated content + cursor + forward queue | Progress authority |
+| **`knowledge/desire.md`** | What you want to learn | Desire authority |
+| **`knowledge/profile.md`** | Level / goals / constraints / current modality | Profile authority |
+| **`knowledge/domain_map.md`** | Subject tree | Structure authority |
+| **`state/gaps.md`** | Weakness recurrence | Gap authority |
+| **`state/log.md`** | Retrospectives and concept ledger | Retro authority |
+| **`notes.json`** | Annotations + AI reviews (with context) | Micro signals |
+| **`protocols/frontend_spec.md`** | Reader behavior acceptance | Frontend authority |
 
-### 排期信息流
+### Scheduling information flow
 
 ```
-intake 确认 → profile + modality
+intake confirm → profile + modality
   + desire + gaps + notes + domain_map + calendar + warehouse
         ↓
-Phase 1 按模态预设提案 → 用户确认
+Phase 1 proposes by modality preset → user confirms
         ↓
-Phase 2 生成 → Phase 3 批改（再出题必须先问）
+Phase 2 generates → Phase 3 grades (extra drills require asking first)
 ```
 
 ---
 
-## 黄金规则
+## Golden rules
 
-1. **路由优先**：未读本文件前禁止开始任务。  
-2. **按需加载**：只加载路由表指定文件。  
-3. **Phase 状态驱动**：Phase 结束更新本文件顶部状态 + `calendar.md`。  
-4. **tech_spec 优先**：写 `.md` / `notes.json` 前先加载。  
-5. **notes 字段边界**：AI 只写允许字段；保留 `context`；不覆盖用户原始注释。  
-6. **严谨评估、禁止吹捧**：MCQ/T-F 全对 ≠ 能应用。  
-7. **模态预设驱动**：Phase 1/2 遵守 `profile` 中的 T/M/H/C；改模态需用户明示或确认。  
-8. **空白模板纪律（仅模板态）**：不得预填真实个人信息；Phase 0 确认后本条改为「以 profile 为准、不编造」。  
-9. **订正后再出题必须先问**：未获明确同意禁止出新题。  
-10. **采集必须确认**：Phase 0 必须走 `intake_checklist` 确认卡；未确认不得生成正文、不得提前改写本 AGENT 为科目态。  
-11. **前端细节不丢**：迁入/调试阅读器时以 `frontend_spec.md` 为准（排序、侧栏 Notes、整句 context 定位、多文档隔离、**图示渲染契约**）。  
-12. **不猜测意图**：用户指令不在路由表中时，先问清楚再加载文件，禁止自行开写。  
-13. **来源可核验**：推荐视频/播客/文献/数据前须检索确认真实存在；禁止伪造引用。不确定标「需核验」。  
-14. **log 表格列名锁定**：一旦前端依赖 `log.md` Concept Ledger 等表头，禁止擅自改列名/列序（见 tech_spec）。  
-15. **项目组织余量**：单科 / 同项目多轨道（相近课）/ 复制文件夹（不相近课）均可，见 `project_lifecycle.md`。Digital Health 这类可先同项目多轨道，画像清晰后再加 Track。  
-16. **图示只用武器库**：Phase 2 只使用 `visual_arsenal.md` 登记的 Type；禁止自创语法导致渲染不一致或崩坏。
+1. **Routing first**: do not start a task before reading this file.  
+2. **Load on demand**: only files named by the routing table.  
+3. **Phase-status driven**: after each Phase, update this file’s top status + `calendar.md`.  
+4. **tech_spec first**: load it before writing `.md` / `notes.json`.  
+5. **notes field boundaries**: AI writes only allowed fields; keep `context`; never overwrite user raw notes.  
+6. **Rigorous assessment, no praise inflation**: all MCQ/T-F correct ≠ can apply.  
+7. **Modality-preset driven**: Phase 1/2 obey T/M/H/C in `profile`; changing modality needs explicit user request or confirm.  
+8. **Blank-template discipline (template mode only)**: do not prefill real personal info; after Phase 0 confirm, this becomes “profile is authoritative; do not invent”.  
+9. **Extra drills after correction require asking first**: no new items without clear consent.  
+10. **Intake must confirm**: Phase 0 must use `intake_checklist` confirmation card; no body generation and no AGENT subject rewrite before confirm.  
+11. **Frontend details must not be lost**: when migrating/debugging the reader, follow `frontend_spec.md` (sort, Notes sidebar, full-sentence context locate, multi-doc isolation, **diagram render contract**).  
+12. **Do not guess intent**: if the user’s command is not in the routing table, ask first — never start writing files unilaterally.  
+13. **Verifiable sources**: before recommending videos/podcasts/papers/data, search to confirm they exist; never fabricate citations. If unsure, mark “needs verification”.  
+14. **log table column lock**: once the frontend depends on headers like Concept Ledger in `log.md`, do not rename/reorder columns (see tech_spec).  
+15. **Project organization headroom**: single subject / multi-track in one project (related courses) / folder copy (unrelated) are all OK — see `project_lifecycle.md`. Domains like Digital Health can start multi-track in one project and add Tracks as the profile clarifies.  
+16. **Visuals only from the arsenal**: Phase 2 uses only Types registered in `visual_arsenal.md`; no invented syntax that causes inconsistent or broken renders.
 
 ---
 
-## 完整学习闭环
+## Full learning loop
 
 ```
-Phase 0  intake 清单采集 → 确认卡 → 写入画像 → 改造 AGENT 为科目项目
+Phase 0  intake checklist → confirmation card → write profile → rewrite AGENT as subject project
    ↓
-Phase 1  按模态预设排期提案
-   ↓ 用户确认
-Phase 2  生成内容 → 图片 → 更新状态
-   ↓ 用户阅读 / 做题 / 高亮（context 整句定位）
-Phase 3  批改 → 订正讲解 → **先询问**是否加练
-   ↓ 仅当用户明确同意
-   （加练）再出题 → …
-   ↓ 回写 gaps / log / calendar / desire
-次期 Phase 1 …
+Phase 1  schedule proposal by modality preset
+   ↓ user confirms
+Phase 2  generate content → images → update state
+   ↓ user reads / drills / highlights (context full-sentence locate)
+Phase 3  grade → remediate → **ask first** about extra drills
+   ↓ only when user clearly agrees
+   (extra drills) more items → …
+   ↓ write back gaps / log / calendar / desire
+Next Phase 1 …
 ```

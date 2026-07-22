@@ -1,102 +1,102 @@
-# Phase 0：科目引导与空白填充 (p0_bootstrap.md)
+# Phase 0: Subject Intake & Blank Fill (p0_bootstrap.md)
 
-> **触发**：用户说「我要学…」「初始化」「设定科目」，或 profile/calendar 仍为空白。  
-> **必须先加载**：`protocols/intake_checklist.md` + `knowledge/modality_presets.md`  
-> **目标**：采集 → **用户确认** → 写入 → **改造 AGENT.md 为科目项目** → 才允许 Phase 1。
-
----
-
-## Step 1：按 intake 清单采集
-
-完整槽位与勾选表见 **`protocols/intake_checklist.md`**（A–G）。
-
-最低限度必须拿到：
-
-1. 科目 + 可检验目标  
-2. 水平 + 已知 + 弱项  
-3. 兴趣（可少）+ 时间约束  
-4. **学习模态预设 T / M / H / C**（见 `modality_presets.md`）  
-5. （建议）阅读器排序 / Notes 范围偏好  
-
-规则：
-
-- 缺什么问什么；不编造。  
-- TBD 允许暂时保留，但须在确认卡列出。  
-- **未输出确认卡并获得用户「确认」前：禁止写入正式画像、禁止改 AGENT、禁止生成正文。**
+> **Trigger**: User says “I want to learn…”, “bootstrap”, “set subject”, or profile/calendar is still blank.  
+> **Must load first**: `protocols/intake_checklist.md` + `knowledge/modality_presets.md`  
+> **Goal**: Collect → **user confirms** → write → **rewrite AGENT.md into a subject project** → only then allow Phase 1.
 
 ---
 
-## Step 2：输出确认卡并等待
+## Step 1: Collect via intake checklist
 
-使用 `intake_checklist.md` 中的「确认卡模板」。
+Full slots and checkboxes: **`protocols/intake_checklist.md`** (A–G).
 
-- 用户修改 → 更新确认卡，再次等待。  
-- 用户确认 → 进入 Step 3。
+Minimum required:
+
+1. Subject + testable goals  
+2. Level + known strengths + weak spots  
+3. Interests (can be short) + time constraints  
+4. **Learning modality preset T / M / H / C** (see `modality_presets.md`)  
+5. (Recommended) Reader sort / Notes scope preferences  
+
+Rules:
+
+- Ask only for what’s missing; do not invent.  
+- TBD is allowed temporarily, but must appear on the confirmation card.  
+- **Before outputting a confirmation card and getting user “confirm”: do not write formal profile data, do not rewrite AGENT, do not generate body content.**
 
 ---
 
-## Step 3：写入知识库与状态
+## Step 2: Output confirmation card and wait
 
-| 写入目标 | 内容来源 |
+Use the “Confirmation card template” in `intake_checklist.md`.
+
+- User requests edits → update the card and wait again.  
+- User confirms → go to Step 3.
+
+---
+
+## Step 3: Write knowledge base and state
+
+| Write target | Content source |
 | :--- | :--- |
-| `knowledge/profile.md` | 科目、目标、水平、已知、约束、**模态预设**、阅读器偏好 |
-| `knowledge/desire.md` | 兴趣与想覆盖主题（`[ ]`） |
-| `state/gaps.md` | 弱项初始 Kanban |
-| `knowledge/domain_map.md` | 学科树草稿；已知节点标 Covered |
-| `knowledge/calendar.md` | 指针 + Wave 前瞻（按模态：T 偏 Unit，M 偏 Mag，H 混合） |
-| `state/warehouse.md` | 按学科改名的小模块池 |
-| `state/log.md` | 空 Dashboard + 说明尚未开始 |
-| `notes.json` | 保持 `[]` 或清空 |
+| `knowledge/profile.md` | Subject, goals, level, known, constraints, **modality preset**, reader prefs |
+| `knowledge/desire.md` | Interests and topics to cover (`[ ]`) |
+| `state/gaps.md` | Initial weak-spot Kanban |
+| `knowledge/domain_map.md` | Draft subject tree; mark known nodes Covered |
+| `knowledge/calendar.md` | Cursor + Wave forward queue (by modality: T → Unit-heavy, M → Mag-heavy, H → mix) |
+| `state/warehouse.md` | Small-module pool renamed for the subject |
+| `state/log.md` | Empty Dashboard + note that learning has not started |
+| `notes.json` | Keep `[]` or clear |
 
-### domain_map 要求（同前）
+### domain_map requirements
 
-- 3–8 个一级主题；Core / Elective；深度 M/U；依赖边。
+- 3–8 top-level themes; Core / Elective; depth M/U; dependency edges.
 
-### calendar 按模态初始化
+### calendar init by modality
 
-| 预设 | Wave A 建议 |
+| Preset | Wave A suggestion |
 | :--- | :--- |
-| T | 多为 Unit 草案 |
-| M | 多为 Magazine 草案 |
-| H | Mag/Unit 交错 |
-| C | 按自定义规则 |
+| T | Mostly Unit drafts |
+| M | Mostly Magazine drafts |
+| H | Mag/Unit interleaved |
+| C | Per custom rules |
 
 ---
 
-## Step 4：改造 AGENT.md（关键）
+## Step 4: Rewrite AGENT.md (critical)
 
-严格执行 `AGENT.md` 章节 **「Bootstrap 后改造」**：
+Follow `AGENT.md` section **“Post-Bootstrap rewrite”** strictly:
 
-1. 标题改为含科目名  
-2. 状态区写入 Subject + 模态 + `Phase 1 就绪`  
-3. 去掉空白模板套话；写入本科目一句话目标  
-4. 调整 Phase 0 路由为「仅补全 / 更新画像」  
-5. 按模态注明默认提案倾向  
-6. **读取并执行 `protocols/cleanup_template.md` 协议**，清除所有模板引导指示并自我删除该清理文件。  
+1. Title includes subject name  
+2. Status area: Subject + modality + `Phase 1 ready`  
+3. Remove blank-template boilerplate; write one-line subject goal  
+4. Narrow Phase 0 routing to “fill TBD / update profile” only  
+5. Note default proposal bias by modality  
+6. **Load and execute `protocols/cleanup_template.md`**, strip template guidance, and self-delete that cleanup file.  
 
-改造完成后，本仓库即视为**该科目的学习项目**，不再是无用空白模。
+After rewrite, this repo is a **subject learning project**, not a blank template.
 
 ---
 
-## Step 5：Bootstrap 摘要（改造后再发一次）
+## Step 5: Bootstrap summary (send once after rewrite)
 
-| 栏目 | 内容 |
+| Field | Content |
 | :--- | :--- |
-| 科目与目标 | … |
-| 模态预设 | T/M/H/C + 含义一句话 |
-| 知识地图 | 一级主题 |
-| 前 5 期待排 | 已按模态标注 Mag/Unit |
-| 初始弱项 | 3–5 条 |
-| AGENT | 已改为科目项目态 ✅ |
-| 待确认 TBD | … |
+| Subject & goals | … |
+| Modality preset | T/M/H/C + one-line meaning |
+| Domain map | Top-level themes |
+| Next 5 queued | Mag/Unit labeled by modality |
+| Initial gaps | 3–5 items |
+| AGENT | Converted to subject-project mode ✅ |
+| Pending TBD | … |
 
-下一步提示：说「今天学什么」或「排期」→ Phase 1。
+Next prompt: say “what should I study today” or “schedule” → Phase 1.
 
 ---
 
-## Step 6：状态标记示例
+## Step 6: Status marker example
 
 ```
-**当前状态**: `Phase 0 完成 — Phase 1 就绪` | Subject: [科目] | 模态: H-Hybrid | YYYY-MM-DD
-> 下一步: 「排期」→ Phase 1
+**Current status**: `Phase 0 complete — Phase 1 ready` | Subject: [subject] | Modality: H-Hybrid | YYYY-MM-DD
+> Next: “schedule” → Phase 1
 ```

@@ -1,13 +1,30 @@
 # AI Learning Module Template
 
-[中文说明](README.zh-CN.md)
+## Language versions
+
+| Branch | Language | Who it’s for |
+| :--- | :--- | :--- |
+| **`English`** (this branch) | Fully English documentation | English-primary users |
+| **`Chinese`** | Chinese-primary docs (may mix some English terms) | Chinese-primary users |
+
+```bash
+# English docs (this branch)
+git clone -b English https://github.com/jimytao/ai-learning-module-template.git
+
+# Chinese docs
+git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+```
+
+Or after cloning: `git checkout English` / `git checkout Chinese`.
+
+---
 
 A **subject-agnostic, AI-coached learning blank template** with dual content modes: long-form **Magazine** articles and drill-oriented **Units**.
 
 Distilled from battle-tested textbook and magazine learning systems: routing, scheduling, generation, grading, annotation-driven review, and a strict visual arsenal (flowcharts, trees, block diagrams, and more).
 
 > **AI entrypoint**: read [`AGENT.md`](AGENT.md) first  
-> **Design notes**: [`DESIGN.md`](DESIGN.md) (currently in Chinese)
+> **Design notes**: [`DESIGN.md`](DESIGN.md)
 
 ---
 
@@ -26,18 +43,16 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 
 ## Quick start
 
-1. Clone this repo, or copy the folder (keep a clean mother template if you like).  
+1. Clone this repo (prefer the branch for your language), or copy the folder (keep a clean mother template if you like).  
 2. Open it in Cursor (or a similar AI coding agent) and say:
 
 ```text
 Follow AGENT.md and run Phase 0 / bootstrap.
 ```
 
-(Chinese also works: `按 AGENT.md 做 Phase 0 / 初始化。`)
-
 3. After you confirm the profile and modality and set up your browser server files:
    * Run the root **`start.bat`** script to launch the local web server with one click.
-   * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"** (or `执行 protocols/cleanup_template.md 清理`). The AI will automatically clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
+   * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"**. The AI will clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
 4. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
 
 ### Learning modality presets
@@ -116,4 +131,3 @@ The browser HTML/JS implementation files are not shipped in this repository. Whe
 ## License
 
 [MIT](LICENSE) — free to use, modify, and redistribute.
-

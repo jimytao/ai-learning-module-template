@@ -1,71 +1,71 @@
-# 学科知识地图 (domain_map.md)
+# Subject Domain Map (domain_map.md)
 
-> Phase 0 生成初稿；之后随学习更新 Covered。  
-> 排期时用本图检查「Core 是否漏盖」，而不是只追兴趣。
+> Phase 0 drafts this; update Covered as learning proceeds.  
+> When scheduling, use this map to check “are Core nodes missing?”, not interest alone.
 
 ---
 
-## 元信息
+## Meta
 
-| 字段 | 值 |
+| Field | Value |
 | :--- | :--- |
-| 学科 / 领域 | `TBD` |
-| 模式 | 单科 / **多轨道** · `TBD` |
-| 轨道列表 Tracks | `TBD`（例：`DH-Core` / `FHIR-Interop` / `HIM`；单科则只写一条） |
-| 地图版本 | 0.1 |
-| 最后更新 | `TBD` |
+| Subject / domain | `TBD` |
+| Mode | Single subject / **multi-track** · `TBD` |
+| Tracks | `TBD` (e.g. `DH-Core` / `FHIR-Interop` / `HIM`; single subject = one entry) |
+| Map version | 0.1 |
+| Last updated | `TBD` |
 
-图例：`Core` 必备 · `Elective` 选修 · 深度 `M`=Magazine · `U`=Unit · 状态 `○` 未学 · `◐` 部分 · `●` 已覆盖
+Legend: `Core` required · `Elective` optional · depth `M`=Magazine · `U`=Unit · status `○` not studied · `◐` partial · `●` covered
 
 ---
 
-## 多轨道时怎么写
+## Multi-track writing
 
-每个 Track 一块一级主题树；节点表增加 **Track** 列。排期与 gaps 用同一 Track 标签对齐。
+One top-level theme tree per Track; node tables add a **Track** column. Scheduling and gaps use the same Track tags.
 
-| 节点 | Track | 深度 | 依赖 | 状态 | 覆盖于 |
+| Node | Track | Depth | Depends on | Status | Covered in |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1.1 `TBD` | `Track-A` | M/U | — | ○ | — |
 
-跨轨道概念（如「隐私伦理」服务多门课）可标 `Track: Shared`，复现时注明。
+Cross-track concepts (e.g. “privacy ethics” serving many courses) may use `Track: Shared` and note that on recurrence.
 
 ---
 
-## 一级主题树
+## Top-level theme tree
 
-### 1. `TBD_Theme_1`（Core）
+### 1. `TBD_Theme_1` (Core)
 
-| 节点 | 深度 | 依赖 | 状态 | 覆盖于 |
+| Node | Depth | Depends on | Status | Covered in |
 | :--- | :--- | :--- | :--- | :--- |
 | 1.1 `TBD` | M/U | — | ○ | — |
 | 1.2 `TBD` | U | 1.1 | ○ | — |
 
-### 2. `TBD_Theme_2`（Core）
+### 2. `TBD_Theme_2` (Core)
 
-| 节点 | 深度 | 依赖 | 状态 | 覆盖于 |
+| Node | Depth | Depends on | Status | Covered in |
 | :--- | :--- | :--- | :--- | :--- |
 | 2.1 `TBD` | M | — | ○ | — |
 
-### 3. `TBD_Theme_3`（Elective）
+### 3. `TBD_Theme_3` (Elective)
 
-| 节点 | 深度 | 依赖 | 状态 | 覆盖于 |
+| Node | Depth | Depends on | Status | Covered in |
 | :--- | :--- | :--- | :--- | :--- |
 | 3.1 `TBD` | M | — | ○ | — |
 
 ---
 
-## 依赖提示（文字）
+## Dependency hints (text)
 
 ```
-（Phase 0 用箭头列出关键路径，例：1.1 → 1.2 → 2.1）
+(Phase 0 lists critical paths with arrows, e.g. 1.1 → 1.2 → 2.1)
 ```
 
 ---
 
-## 覆盖度快照
+## Coverage snapshot
 
-| 指标 | 值 |
+| Metric | Value |
 | :--- | :--- |
-| Core 节点总数 | `TBD` |
-| Core 已覆盖 | 0 |
-| 下一步应优先的 Core | `TBD` |
+| Core node total | `TBD` |
+| Core covered | 0 |
+| Next Core to prioritize | `TBD` |

@@ -1,36 +1,36 @@
-# 弱项看板 (gaps.md)
+# Gaps Kanban (gaps.md)
 
-> 追踪「已暴露的不懂 / 易混 / 怕用错」。与 `desire.md`（想要的）互补。  
-> Phase 1 必须读取本表；Phase 3 必须回写状态。
+> Tracks “exposed unknowns / easy-to-confuse / fear of misuse”. Complements `desire.md` (wants).  
+> Phase 1 must read this table; Phase 3 must write status back.
 
 ---
 
-## 掌握量化判定（默认）
+## Mastery judgment (default)
 
-| 状态 | 含义 |
+| Status | Meaning |
 | :--- | :--- |
-| `⏳ 待编入` | 已登记，尚未进入教学内容 |
-| `🔄 学习中` | 已编入 ≥1 次，尚未达标 |
-| `✅ 暂过关` | 在无提示或变形题中正确应用 ≥2 次，且近期未再标错 |
-| `↩️ 回退` | 曾过关但再次标错 / 再认以外层失败 → 回到学习中 |
+| `⏳ queued` | Registered, not yet in teaching content |
+| `🔄 in progress` | Included ≥1 time, not yet at bar |
+| `✅ provisional pass` | Correct application ≥2 times without heavy prompts / on variants, and no recent wrong marks |
+| `↩️ relapsed` | Once passed but marked wrong again / failed beyond recognition → back to in progress |
 
-> MCQ/T-F 正确只作为弱证据；开放题 / 讲解 / 无提示召回才计为强证据。
+> MCQ/T-F correct is weak evidence only; open answers / explanations / unaided recall count as strong evidence.
 
 ---
 
 ## Active Gaps Kanban
 
-| ID | Track | 弱项描述 | 典型误解 | 建议复现方式 | Target | Status |
+| ID | Track | Gap description | Typical misconception | Suggested recurrence | Target | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| G01 | `TBD` | `TBD`（Phase 0 写入） | | Mag 织入 / Unit 专练 | 第 1–2 期 | ⏳ 待编入 |
+| G01 | `TBD` | `TBD` (Phase 0 write) | | Mag weave-in / Unit drill | Issues 1–2 | ⏳ queued |
 
 ---
 
-## 详细备注（可选）
+## Detail notes (optional)
 
-### G01 — 标题
+### G01 — Title
 
-- 首次发现：  
-- 相关 domain 节点：  
-- 已复现于：  
-- 仍缺的证据：再认 / 理解 / 应用 / 迁移  
+- First found:  
+- Related domain nodes:  
+- Already recurred in:  
+- Evidence still missing: recognition / understanding / application / transfer  

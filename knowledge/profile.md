@@ -1,87 +1,87 @@
-# 学习者画像 (profile.md)
+# Learner Profile (profile.md)
 
-> Phase 0 填写。保持简短；细节弱项进 `state/gaps.md`，意愿主题进 `desire.md`。  
-> **空白模板：不要预填真实个人信息。**
+> Filled in Phase 0. Keep short; detailed weaknesses go to `state/gaps.md`, wanted topics to `desire.md`.  
+> **Blank template: do not prefill real personal information.**
 
 ---
 
-## 科目与目标
+## Subject & goals
 
-| 字段 | 内容 |
+| Field | Content |
 | :--- | :--- |
-| 科目 / 领域 | `TBD` |
-| 组织方式 | 单科 / 同项目多轨道 / （另有不相近科目用复制文件夹）· `TBD` |
-| 轨道 Tracks | `TBD`（多轨道时填写；单科写一门即可） |
-| 一句话目标 | `TBD` |
-| 成功标准（可检验） | `TBD`（例：能讲解 X、能做 Y 类题、能读懂 Z 类文献摘要） |
-| 时间地平线 | `TBD`（例：8 周 / 一学期） |
+| Subject / domain | `TBD` |
+| Organization | Single subject / multi-track in one project / (unrelated subjects use folder copies) · `TBD` |
+| Tracks | `TBD` (fill for multi-track; single subject = one name) |
+| One-line goal | `TBD` |
+| Success criteria (testable) | `TBD` (e.g. can explain X, solve Y-type items, read Z-type abstracts) |
+| Time horizon | `TBD` (e.g. 8 weeks / one semester) |
 
 ---
 
-## 水平（自述）
+## Level (self-report)
 
-| 维度 | 自评 | 备注 |
+| Dimension | Self-rating | Notes |
 | :--- | :--- | :--- |
-| 总体阶段 | 新手 / 有基础 / 进阶 · `TBD` | |
-| 被动理解（读/听） | `TBD` | |
-| 主动产出（写/讲/做题） | `TBD` | |
-| 相关先修 / 成绩 | `TBD` | 没有则写「无」 |
+| Overall stage | Beginner / some foundation / advanced · `TBD` | |
+| Passive understanding (read/listen) | `TBD` | |
+| Active production (write/speak/solve) | `TBD` | |
+| Related prior courses / scores | `TBD` | Write “none” if none |
 
 ---
 
-## 已知基础（「不弱」）
+## Known foundation (“not weak”)
 
-- `TBD` — 已理解的子主题列表（Phase 0 写入后，同步在 `domain_map.md` 标 Covered）
-
----
-
-## 兴趣与动机
-
-- `TBD` — 想深入的方向、案例类型、应用场景（详细勾选清单以 `desire.md` 为准）
+- `TBD` — list of already-understood subtopics (after Phase 0 write, mark Covered in `domain_map.md`)
 
 ---
 
-## 约束与偏好
+## Interests & motivation
 
-| 字段 | 内容 |
+- `TBD` — directions to go deep, case types, application scenes (detailed checklist lives in `desire.md`)
+
+---
+
+## Constraints & preferences
+
+| Field | Content |
 | :--- | :--- |
-| 每周可投入 | `TBD` |
-| 单次学习窗口 | `TBD`（影响体量） |
-| 内容语言 | 中文 / 英文 / 双语 · `TBD` |
-| 文献深度 | 科普级 / 教材级 / 需摘引指南或论文表述 · `TBD` |
-| 喜欢的案例类型 | `TBD` |
-| 想避开的内容 | `TBD` |
-| 其它约束 | `TBD` |
+| Weekly time budget | `TBD` |
+| Single study window | `TBD` (affects size) |
+| Content language | Chinese / English / bilingual · `TBD` |
+| Literature depth | Popular / textbook / needs guideline or paper phrasing · `TBD` |
+| Preferred case types | `TBD` |
+| Content to avoid | `TBD` |
+| Other constraints | `TBD` |
 
 ---
 
-## 学习模态预设（必填）
+## Learning modality preset (required)
 
-> 定义见 `knowledge/modality_presets.md`。Phase 1/2 必须遵守。可日后切换。
+> Definitions: `knowledge/modality_presets.md`. Phase 1/2 must comply. Switchable later.
 
-| 字段 | 内容 |
+| Field | Content |
 | :--- | :--- |
-| 当前预设 | `T` Textbook-first / `M` Magazine-first / `H` Hybrid / `C` Custom · **默认推荐填 H，待 Phase 0 确认** |
-| 选择日期 | `TBD` |
-| Custom 规则原文（仅 C） | `TBD` |
-| 切换历史 | （例：2026-xx-xx H→T …） |
+| Current preset | `T` Textbook-first / `M` Magazine-first / `H` Hybrid / `C` Custom · **recommended default H until Phase 0 confirms** |
+| Chosen on | `TBD` |
+| Custom rules raw text (C only) | `TBD` |
+| Switch history | (e.g. 2026-xx-xx H→T …) |
 
 ---
 
-## 阅读器偏好（frontend_spec）
+## Reader preferences (frontend_spec)
 
-| 字段 | 内容 |
+| Field | Content |
 | :--- | :--- |
-| 目录默认排序 | `新到旧`（可切换旧到新）· `TBD` |
-| Notes 默认范围 | `仅当前文档`（可切全部）· `TBD` |
-| 批改语言风格 | 简洁 / 详细 · `TBD` |
+| TOC default sort | `newest first` (switchable to oldest first) · `TBD` |
+| Notes default scope | `current document only` (switchable to all) · `TBD` |
+| Grading tone | Concise / detailed · `TBD` |
 
 ---
 
-## 学习原则（AI 必须遵守）
+## Learning principles (AI must follow)
 
-1. 不吹捧；区分再认正确与独立产出。  
-2. 弱项必须进入复现队列，不能只讲新课。  
-3. 遵守当前模态预设；改预设须用户明示。  
-4. 用户没提供的槽位保持 TBD，走 intake 确认，不编造。  
-5. 订正后加练必须先问。
+1. No baseless praise; distinguish recognition correctness from independent production.  
+2. Weaknesses must enter the recurrence queue — not only new lessons.  
+3. Obey the current modality preset; switching requires explicit user intent.  
+4. Unprovided slots stay TBD; go through intake confirmation — do not invent.  
+5. Extra drills after correction require asking first.

@@ -1,53 +1,53 @@
-# 教学范式参考 (coach_reference.md)
+# Coaching Reference (coach_reference.md)
 
-> 学科无关的批改与助记原则。Phase 2/3 按需加载。  
-> 具体学科口诀可在 Phase 0 后追加「本学科附录」，但不要覆盖通用原则。
+> Subject-agnostic grading and memory principles. Load on demand in Phase 2/3.  
+> After Phase 0 you may append a “subject appendix”, but do not overwrite the general principles.
 
 ---
 
-## 1. 助记范式选择
+## 1. Memory paradigm selection
 
-| 内容类型 | 优先范式 |
+| Content type | Prefer |
 | :--- | :--- |
-| 过程 / 机制 | 因果链或时间线（Step 1→2→3） |
-| 易混概念对 | 对比表：相同点 / 不同点 / 一句话口诀 |
-| 抽象术语 | 具体类比 + 边界（什么情况不适用） |
-| 公式 / 定量 | 「每个符号的现实含义」先于代数操作 |
-| 分类系统 | 决策树：先问哪个分流问题 |
-| 文献结论 | 主张 → 证据强度 → 适用范围 → 常见误读 |
+| Process / mechanism | Causal chain or timeline (Step 1→2→3) |
+| Easy-to-confuse pairs | Contrast table: same / different / one-line mnemonic |
+| Abstract terms | Concrete analogy + boundary (when it does **not** apply) |
+| Formulas / quantitative | “Real meaning of each symbol” before algebra |
+| Taxonomies | Decision tree: which triage question first |
+| Literature claims | Claim → evidence strength → scope → common misreads |
 
 ---
 
-## 2. 批改语气
+## 2. Grading tone
 
-- 客观、具体、可执行；指出错因，不评价人格。  
-- 先肯定「哪一部分推理有效」，再修关键缺口。  
-- 禁止：完美、天赋、native 级等无证据夸张词。
+- Objective, specific, actionable; name the error cause — never judge the person.  
+- First affirm “which part of the reasoning works”, then fix the critical gap.  
+- Banned: baseless words like perfect, gifted, native-level.
 
 ---
 
-## 3. 能力分层（评分时标注）
+## 3. Ability layers (label when scoring)
 
-| 层 | 典型证据 | 不可外推为 |
+| Layer | Typical evidence | Must not extrapolate to |
 | :--- | :--- | :--- |
-| 再认 | MCQ / T-F / 匹配 | 能讲解、能迁移 |
-| 理解 | 能用自己的话解释、能找错 | 能在新情境独立应用 |
-| 应用 | 案例填空、开放题、计算 | 能教别人 / 能综述 |
-| 迁移 | 无提示解决变形题 | — |
+| Recognition | MCQ / T-F / matching | Can explain or transfer |
+| Understanding | Explain in own words, spot errors | Can independently apply in new scenes |
+| Application | Case blanks, open items, calculation | Can teach others / write a review |
+| Transfer | Solve variants without prompts | — |
 
 ---
 
-## 4. 注释讲解最低结构
+## 4. Minimum annotation explanation structure
 
-1. 回应用户原话  
-2. 语境中的精确含义  
-3. 记忆锚点  
-4. 可迁移的一句应用 / 反例  
+1. Respond to the user’s own words  
+2. Precise meaning in this context  
+3. Memory hook  
+4. One transferable application / counterexample  
 
 ---
 
-## 5. 本学科附录（Phase 0 后填写）
+## 5. Subject appendix (fill after Phase 0)
 
-_（例：医学的“红旗症状”检查清单；法学的“构成要件”四步；编程的“输入-不变量-输出”……）_
+_(e.g. medicine “red-flag symptom” checklist; law “elements” four-step; programming “input–invariant–output”…)_
 
 `TBD`

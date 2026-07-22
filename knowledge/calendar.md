@@ -1,71 +1,71 @@
-# 现行学习日历 (calendar.md)
+# Active Learning Calendar (calendar.md)
 
-> **进度与前瞻排期的唯一权威。**  
-> `desire.md` = 想要什么；本文件 = 排到哪了、下一步建议什么。
+> **Sole authority for progress and forward scheduling.**  
+> `desire.md` = what you want; this file = how far you’ve got and what’s suggested next.
 
 ---
 
-## 当前指针（Cursor）
+## Current cursor
 
-| 字段 | 值 |
+| Field | Value |
 | :--- | :--- |
-| 科目 | `TBD`（Phase 0 填写） |
-| 最新生成 | — |
-| 流水线状态 | `Phase 0 就绪 — 等待科目引导` |
-| 下一项待排 | Phase 0 完成后由 Phase 1 确认 |
-| 日历最后更新 | `TBD` |
+| Subject | `TBD` (filled in Phase 0) |
+| Latest generated | — |
+| Pipeline status | `Phase 0 ready — awaiting subject intake` |
+| Next to schedule | After Phase 0, confirmed by Phase 1 |
+| Calendar last updated | `TBD` |
 
 ---
 
-## 已发行进度（Issued）
+## Issued progress
 
-| ID | 标题 | 类型 | Track | Status | 完成日 | 文件 |
+| ID | Title | Type | Track | Status | Done on | File |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | — | — | — | — | — | — | — |
 
-> 单科时 Track 列填科目名或 `-`。多轨道时必填（与 `domain_map` 一致）。
+> Single subject: Track column = subject name or `-`. Multi-track: required (align with `domain_map`).
 
-Status 取值：`[ ]` Unread/Not studied · `[~]` In progress · `[x]` Reviewed
+Status values: `[ ]` Unread/Not studied · `[~]` In progress · `[x]` Reviewed
 
 ---
 
-## 前瞻排期池（Forward Queue）
+## Forward queue
 
-> 建议队列，不是锁定交稿。Phase 1 必须结合 gaps、notes、desire、domain_map 与用户当场指示。
+> Suggested queue, not locked deadlines. Phase 1 must combine gaps, notes, desire, domain_map, and live user direction.
 
-### Wave A — 地基（先建立地图上的 Core）
+### Wave A — Foundation (cover Core on the map first)
 
-| 顺位 | 主题草案 | 建议模态 | 优先级 | 备注 |
+| Order | Theme draft | Suggested mode | Priority | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | A1 | `TBD` | Magazine | P0 | |
 | A2 | `TBD` | Unit | P0 | |
 | A3 | `TBD` | Magazine | P1 | |
 
-### Wave B — 加深 / 现状 / 文献感
+### Wave B — Deepen / landscape / literature feel
 
-| 顺位 | 主题草案 | 建议模态 | 优先级 | 备注 |
+| Order | Theme draft | Suggested mode | Priority | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | B1 | `TBD` | Magazine | P1 | |
 | B2 | `TBD` | Magazine | P2 | |
 
-### Wave C — 兴趣与应用穿插
+### Wave C — Interest & application interleaves
 
-| 顺位 | 主题草案 | 建议模态 | 优先级 | 备注 |
+| Order | Theme draft | Suggested mode | Priority | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| C1 | `TBD` | Magazine 或 Unit | Flex | |
+| C1 | `TBD` | Magazine or Unit | Flex | |
 
-### 持续穿插（Recurring）
+### Recurring
 
-- 来自 `gaps.md` 的弱点复现（每 1–3 期编入）  
-- `warehouse.md` 小模块挂载  
+- Weakness recurrence from `gaps.md` (every 1–3 issues)  
+- Small modules from `warehouse.md`  
 
 ---
 
-## 维护清单
+## Maintenance checklist
 
-| 触发 | 要改什么 |
+| Trigger | What to update |
 | :--- | :--- |
-| Phase 2 完成 | 已发行表新增行；更新当前指针；调整前瞻池 |
-| Phase 3 完成 | 该行 Status → Reviewed；必要时 Wave 备注补复现 |
-| 用户大改 desire | 重排 Wave 优先级 |
-| 用户问「排到哪了」 | 只依据本文件 + log，不凭记忆 |
+| Phase 2 complete | Add issued row; update cursor; adjust forward queue |
+| Phase 3 complete | That row Status → Reviewed; note recurrence on Wave if needed |
+| Major desire rewrite | Re-prioritize Waves |
+| User asks “where am I?” | Only this file + log — never from memory |

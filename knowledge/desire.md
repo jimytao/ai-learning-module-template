@@ -1,48 +1,48 @@
-# 意愿清单 (desire.md)
+# Desire List (desire.md)
 
-> 「想学什么」的原料库，**不是**期号日历。  
-> 排期权威见 `calendar.md`。Phase 1 读未勾选项；**不要**把某一勾选项不经确认直接锁定为标题。
-
----
-
-## 使用说明
-
-- `[ ]` 未覆盖 · `[~]` 部分覆盖 · `[x]` 已在某期实质覆盖（注明 Mag/Unit 编号）  
-- Phase 0 根据用户兴趣与 domain Core 节点生成分类；之后可随时追加  
-- AI 可持续把「值得学但用户未点名」的候选主题追加到对应分类（标注 `AI建议`），由用户确认是否保留
+> Raw material for “what I want to learn” — **not** an issue calendar.  
+> Scheduling authority: `calendar.md`. Phase 1 reads unchecked items; **do not** lock a checked desire item as a final title without confirmation.
 
 ---
 
-## 分类 A — 核心必学（Core）
+## How to use
 
-- [ ] `TBD`（Phase 0 从 domain_map Core 生成）
+- `[ ]` not covered · `[~]` partially covered · `[x]` substantially covered in some issue (note Mag/Unit ID)  
+- Phase 0 builds categories from user interests + domain Core nodes; append anytime later  
+- AI may append “worth learning but not named by user” candidates (tag `AI suggestion`) for the user to keep or drop
 
 ---
 
-## 分类 B — 兴趣加深（Interest）
+## Category A — Core must-learn
+
+- [ ] `TBD` (Phase 0 generates from domain_map Core)
+
+---
+
+## Category B — Interest deepen
 
 - [ ] `TBD`
 
 ---
 
-## 分类 C — 应用 / 案例 / 项目
+## Category C — Application / cases / projects
 
 - [ ] `TBD`
 
 ---
 
-## 分类 D — 议题 / 现状 / 文献向（适合 Magazine）
+## Category D — Topics / landscape / literature (Magazine-friendly)
 
-- [ ] `TBD`（行业现状、指南演变、经典争论、数据解读…）
-
----
-
-## 分类 E — 技能操练（适合 Unit）
-
-- [ ] `TBD`（计算、鉴别诊断、写作结构、实验步骤…）
+- [ ] `TBD` (industry landscape, guideline evolution, classic debates, data reading…)
 
 ---
 
-## 备注
+## Category E — Skill drills (Unit-friendly)
 
-_用户临时想法、一句话愿望可记在这里，Phase 1 再结构化。_
+- [ ] `TBD` (calculation, differential diagnosis, writing structure, lab steps…)
+
+---
+
+## Notes
+
+_User one-liner wishes can live here; Phase 1 structures them later._

@@ -1,29 +1,29 @@
-# 小模块主题库 (warehouse.md)
+# Small-Module Warehouse (warehouse.md)
 
-> 挂在 Magazine Block 3 或 Unit 附录的可复用短模块。  
-> 选中后立即标记 `[x] 已使用 · Magazine/Unit NN`。
-
----
-
-## 待用池
-
-- [ ] 易混概念对比诊所（A vs B）
-- [ ] 一页决策树 / 分流算法
-- [ ] 数据解读便利贴（如何读一张表/图）
-- [ ] 常见谬误解剖（相关≠因果等）
-- [ ] 术语升级：日常说法 → 专业说法
-- [ ] 迷你案例（300–500 字）+ 3 问
-- [ ] 公式/机制「符号含义」速解
-- [ ] 文献句子拆解（主张 / 证据 / 限定）
-- [ ] 五分钟口语/书面解释框架（给别人讲清一个概念）
-- [ ] 错题变形再生器（同一考点换皮）
-
-> Phase 0 后：删除无关项，按学科改名并增补 5–10 条。
+> Reusable short modules for Magazine Block 3 or Unit appendices.  
+> When selected, immediately mark `[x] used · Magazine/Unit NN`.
 
 ---
 
-## 已使用记录
+## Unused pool
 
-| 主题 | 用于 | 日期 |
+- [ ] Easy-to-confuse concept clinic (A vs B)
+- [ ] One-page decision tree / triage algorithm
+- [ ] Data-reading sticky (how to read one table/chart)
+- [ ] Common fallacy autopsy (correlation ≠ causation, etc.)
+- [ ] Term upgrade: everyday phrasing → professional phrasing
+- [ ] Mini case (300–500 words) + 3 questions
+- [ ] Formula/mechanism “symbol meaning” quick decode
+- [ ] Literature sentence teardown (claim / evidence / qualifier)
+- [ ] Five-minute explain-to-someone framework (one concept)
+- [ ] Wrong-item variant regenerator (same point, new skin)
+
+> After Phase 0: delete irrelevant items, rename for the subject, and add 5–10 more.
+
+---
+
+## Used record
+
+| Theme | Used in | Date |
 | :--- | :--- | :--- |
 | — | — | — |

@@ -1,18 +1,18 @@
-# 学习日志 (log.md)
+# Learning Log (log.md)
 
 ---
 
 ## Progress Dashboard
 
-| ID | 标题 | 类型 | Track | Status | 掌握度备注 | 文件 |
+| ID | Title | Type | Track | Status | Mastery notes | File |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| — | — | — | — | — | 尚未开始 | — |
+| — | — | — | — | — | Not started | — |
 
 ---
 
-## Concept Ledger（概念台账）
+## Concept Ledger
 
-> 每期 / 每单元新增的核心概念追加于此，供侧边栏或复习使用。列名可按学科改，但一旦前端依赖则勿随意改列顺序。
+> Append core concepts from each issue/unit for sidebar or review. Column names may adapt to the subject, but once the frontend depends on them, do not casually reorder columns.
 
 | Concept | Plain meaning | Memory hook | Example / Use | Source |
 | :--- | :--- | :--- | :--- | :--- |
@@ -20,28 +20,28 @@
 
 ---
 
-## Hard Points Tracker（难点追踪）
+## Hard Points Tracker
 
-| ID | 类型 | 错误表现 | 正确形式 / 规律 | 来源 | Status |
+| ID | Type | Error pattern | Correct form / rule | Source | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | — | — | — | — | — | — |
 
-类型示例：概念混淆 / 因果颠倒 / 适用范围错误 / 计算步骤 / 术语误用 / 其它
+Type examples: concept confusion / reversed causality / wrong scope / calculation steps / term misuse / other
 
 ---
 
-## Retro 日志
+## Retro log
 
 ### Template
 
 ```
 ### YYYY-MM-DD · Magazine/Unit NN
-- 再认层：MCQ … · T/F …
-- 产出层：…
-- 注释：A/B/C/N …
-- 新 Hard Points：…
-- 能量 / 信心（1–10，可选）：…
-- 下期必须复现：…
+- Recognition: MCQ … · T/F …
+- Production: …
+- Annotations: A/B/C/N …
+- New Hard Points: …
+- Energy / confidence (1–10, optional): …
+- Must recur next: …
 ```
 
-（尚无条目）
+(No entries yet)
