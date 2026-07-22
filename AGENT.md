@@ -167,7 +167,8 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 13. **来源可核验**：推荐视频/播客/文献/数据前须检索确认真实存在；禁止伪造引用。不确定标「需核验」。  
 14. **log 表格列名锁定**：一旦前端依赖 `log.md` Concept Ledger 等表头，禁止擅自改列名/列序（见 tech_spec）。  
 15. **项目组织余量**：单科 / 同项目多轨道（相近课）/ 复制文件夹（不相近课）均可，见 `project_lifecycle.md`。Digital Health 这类可先同项目多轨道，画像清晰后再加 Track。  
-16. **图示只用武器库**：Phase 2 只使用 `visual_arsenal.md` 登记的 Type；禁止自创语法导致渲染不一致或崩坏。
+16. **图示只用武器库**：Phase 2 只使用 `visual_arsenal.md` 登记的 Type；禁止自创语法导致渲染不一致或崩坏。  
+17. **填空与开放题互斥**：同一题禁止同时使用行内 `___` / `__已填__` 与 `**[Your Answer]**`（双重输入框会导致批改读错）。生成遵守 tech_spec §1.1；批改优先读行内填空（见 `p3_review.md` §1.1）；`validate_content.js` 会报 dual input。
 
 ---
 

@@ -19,7 +19,7 @@
 - 用 `__` 表示空填（会被当成空已填值）  
 - 在代码块 / sticky-note 内放 `___`  
 - 用长纯下划线当装饰答题线  
-- 同一题同时放 `___` 与 `[Your Answer]`  
+- **同一道题同时放行内填空（`___` / `__已填__`）与 `**[Your Answer]**`**（见 §1.1）
 
 对话填空写在正文（不要包在 ` ``` ` 里）：
 
@@ -27,6 +27,40 @@
 Mentor: What is the first step?
 You: ___ (✏️ 用今天的概念回答)
 ```
+
+### 1.1 填空 vs 开放问答：互斥（硬性，防双重输入框）
+
+> 源项目真实故障：句内已有 `__into__` 填空，又在题下加了空的 `* **[Your Answer]**:` → UI 出现**两个输入框**；批改只读到空白 textarea，误判「未作答」。
+
+| 题型意图 | 只用 | 禁止再加 |
+| :--- | :--- | :--- |
+| 句内 / 对话短填空（词、介词、术语） | `___` 或写回后的 `__答案__` | `**[Your Answer]**` |
+| 多句开放产出、解释、案例分析 | `**[Your Answer]**` | 同一题干下再放 `___` 当「主答题框」 |
+
+**错误（禁止）**：
+
+```markdown
+#### Exercise 1 — Prepositions
+She walked __into__ the room and looked __over__ the notes.
+*   **[Your Answer]**:
+```
+
+**正确（填空）**：
+
+```markdown
+#### Exercise 1 — Prepositions
+She walked ___ the room and looked ___ the notes.
+```
+
+**正确（开放题，另起一题）**：
+
+```markdown
+#### Exercise 2 — Explain
+Why does the preposition change the meaning here?
+*   **[Your Answer]**:
+```
+
+不同 Part / 不同题号可以分别用填空或开放题；**禁止在同一题块内叠两种控件**。
 
 ---
 
@@ -38,8 +72,8 @@ You: ___ (✏️ 用今天的概念回答)
 *   **[Your Answer]** (✏️ 提示文字):
 ```
 
-缩进 4 空格的后续行会进入 textarea 初始值。禁止手写 `<textarea>`。
-
+缩进 4 空格的后续行会进入 textarea 初始值。禁止手写 `<textarea>`。  
+**不要**给已经含 `___` / `__已填__` 的填空题再追加本标记。
 ---
 
 ## 3. 单项选择题（MCQ）— 本模板新增标准
@@ -232,7 +266,7 @@ Unit：≥3 题。Magazine Quick Check：0–5 题。
 [ ] imageQuery 全部下载或标注失败项
 [ ] 图示均有 <!-- visual: … --> 且 Type 在 visual_arsenal 内
 [ ] MCQ/T-F 均含 <!-- answer: … --> 供批改
-[ ] 无非法 ___ / 双重输入框
+[ ] 无非法 ___ ；无「同一题 ___ + [Your Answer]」双重输入框（validate 会报 dual input）
 [ ] node scripts/validate_content.js 通过
 [ ] calendar.md / log.md / AGENT.md 已更新
 [ ] warehouse 已标记（若使用）

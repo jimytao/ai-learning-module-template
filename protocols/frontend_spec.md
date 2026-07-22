@@ -99,6 +99,14 @@ Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典
 | **主观问答** | `**[Your Answer]**` 或 `**[Your Answer]**: (答案)` | `<textarea class="interactive-textarea" data-index="N">答案</textarea>` | **解析**：匹配行首或列表项中的 `**[Your Answer]**` 标记。若冒号后或括号内有答案，则作为 textarea 初始值。<br>**写回**：用户输入时，在 Markdown 对应行的 `**[Your Answer]**:` 后面更新为 `(用户答案)` 或紧跟 `用户答案`，保持 Markdown 语法结构。 |
 | **单选/多选/判断** | `- [ ]` 或 `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **解析**：标准的 Markdown 任务列表语法，渲染为可勾选的 checkbox。<br>**写回**：用户勾选/取消勾选时，将内存中 Markdown 对应位置的 `[ ]` 切换为 `[x]`，反之亦然。 |
 
+### 6.1.1 双重输入框容错（强烈建议）
+
+协议层已禁止同一题叠用填空 + `[Your Answer]`（见 `tech_spec.md` §1.1）。迁入阅读器时仍建议做 UI 容错，避免历史坏内容再次误导用户：
+
+1. 按标题（`##` / `###` / `####`）或题块切分 DOM。  
+2. 若某题块内**已有** `.interactive-blank`（来自 `___` / `__已填__`），且紧随其后的 `[Your Answer]` 渲染出的 textarea **为空** → **不渲染**该冗余 textarea（或折叠并标「redundant — ignored」）。  
+3. 不要把空 textarea 当成「用户未作答」的唯一证据；批改侧仍以行内填空为准（`p3_review.md` §1.1）。
+
 ### 6.2 自动保存信息流 (Autosave Flow)
 
 1. **内存副本维护**：前端加载 Markdown 后，在内存中保留一份 raw Markdown 字符串副本。
