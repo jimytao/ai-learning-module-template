@@ -19,7 +19,7 @@
 - Using `__` for an empty blank (parsed as empty filled value)  
 - Putting `___` inside code fences / sticky-notes  
 - Long pure underscored decorative answer lines  
-- Putting both `___` and `[Your Answer]` on the same item  
+- **Putting inline blanks (`___` / `__filled__`) and `**[Your Answer]**` on the same item** (see §1.1)
 
 Dialogue blanks go in body prose (not inside \`\`\` fences):
 
@@ -27,6 +27,40 @@ Dialogue blanks go in body prose (not inside \`\`\` fences):
 Mentor: What is the first step?
 You: ___ (✏️ answer with today’s concept)
 ```
+
+### 1.1 Blanks vs open answers: mutually exclusive (hard rule — prevents dual input boxes)
+
+> Real failure from a source project: the sentence already had `__into__` blanks, then an empty `* **[Your Answer]**:` was added below → UI showed **two input boxes**; grading read only the empty textarea and marked “unanswered”.
+
+| Intent | Use only | Do not also add |
+| :--- | :--- | :--- |
+| In-sentence / dialogue short blanks (words, prepositions, terms) | `___` or write-back `__answer__` | `**[Your Answer]**` |
+| Multi-sentence open production, explanations, case write-ups | `**[Your Answer]**` | Another `___` as the “main answer box” under the same stem |
+
+**Wrong (banned)**:
+
+```markdown
+#### Exercise 1 — Prepositions
+She walked __into__ the room and looked __over__ the notes.
+*   **[Your Answer]**:
+```
+
+**Correct (blanks)**:
+
+```markdown
+#### Exercise 1 — Prepositions
+She walked ___ the room and looked ___ the notes.
+```
+
+**Correct (open item, separate exercise)**:
+
+```markdown
+#### Exercise 2 — Explain
+Why does the preposition change the meaning here?
+*   **[Your Answer]**:
+```
+
+Different Parts / different exercise numbers may use blanks or open answers separately; **never stack both controls in the same exercise block**.
 
 ---
 
@@ -38,7 +72,8 @@ You: ___ (✏️ answer with today’s concept)
 *   **[Your Answer]** (✏️ hint text):
 ```
 
-Following lines indented 4 spaces become the textarea initial value. Do not hand-write `<textarea>`.
+Following lines indented 4 spaces become the textarea initial value. Do not hand-write `<textarea>`.  
+**Do not** append this marker under an item that already has `___` / `__filled__`.
 
 ---
 
@@ -232,7 +267,7 @@ Do not skip heading levels (no H4 right after H2) — breaks TOC.
 [ ] All imageQuery downloaded or failures marked
 [ ] Every diagram has <!-- visual: … --> and Type is in visual_arsenal
 [ ] All MCQ/T-F include <!-- answer: … --> for grading
-[ ] No illegal ___ / dual input boxes
+[ ] No illegal ___; no “same item ___ + [Your Answer]” dual input (validate reports dual input)
 [ ] node scripts/validate_content.js passes
 [ ] calendar.md / log.md / AGENT.md updated
 [ ] warehouse marked (if used)

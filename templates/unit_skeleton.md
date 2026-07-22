@@ -1,6 +1,7 @@
 # Unit.NN Content Skeleton (template)
 
-> Copy this structure when generating. This skeleton does not count as issued progress.
+> Copy this structure when generating. This skeleton does not count as issued progress.  
+> **Mutual exclusion**: do not use `___` and `**[Your Answer]**` on the same item (see `tech_spec.md` §1.1). This skeleton already splits Parts: Part 3 uses blanks only; Parts 0/2/5 use open answers only.
 
 ```markdown
 # Unit.NN: [title]

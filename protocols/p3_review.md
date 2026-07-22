@@ -10,8 +10,24 @@
 
 1. Confirm current file path (magazine or unit).  
 2. Filter `notes.json` to all annotations for that file; read `context` for situated feedback.  
-3. Read user answers in blanks / `[Your Answer]` / MCQ / T-F.  
+3. Read user answers (**must follow the extraction priority below**, see §1.1).  
 4. Read `log.md` Hard Points and current `gaps.md` items — avoid repetitive fluff; align mastery judgment.
+
+### 1.1 Answer extraction priority (prevents dual-box false negatives)
+
+For **each item**, decide the control type, then take the answer:
+
+| Priority | Scan for | Treat as |
+| :--- | :--- | :--- |
+| 1 (highest) | In-stem `__filled text__` or still-empty `___` | **Blank** primary answers; filled words = user response |
+| 2 | `**[Your Answer]**` and following content in the same block | Primary answer **only if this item has no inline blanks** |
+| 3 | MCQ / T-F `- [x]` | Objective answers |
+
+**Hard rules**:
+
+- If the same block has inline blanks **and** an empty `* **[Your Answer]**:` → **trust the inline blanks**; do not mark “0 / unanswered” because the textarea is empty. Note in the summary: “dual controls detected; ignored redundant textarea; generation side should delete it.”  
+- Never scan only `[Your Answer]` and miss in-sentence filled `__word__`.  
+- If legacy content still has dual controls: grade by the blanks, and suggest (or after user consent) delete the redundant `[Your Answer]` line.
 
 ---
 
@@ -28,7 +44,8 @@
 
 | Type | Grading action |
 | :--- | :--- |
-| Blank / open | Mark every substantive error; give Model Answer; score (e.g. 3/5) |
+| Blank | Use `__filled__` / `___`; mark every substantive error; give Model Answer; score (e.g. 2/2) |
+| Open | Read `[Your Answer]` only when there are no inline blanks; mark errors + Model Answer + score |
 | MCQ | Right/wrong; if wrong: why distractors tempt + evidence for correct option (bind to body concepts) |
 | T/F | Right/wrong; if False: which qualifier / causality / scope is wrong |
 | Highlight / note | see §2.2 |

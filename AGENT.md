@@ -167,7 +167,8 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
 13. **Verifiable sources**: before recommending videos/podcasts/papers/data, search to confirm they exist; never fabricate citations. If unsure, mark “needs verification”.  
 14. **log table column lock**: once the frontend depends on headers like Concept Ledger in `log.md`, do not rename/reorder columns (see tech_spec).  
 15. **Project organization headroom**: single subject / multi-track in one project (related courses) / folder copy (unrelated) are all OK — see `project_lifecycle.md`. Domains like Digital Health can start multi-track in one project and add Tracks as the profile clarifies.  
-16. **Visuals only from the arsenal**: Phase 2 uses only Types registered in `visual_arsenal.md`; no invented syntax that causes inconsistent or broken renders.
+16. **Visuals only from the arsenal**: Phase 2 uses only Types registered in `visual_arsenal.md`; no invented syntax that causes inconsistent or broken renders.  
+17. **Blanks and open answers are mutually exclusive**: never use inline `___` / `__filled__` and `**[Your Answer]**` on the same item (dual input boxes cause grading to read the wrong field). Generation follows tech_spec §1.1; grading prefers inline blanks (see `p3_review.md` §1.1); `validate_content.js` reports dual input.
 
 ---
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Validate interactive markdown in content/magazines and content/units.
  * Usage: node scripts/validate_content.js
  */
@@ -28,6 +28,36 @@ function getMarkdownFiles(dir) {
     else if (name.endsWith('.md')) results.push(full);
   }
   return results;
+}
+
+/**
+ * Flag exercise blocks that mix inline blanks (___) with [Your Answer] textareas.
+ * Blocks are split on ##–###### headings or horizontal rules.
+ */
+function detectDualInputs(lines, errors) {
+  const blankRe = /_{3,}|__[^_\n]+__/;
+  const textareaRe = /\*\*\s*\[?\s*Your Answer\s*\]?\s*\*\*/i;
+  let blockStart = 0;
+
+  const flush = (start, end) => {
+    if (end <= start) return;
+    const block = lines.slice(start, end).join('\n');
+    // Skip pure template/code examples inside fences if the whole block is a fence-only demo —
+    // still flag real content mixes; fenced examples in skeletons live outside content/.
+    if (blankRe.test(block) && textareaRe.test(block)) {
+      errors.push(
+        `L${start + 1}-L${end}: dual input — same exercise block has both inline blank (___) and [Your Answer]; remove one (see tech_spec §1.1)`
+      );
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    if (/^#{2,6}\s/.test(lines[i]) || /^---\s*$/.test(lines[i])) {
+      flush(blockStart, i);
+      blockStart = i;
+    }
+  }
+  flush(blockStart, lines.length);
 }
 
 function validateFile(filePath) {
@@ -89,6 +119,10 @@ function validateFile(filePath) {
   if (/___/.test(content) && /```[\s\S]*?___[\s\S]*?```/.test(content)) {
     errors.push('Possible blank "___" inside fenced code block (will not render as input)');
   }
+
+  // Dual input: same exercise block must not mix inline blanks and [Your Answer]
+  // (causes two UI boxes; grading often reads the empty textarea and marks unanswered)
+  detectDualInputs(lines, errors);
 
   // Visual arsenal: mermaid / viz-* should have a preceding <!-- visual: ... -->
   const visualTypes = ['photo', 'table', 'steps', 'callout', 'flow', 'tree', 'seq', 'state', 'blocks', 'svg-lite', 'formula'];

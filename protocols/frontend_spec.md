@@ -99,6 +99,14 @@ The frontend must parse interactive Markdown elements, render HTML controls, and
 | **Open answer** | `**[Your Answer]**` or `**[Your Answer]**: (answer)` | `<textarea class="interactive-textarea" data-index="N">answer</textarea>` | **Parse**: match `**[Your Answer]**` at line start or list item; text after colon/in parens is initial value.<br>**Write-back**: update after `**[Your Answer]**:` to `(user answer)` or trailing answer, keeping Markdown structure. |
 | **Choice / T-F** | `- [ ]` or `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **Parse**: standard Markdown task list → checkbox.<br>**Write-back**: toggle `[ ]` ↔ `[x]` at the matching position. |
 
+### 6.1.1 Dual-input tolerance (strongly recommended)
+
+Protocol already bans stacking blanks + `[Your Answer]` on the same item (`tech_spec.md` §1.1). When migrating the reader, still add UI tolerance so legacy bad content does not mislead users again:
+
+1. Split DOM by heading (`##` / `###` / `####`) or exercise block.  
+2. If a block **already has** `.interactive-blank` (from `___` / `__filled__`) and a following `[Your Answer]` textarea is **empty** → **do not render** that redundant textarea (or collapse it and mark “redundant — ignored”).  
+3. Do not treat an empty textarea as the sole evidence of “unanswered”; grading still prefers inline blanks (`p3_review.md` §1.1).
+
 ### 6.2 Autosave flow
 
 1. **In-memory copy**: after loading Markdown, keep a raw Markdown string in memory.  

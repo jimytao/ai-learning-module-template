@@ -101,6 +101,8 @@ Example: content/units/unit01_acid_base_basics.md
 | MCQ | see tech_spec §MCQ | ≥3 |
 | T/F | see tech_spec §True/False | ≥3 |
 
+> ⚠️ **Hard mutual exclusion (do not violate)**: blank items (in-sentence `___`) **must not** also add `* **[Your Answer]**:` under the same item; open items use the textarea and **must not** stack inline blanks as the main answer box. Stacking creates dual input boxes and grading will read the wrong answer. See `tech_spec.md` §1.1. Suggested split: Part 3 case progression uses `___`; Parts 0 / 2 / 5 use `[Your Answer]` — different Parts, never mixed in one block.
+
 ### Storyline (optional but recommended)
 
 Thread Parts 1→5 with one case / patient / project / experiment timeline. Core concepts must reappear in Scenario and drills.
