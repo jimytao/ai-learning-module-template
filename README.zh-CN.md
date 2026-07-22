@@ -2,6 +2,25 @@
 
 [English](README.md)
 
+## 语言版本
+
+| 分支 | 语言 | 适用对象 |
+| :--- | :--- | :--- |
+| **`Chinese`**（本分支） | 以中文为主的文档（可夹杂英文术语） | 中文用户 |
+| **`English`** | 全英文文档 | 英文用户 |
+
+```bash
+# 中文文档（本分支）
+git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+
+# 全英文文档
+git clone -b English https://github.com/jimytao/ai-learning-module-template.git
+```
+
+克隆后也可：`git checkout Chinese` / `git checkout English`。
+
+---
+
 学科无关的 **AI 教练式学习空白模板**（Magazine 长文 + Unit 短课双模态）。  
 从已验证的课本引擎与杂志引擎提炼：路由、排期、生成、批改、标注复现、图示武器库。
 

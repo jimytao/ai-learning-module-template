@@ -2,12 +2,31 @@
 
 [中文说明](README.zh-CN.md)
 
+## Language versions
+
+| Branch | Language | Who it’s for |
+| :--- | :--- | :--- |
+| **`Chinese`** (this branch) | Chinese-primary docs (may mix English terms) | Chinese-primary users |
+| **`English`** | Fully English documentation | English-primary users |
+
+```bash
+# Chinese docs (this branch)
+git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+
+# English docs
+git clone -b English https://github.com/jimytao/ai-learning-module-template.git
+```
+
+Or after cloning: `git checkout Chinese` / `git checkout English`.
+
+---
+
 A **subject-agnostic, AI-coached learning blank template** with dual content modes: long-form **Magazine** articles and drill-oriented **Units**.
 
 Distilled from battle-tested textbook and magazine learning systems: routing, scheduling, generation, grading, annotation-driven review, and a strict visual arsenal (flowcharts, trees, block diagrams, and more).
 
 > **AI entrypoint**: read [`AGENT.md`](AGENT.md) first  
-> **Design notes**: [`DESIGN.md`](DESIGN.md) (currently in Chinese)
+> **Design notes**: [`DESIGN.md`](DESIGN.md) (Chinese on this branch)
 
 ---
 
