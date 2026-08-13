@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AI Learning Module Reader</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/scripts/viz.css">
+</head>
+<body>
+  <header class="app-header">
+    <button id="sidebarToggle" class="icon-button mobile-only" type="button" aria-label="打开侧栏">☰</button>
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <div><strong>Learning Reader</strong><small>Magazine + Unit</small></div>
+    </div>
+    <div id="documentTitle" class="document-title">选择一篇内容</div>
+    <div class="header-actions">
+      <span id="saveStatus" class="save-status" aria-live="polite">就绪</span>
+      <button id="exportButton" type="button" disabled>导出</button>
+      <button id="themeButton" class="icon-button" type="button" aria-label="切换主题">◐</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <nav class="tabs" aria-label="阅读器侧栏">
+        <button class="tab active" type="button" data-tab="contents">目录</button>
+        <button class="tab" type="button" data-tab="concepts">概念</button>
+        <button class="tab" type="button" data-tab="notes">Notes</button>
+      </nav>
+
+      <section id="contentsPanel" class="tab-panel active" data-panel="contents">
+        <div class="panel-toolbar">
+          <button id="sortButton" type="button">新 → 旧</button>
+          <button id="refreshButton" type="button">刷新</button>
+        </div>
+        <div id="contentsList" class="contents-list"></div>
+      </section>
+
+      <section id="conceptsPanel" class="tab-panel" data-panel="concepts">
+        <p class="panel-hint">来自当前文档标题；点击可跳转。</p>
+        <div id="conceptsList" class="concepts-list empty-list">尚未打开文档</div>
+      </section>
+
+      <section id="notesPanel" class="tab-panel" data-panel="notes">
+        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> 显示全部文档注释</label>
+        <div id="notesList" class="notes-list empty-list">暂无注释</div>
+      </section>
+    </aside>
+
+    <main id="mainViewport" class="main-viewport">
+      <article id="reader" class="reader" aria-live="polite">
+        <div class="welcome-card">
+          <p class="eyebrow">UNIVERSAL READER</p>
+          <h1>学习内容会出现在这里</h1>
+          <p>先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
+        </div>
+      </article>
+    </main>
+  </div>
+
+  <button id="addNoteButton" class="selection-action" type="button" hidden>＋ Note</button>
+
+  <dialog id="noteDialog" class="note-dialog">
+    <form id="noteForm" method="dialog">
+      <div class="dialog-heading">
+        <div><small>选中文本</small><strong id="noteWord"></strong></div>
+        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <label for="noteText">你的注释</label>
+      <textarea id="noteText" rows="6" placeholder="写下疑问、解释或 +显式查询…"></textarea>
+      <div class="dialog-actions">
+        <button id="deleteNoteButton" class="danger" type="button" hidden>删除</button>
+        <span class="dialog-spacer"></span>
+        <button id="cancelNoteButton" type="button">取消</button>
+        <button class="primary" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/vendor/marked.js"></script>
+  <script src="/vendor/purify.js"></script>
+  <script src="/vendor/mermaid.js"></script>
+  <script src="/reader-core.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

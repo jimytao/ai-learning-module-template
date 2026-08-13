@@ -52,7 +52,7 @@
 | 黄金规则第 8 条 | 模板态的「不得预填个人信息」改为：「画像以 profile 为准；勿编造未提供信息」 |
 
 > [!IMPORTANT]
-> **自动清理步骤**：在 Phase 0 确认卡通过、浏览器与服务器生成完毕且 `start.bat` 配置好后，AI **必须**主动加载并读取 `protocols/cleanup_template.md`，执行其定义的模板精简与文件清理程序，使项目彻底转为科目专属态，并在完成后**自我删除**该清理协议文件。
+> **自动清理步骤**：在 Phase 0 确认卡通过、内置阅读器可由 `start.command` 正常启动后，AI **必须**主动加载并读取 `protocols/cleanup_template.md`，执行其定义的模板精简与文件清理程序，使项目彻底转为科目专属态，并在完成后**自我删除**该清理协议文件。
 
 ### 可以精简 / 归档的部分
 
@@ -87,7 +87,8 @@
 
 ```
 AGENT.md                          ← 入口路由（本文件；Bootstrap 后会改写）
-start.bat                         ← 浏览器与本地服务器一键启动脚本
+start.command                     ← macOS 浏览器与本地服务器一键启动脚本
+server.js · index.html            ← 内置通用阅读器后端与页面入口
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0：采集确认清单（强制）
@@ -112,7 +113,7 @@ start.bat                         ← 浏览器与本地服务器一键启动脚
 ├── state/          log.md · gaps.md · warehouse.md
 ├── content/        magazines/ · units/
 ├── images/
-├── scripts/        download_images.py …
+├── scripts/        download_images.py · validate_content.js · viz.css
 ├── templates/      magazine_skeleton · unit_skeleton
 ├── notes.json
 ├── review.md                     ← Phase3 复盘长文存档（按期追加）

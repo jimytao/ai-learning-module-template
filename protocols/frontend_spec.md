@@ -1,7 +1,7 @@
 # 阅读器 / 前端规范 (frontend_spec.md)
 
 > 从 English Learning 预览器与 Culture Magazine 阅读器提炼的**必须保留的产品细节**。  
-> 本仓库当前以 Markdown + 协议为主；迁入或重做前端时，**按本文件验收**，不得丢行为。
+> macOS 阅读器实现位于根目录 `server.js`、`index.html`、`app.js`、`reader-core.js`；后续改动仍须**按本文件验收**，不得丢行为。
 
 ---
 

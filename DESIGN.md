@@ -265,7 +265,7 @@ wait for confirm
 
 ### 有意延后（已知，不是漏设计）
 
-- [ ] 预览前端整包迁入（`index.html` / server / Mermaid 接入）— 规范已写好  
+- [x] macOS 分支已内置通用预览前端（`index.html` / `server.js` / Mermaid / Notes / 自动保存）
 - [ ] 数学公式 KaTeX（武器库已留 `formula`；引擎可选）  
 - [ ] 音频 / TTS（非默认）  
 - [ ] 母模板与科目项目的自动协议同步脚本  

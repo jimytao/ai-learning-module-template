@@ -6,8 +6,9 @@
 
 | 分支 | 语言 | 适用对象 |
 | :--- | :--- | :--- |
-| **`Chinese`**（本分支） | 以中文为主的文档（可夹杂英文术语） | 中文用户 |
+| **`Chinese`** | 以中文为主的文档（可夹杂英文术语） | Windows 基线 / 中文用户 |
 | **`English`** | 全英文文档 | 英文用户 |
+| **`macos-chinese`**（本分支） | 中文模板 + 完整 macOS 阅读器 | 中文为主的 macOS 用户 |
 
 ```bash
 # 中文文档（本分支）
@@ -53,10 +54,12 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 （英文也可以：`Follow AGENT.md and run Phase 0 / bootstrap.`）
 
-3. 在确认画像与模态并创建好浏览器服务器文件后：
-   * 双击运行根目录下的 **`start.bat`** 启动脚本，一键运行本地 web 服务器。
+3. 安装好 Node.js 20+ 后，双击根目录的 **`start.command`**。首次启动会安装本地依赖，随后打开完整网页阅读器。
+   * 如果 macOS 阻止首次双击，可在终端运行 `chmod +x start.command && ./start.command`。
+   * 阅读器内置目录、Markdown/Mermaid 渲染、答题自动写回、Notes 高亮与 Smart Merge。
+4. 在确认画像与模态后：
    * 对 AI 说：**「执行 protocols/cleanup_template.md 清理」**（或英文 `execute cleanup using protocols/cleanup_template.md`）。AI 会自动根据 HTML 注释锚点彻底清除 `AGENT.md` 中的初始化模板套话，并将清理协议文件自身删除。
-4. 正式开始学习：说「排期」→「开始生成」→ 学习 / 高亮 →「帮我批改」。
+5. 正式开始学习：说「排期」→「开始生成」→ 学习 / 高亮 →「帮我批改」。
 
 ### 学习模态预设
 
@@ -85,7 +88,10 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ```
 AGENT.md                 # AI 唯一入口路由 (初始化清理后会自动移除模板说明)
-start.bat                # Windows 一键启动 Node 服务器脚本
+start.command            # macOS 一键安装依赖、启动服务器并打开浏览器
+server.js                # 本地文件、自动保存、Notes Smart Merge 后端
+index.html / app.js      # Magazine + Unit 通用网页阅读器
+reader-core.js           # 交互题解析与 Markdown 写回逻辑
 DESIGN.md                # 设计逻辑
 protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec、cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / 模态预设
@@ -112,22 +118,25 @@ review.md                # 批改复盘存档
 ## 工具脚本
 
 ```bash
-# 启动本地服务器 (创建浏览器服务端文件后可用)
-start.bat
+# macOS 一键启动（也可双击 start.command）
+./start.command
+
+# 仅启动服务器，不自动打开浏览器
+npm start
 
 # 校验 content 下交互格式与图示声明头
 node scripts/validate_content.js
 
 # 下载 imageQuery 图片
-set BRAVE_API_KEY=your_key
-python scripts/download_images.py content/magazines/magazine01_xxx.md
+export BRAVE_API_KEY=your_key
+python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 ```
 
 ---
 
-## 尚未包含
+## 内置网页阅读器
 
-本仓库目前不直接包含网页端/浏览器的 HTML/JS 实现代码。在后续迁入或开发您的阅读器和服务器时，请严格参考 [`protocols/frontend_spec.md`](protocols/frontend_spec.md)。该文档制定了 Textbook 模式（填空、选择、文本框输入实时回写保存至源文件）与 Magazine 模式（目录排序、基于 context 定位的高亮标注、Smart Merge 智能合并）相融合的完整规范。
+本分支已经按 [`protocols/frontend_spec.md`](protocols/frontend_spec.md) 内置完整通用阅读器：Magazine / Unit 分组目录、升降序持久化、Markdown 与 Mermaid、填空/问答/选择题自动保存、按文档隔离的 Notes、基于 `context + contextOffset` 的跳转，以及保留 AI 批注的 Smart Merge。服务器仅监听 `127.0.0.1`，并且只允许网页写入两个 `content/` 学习目录和 `notes.json`。
 
 ---
 
