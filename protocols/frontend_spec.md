@@ -467,5 +467,6 @@ Reference styles may live in `scripts/viz.css` (import on migrate). Small screen
 ### 11.5 With the annotation system
 
 - Text inside Mermaid-rendered SVG: **not highlightable by default** (same exclusion as code) — avoids locate failure after Mermaid rewrite.  
-- Ordinary text in `viz-caption`, `viz-block-body`: **allowed**.  
+- Ordinary text in `viz-caption`, `viz-block-body`: **allowed** (see §4.3 for how — `.viz-block-body`
+  is a `<div>` and needs an explicit class check, not just the generic tag list).  
 - `<text>` inside `viz-svg`: suggest exclude from annotations.
