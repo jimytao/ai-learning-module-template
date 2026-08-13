@@ -23,6 +23,7 @@
 | :--- | :--- | :--- | :--- |
 | “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
+| “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
 | “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
 | “new subject” / “copy template” / “add track” / “how to archive” | **Lifecycle** | `protocols/project_lifecycle.md` + `domain_map.md` if needed | `intake_checklist` (new-track slots only) |
 | “check knowledge map” / “this concept” / “what are my gaps” | **Knowledge Query** | matching `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
@@ -77,6 +78,7 @@
 - [ ] Status area has no “unset”  
 - [ ] Modality preset written  
 - [ ] Confirmation card left traces (profile / desire / gaps / calendar / domain_map no longer all TBD)  
+- [ ] Primary explanation language and learning-content language are confirmed separately in `profile.md`
 - [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (cleanup file auto-deleted)  
 - [ ] Next step points to Phase 1  
 <!-- TEMPLATE_BOOTSTRAP_END -->
@@ -159,7 +161,7 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
 5. **notes field boundaries**: AI writes only allowed fields; keep `context`; never overwrite user raw notes.  
 6. **Rigorous assessment, no praise inflation**: all MCQ/T-F correct ≠ can apply.  
 7. **Modality-preset driven**: Phase 1/2 obey T/M/H/C in `profile`; changing modality needs explicit user request or confirm.  
-8. **Blank-template discipline (template mode only)**: do not prefill real personal info; after Phase 0 confirm, this becomes “profile is authoritative; do not invent”.  
+8. **Blank-template discipline (template mode only)**: do not prefill real personal info; after Phase 0 confirm, this becomes “profile is authoritative; do not invent”. Confirmed explanation language is durable profile data: cleanup removes the intake prompt, not the saved preference.
 9. **Extra drills after correction require asking first**: no new items without clear consent.  
 10. **Intake must confirm**: Phase 0 must use `intake_checklist` confirmation card; no body generation and no AGENT subject rewrite before confirm.  
 11. **Frontend details must not be lost**: when migrating/debugging the reader, follow `frontend_spec.md` (sort, Notes sidebar, full-sentence context locate, multi-doc isolation, **diagram render contract**).  
