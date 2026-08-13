@@ -59,6 +59,10 @@ button.danger { color: var(--danger); }
 .save-status.error { color: var(--danger); }
 
 .app-shell { min-height: 100%; padding-top: var(--header-height); }
+/* Collapse state is persisted in ltm_sidebar_collapsed (frontend_spec §3.2). */
+.sidebar.collapsed { transform: translateX(-101%); }
+.sidebar.collapsed + .main-viewport { margin-left: 0; }
+.sidebar { transition: transform 180ms ease; }
 .sidebar {
   position: fixed; z-index: 10; top: var(--header-height); bottom: 0; left: 0; width: 300px;
   overflow: hidden; border-right: 1px solid var(--border); background: var(--surface);
@@ -69,6 +73,13 @@ button.danger { color: var(--danger); }
 .tab-panel { display: none; height: calc(100% - 55px); overflow-y: auto; padding: 0.8rem; }
 .tab-panel.active { display: block; }
 .panel-toolbar { display: flex; justify-content: space-between; margin-bottom: 0.75rem; }
+.sidebar-search { padding: 0.7rem 0.75rem 0; }
+.sidebar-search input {
+  width: 100%; padding: 0.42rem 0.6rem; font: inherit; font-size: 0.85rem;
+  color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.sidebar-search input::placeholder { color: var(--muted); }
 .panel-hint, .empty-list { color: var(--muted); font-size: 0.85rem; }
 .content-group { margin: 0.7rem 0 1.2rem; }
 .content-group h3 { margin: 0 0 0.4rem; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -119,8 +130,22 @@ button.danger { color: var(--danger); }
 .reader .feedback-body, .reader .grading-section { padding: 0.75rem 1rem; }
 .reader .err { color: #b33b3e; text-decoration: line-through; background: rgba(179, 59, 62, 0.12); }
 .reader .fix { color: #267a58; text-decoration: underline; background: rgba(38, 122, 88, 0.12); }
-.reader mark.reader-note { padding: 0.05em 0; color: inherit; background: var(--highlight); cursor: pointer; }
-.reader mark.reader-note.flash { animation: note-flash 1.1s ease; }
+/* Two annotation forms (frontend_spec §4.1): an underline carries a note, a fill is
+   a wordless highlight. Every occurrence is marked; [data-primary] is the one the
+   note was written about (§4.3) and reads as solid rather than dotted. */
+.reader mark.annotated-word {
+  padding: 0.05em 0; color: inherit; background: transparent; cursor: pointer;
+  border-bottom: 2px dotted var(--accent);
+}
+.reader mark.annotated-word:hover { background: var(--accent-soft); }
+.reader mark.annotated-word[data-primary="true"] { border-bottom-style: solid; }
+.reader mark.annotated-word.custom-highlight {
+  background: var(--highlight); border-bottom-color: color-mix(in srgb, var(--highlight) 70%, var(--text));
+}
+:root[data-theme="dark"] .reader mark.annotated-word.custom-highlight {
+  background: color-mix(in srgb, var(--highlight) 34%, transparent);
+}
+.reader mark.annotated-word.flash { animation: note-flash 1.1s ease; }
 @keyframes note-flash { 0%, 100% { outline: 0 solid transparent; } 35% { outline: 5px solid color-mix(in srgb, var(--highlight) 70%, transparent); } }
 .welcome-card { max-width: 600px; margin: 12vh auto; text-align: center; }
 .welcome-card .eyebrow { color: var(--accent); font: 700 0.72rem/1 Inter, sans-serif; letter-spacing: 0.16em; }
@@ -148,7 +173,7 @@ button.danger { color: var(--danger); }
   .document-title { text-align: left; }
   .save-status, #exportButton { display: none; }
   .sidebar { transform: translateX(-101%); transition: transform 180ms ease; box-shadow: var(--shadow); }
-  .sidebar.open { transform: translateX(0); }
+  .sidebar:not(.collapsed) { transform: translateX(0); }
   .main-viewport { margin-left: 0; padding: 0.7rem; }
   .reader { min-height: calc(100vh - var(--header-height) - 1.4rem); padding: 1.25rem; border-radius: 12px; }
 }

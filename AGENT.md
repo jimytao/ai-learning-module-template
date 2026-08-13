@@ -21,7 +21,7 @@
 
 | User command keywords | Triggers Phase | Must load | On demand |
 | :--- | :--- | :--- | :--- |
-| “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
+| “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
 | “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
 | “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
@@ -39,8 +39,10 @@
 <!-- TEMPLATE_BOOTSTRAP_START -->
 ## Post-Bootstrap rewrite (blank template → this subject’s learning project)
 
-> After the Phase 0 confirmation card passes, the AI **must** rewrite this `AGENT.md` (and the cleanup below) so the repo becomes “this subject’s learning project” instead of a generic template.  
-> Do not enter Phase 2 body generation until the rewrite is done.
+> After the Phase 0 confirmation card passes, the AI **must** rewrite this `AGENT.md` so the repo becomes “this subject’s learning project” instead of a generic template.  
+> This happens in **two gates** (see `protocols/p0_bootstrap.md` Step 4):  
+> **Gate A** — the rewrite below; run it immediately after confirmation. Phase 2 body generation is blocked until Gate A is done.  
+> **Gate B** — template cleanup; deferred until the reader is verified. Gate B blocks nothing: an uncleaned Bootstrap block is inert text, so **never** make the user wait on it.
 
 ### Must rewrite
 
@@ -53,7 +55,10 @@
 | Golden rule #8 | Replace template-mode “do not prefill personal info” with: “Profile is authoritative; do not invent unprovided info” |
 
 > [!IMPORTANT]
-> **Auto cleanup**: after the Phase 0 confirmation card passes and the built-in reader starts successfully through `start.command`, the AI **must** load and read `protocols/cleanup_template.md`, run its template cleanup, fully convert the project to subject-owned mode, and **self-delete** that cleanup protocol file when done.
+> **Gate B — cleanup**: this branch **ships a working reader**, so `p0_bootstrap.md` **Step 3.5** verifies it rather than building it. Once `start.command` runs, `npm test` passes, and `node scripts/verify_reader.js` reports no FAIL, the AI loads `protocols/cleanup_template.md`, runs its template cleanup, and lets it **self-delete**. If verification has not been done, say so in one line and continue to Phase 1; do not run cleanup with unmet preconditions.
+
+> [!NOTE]
+> **Initialization trace**: this checklist lives inside the block that cleanup deletes, so it cannot record its own completion. Before deleting anything, cleanup appends one `Initialized …` line to `state/log.md` and stamps the status bar. That line — not this checklist — is the durable proof the project was bootstrapped, and the idempotence marker that stops a later session from re-running Phase 0.
 
 ### May slim / archive
 
@@ -74,13 +79,20 @@
 
 ### Rewrite done checklist
 
+**Gate A (blocking — finish before Phase 2):**
+
 - [ ] Title includes subject name  
 - [ ] Status area has no “unset”  
 - [ ] Modality preset written  
+- [ ] Phase 0 routing row narrowed to “fill TBD / update profile”, re-entry guard in place (golden rule 18)  
 - [ ] Confirmation card left traces (profile / desire / gaps / calendar / domain_map no longer all TBD)  
 - [ ] Primary explanation language and learning-content language are confirmed separately in `profile.md`
-- [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (cleanup file auto-deleted)  
 - [ ] Next step points to Phase 1  
+
+**Gate B (deferred — blocks nothing):**
+
+- [ ] Shipped reader verified: `start.command` runs, `npm test` passes, `verify_reader.js` reports no FAIL  
+- [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (`Initialized …` line written to `state/log.md`; cleanup file auto-deleted)  
 <!-- TEMPLATE_BOOTSTRAP_END -->
 
 ---
@@ -90,7 +102,6 @@
 ```
 AGENT.md                          ← entry router (this file; rewritten after Bootstrap)
 start.command                     ← one-click macOS browser + local server start
-server.js · index.html            ← built-in Universal Reader backend and page entrypoint
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0: intake confirmation checklist (mandatory)
@@ -115,8 +126,8 @@ server.js · index.html            ← built-in Universal Reader backend and pag
 ├── state/          log.md · gaps.md · warehouse.md
 ├── content/        magazines/ · units/
 ├── images/
-├── scripts/        download_images.py …
-├── templates/      magazine_skeleton · unit_skeleton
+├── scripts/        download_images.py · validate_content.js · verify_reader.js …
+├── templates/      magazine_skeleton · unit_skeleton · reader_skeleton.html
 ├── notes.json
 ├── review.md                     ← Phase3 long retrospective archive (append per issue)
 ├── DESIGN.md
@@ -172,6 +183,10 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
 15. **Project organization headroom**: single subject / multi-track in one project (related courses) / folder copy (unrelated) are all OK — see `project_lifecycle.md`. Domains like Digital Health can start multi-track in one project and add Tracks as the profile clarifies.  
 16. **Visuals only from the arsenal**: Phase 2 uses only Types registered in `visual_arsenal.md`; no invented syntax that causes inconsistent or broken renders.  
 17. **Blanks and open answers are mutually exclusive**: never use inline `___` / `__filled__` and `**[Your Answer]**` on the same item (dual input boxes cause grading to read the wrong field). Generation follows tech_spec §1.1; grading prefers inline blanks (see `p3_review.md` §1.1); `validate_content.js` reports dual input.
+18. **Phase 0 re-entry guard — never silently re-bootstrap**: before running Phase 0, check whether this project is already initialized. It is if **any** of these hold: `state/log.md` has an `Initialized …` line, the status bar names a subject, or `knowledge/profile.md` has a subject and modality that are not `TBD`.  
+    * **Already initialized** → Phase 0 is **patch-only**. Fill `TBD` slots and change what the user asked about. **Never** overwrite a confirmed value, wipe `desire` / `gaps` / `calendar` / `domain_map`, or re-run the full interview without saying plainly “this project is already set up for *[subject]* — do you want to update a few fields, or start a completely new subject?” and getting an answer. Starting a new subject in the same folder is the archive route in `project_lifecycle.md`, not a Phase 0 rerun.  
+    * **Not initialized** → run Phase 0 normally.  
+    * A user saying “I want to learn X” in an initialized project is far more often a Phase 1 request than a re-bootstrap. Ask; do not assume.
 
 ---
 

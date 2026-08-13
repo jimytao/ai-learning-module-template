@@ -64,22 +64,64 @@ Use the “Confirmation card template” in `intake_checklist.md`.
 
 ---
 
-## Step 4: Rewrite AGENT.md (critical)
+## Step 3.5: Verify the reader (owner of the browser/server files)
+
+> **This branch ships a working reader** (`index.html`, `app.js`, `reader-core.js`, `server.js`,
+> `styles.css`). So this step **verifies** it rather than building it. `cleanup_template.md` requires a
+> verified reader, so if this step is skipped, cleanup can never legitimately run.
+
+1. Install once if needed (`npm install`), then launch with `start.command` and open the page.
+   An empty TOC is expected before Phase 2 — "loads without error" is the acceptance bar here,
+   not "shows lessons".
+2. **Run `npm test`.** The suite covers interactive-markdown round-tripping, server path safety,
+   Smart Merge, and the annotation anchoring rule (`ReaderCore.annotationMatches`).
+3. **Run `node scripts/verify_reader.js`. It must report no FAIL.** It checks the contracts that
+   silently rot: theme carrier and FOUC guard, locked storage keys and routes, the `data-primary`
+   anchoring rule, excluded features (no Git UI), and `notes.json` consistency. Fix every FAIL against
+   `frontend_spec.md` rather than editing the checks.
+4. `templates/reader_skeleton.html` is kept as the **reference shell**, not as a thing to copy here —
+   the shipped reader already implements what it demonstrates. Consult it when extending the UI.
+5. If `start.command` lost its executable bit after a copy, restore it with `chmod +x start.command`.
+
+Outcome of this step decides Gate B in Step 4 below.
+
+---
+
+## Step 4: Rewrite AGENT.md (critical) — two gates
+
+The rewrite happens in **two independent gates**. Gate A converts the project and unblocks learning;
+Gate B only removes one-shot template text. **Never make Gate B a precondition for learning** — the
+Bootstrap block is inert prompt text, and leaving it in place costs the user nothing.
+
+### Gate A — immediately after the confirmation card passes (mandatory)
 
 Follow `AGENT.md` section **“Post-Bootstrap rewrite”** strictly:
 
 1. Title includes subject name  
 2. Status area: Subject + modality + `Phase 1 ready`  
 3. Remove blank-template boilerplate; write one-line subject goal  
-4. Narrow Phase 0 routing to “fill TBD / update profile” only  
+4. **Narrow the Phase 0 routing row** to “fill TBD / update profile” only, and add the re-entry guard
+   (see `AGENT.md` golden rule on Phase 0 re-entry)  
 5. Note default proposal bias by modality  
-6. **Load and execute `protocols/cleanup_template.md`**, strip the Phase 0 interview guidance, retain confirmed profile data (including explanation language), and self-delete that cleanup file.
 
-After rewrite, this repo is a **subject learning project**, not a blank template.
+Gate A owns every edit above. `cleanup_template.md` deliberately does **not** touch the routing table,
+so if Gate A skips item 4 nothing else will do it.
+
+**After Gate A the project is a subject learning project, and Phase 1 / Phase 2 are unblocked.**
+
+### Gate B — after the reader is verified (deferred, not urgent)
+
+Run only when Step 3.5 verification passed: `start.command` launches the reader, `npm test` is green,
+and `verify_reader.js` reports no FAIL. Then **load and execute `protocols/cleanup_template.md`**: it strips the one-shot
+Phase 0 interview guidance from `AGENT.md`, retains all confirmed profile data (including explanation
+language), and self-deletes.
+
+If Gate B cannot run yet, say so in one line and move on to Phase 1 — do not stall the user, and do
+not run cleanup with unmet preconditions.
 
 ---
 
-## Step 5: Bootstrap summary (send once after rewrite)
+## Step 5: Bootstrap summary (send once after Gate A)
 
 | Field | Content |
 | :--- | :--- |
@@ -88,7 +130,9 @@ After rewrite, this repo is a **subject learning project**, not a blank template
 | Domain map | Top-level themes |
 | Next 5 queued | Mag/Unit labeled by modality |
 | Initial gaps | 3–5 items |
-| AGENT | Converted to subject-project mode ✅ |
+| AGENT | Converted to subject-project mode ✅ (Gate A) |
+| Reader | shipped reader verified (start.command · npm test · verify_reader) |
+| Template cleanup | done (Gate B) / deferred until the reader is verified |
 | Pending TBD | … |
 
 Next prompt: say “what should I study today” or “schedule” → Phase 1.

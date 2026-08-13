@@ -73,7 +73,7 @@
 
 | Field | Content |
 | :--- | :--- |
-| TOC default sort | `newest first` (switchable to oldest first) · `TBD` |
+| TOC default sort | `oldest first` (switchable to newest first) · `TBD` |
 | Notes default scope | `current document only` (switchable to all) · `TBD` |
 | Grading tone | Concise / detailed · `TBD` |
 

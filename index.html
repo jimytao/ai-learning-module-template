@@ -1,16 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>AI Learning Module Reader</title>
+  <!-- FOUC guard: applies the saved theme before first paint. Must stay above every
+       stylesheet — running this on DOMContentLoaded is what causes the white flash. -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('ltm_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/scripts/viz.css">
 </head>
 <body>
   <header class="app-header">
-    <button id="sidebarToggle" class="icon-button mobile-only" type="button" aria-label="Open sidebar">☰</button>
+    <button id="sidebarToggle" class="icon-button" type="button" aria-label="Toggle sidebar">☰</button>
     <div class="brand">
       <span class="brand-mark">L</span>
       <div><strong>Learning Reader</strong><small>Magazine + Unit</small></div>
@@ -31,9 +39,13 @@
         <button class="tab" type="button" data-tab="notes">Notes</button>
       </nav>
 
+      <div class="sidebar-search">
+        <input id="sidebarSearch" type="search" placeholder="Search documents, concepts, notes…" autocomplete="off" aria-label="Search sidebar">
+      </div>
+
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
-          <button id="sortButton" type="button">New → Old</button>
+          <button id="sortButton" type="button">↑ Old → New</button>
           <button id="refreshButton" type="button">Refresh</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
