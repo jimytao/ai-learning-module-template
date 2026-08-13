@@ -52,7 +52,7 @@
 | Golden rule #8 | Replace template-mode “do not prefill personal info” with: “Profile is authoritative; do not invent unprovided info” |
 
 > [!IMPORTANT]
-> **Auto cleanup**: after the Phase 0 confirmation card passes, browser/server files are generated, and `start.bat` is configured, the AI **must** load and read `protocols/cleanup_template.md`, run its template cleanup, fully convert the project to subject-owned mode, and **self-delete** that cleanup protocol file when done.
+> **Auto cleanup**: after the Phase 0 confirmation card passes and the built-in reader starts successfully through `start.command`, the AI **must** load and read `protocols/cleanup_template.md`, run its template cleanup, fully convert the project to subject-owned mode, and **self-delete** that cleanup protocol file when done.
 
 ### May slim / archive
 
@@ -87,7 +87,8 @@
 
 ```
 AGENT.md                          ← entry router (this file; rewritten after Bootstrap)
-start.bat                         ← one-click browser + local server start
+start.command                     ← one-click macOS browser + local server start
+server.js · index.html            ← built-in Universal Reader backend and page entrypoint
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0: intake confirmation checklist (mandatory)

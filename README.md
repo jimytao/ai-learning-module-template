@@ -4,18 +4,20 @@
 
 | Branch | Language | Who it’s for |
 | :--- | :--- | :--- |
-| **`English`** (this branch) | Fully English documentation | English-primary users |
+| **`macos-english`** (this branch) | Fully English template + complete macOS reader | English-primary macOS users |
+| **`English`** | Fully English documentation baseline | English-primary users |
 | **`Chinese`** | Chinese-primary docs (may mix some English terms) | Chinese-primary users |
+| **`macos-chinese`** | Chinese-primary template + complete macOS reader | Chinese-primary macOS users |
 
 ```bash
-# English docs (this branch)
-git clone -b English https://github.com/jimytao/ai-learning-module-template.git
+# Complete English macOS reader (this branch)
+git clone -b macos-english https://github.com/jimytao/ai-learning-module-template.git
 
 # Chinese docs
 git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-Or after cloning: `git checkout English` / `git checkout Chinese`.
+Or after cloning: `git checkout macos-english` / `git checkout macos-chinese`.
 
 ---
 
@@ -50,10 +52,12 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 Follow AGENT.md and run Phase 0 / bootstrap.
 ```
 
-3. After you confirm the profile and modality and set up your browser server files:
-   * Run the root **`start.bat`** script to launch the local web server with one click.
+3. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader.
+   * If macOS blocks the first launch, run `chmod +x start.command && ./start.command` in Terminal.
+   * The reader includes navigation, Markdown/Mermaid rendering, answer autosave, highlights, Notes, and Smart Merge.
+4. After you confirm the profile and modality:
    * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"**. The AI will clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
-4. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
+5. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
 
 ### Learning modality presets
 
@@ -82,7 +86,10 @@ See [`protocols/project_lifecycle.md`](protocols/project_lifecycle.md).
 
 ```
 AGENT.md                 # Sole AI router / entrypoint (Bootstrap post-cleanup removes setup guides)
-start.bat                # One-click Windows batch file to start the web server (node)
+start.command            # macOS first-run install, server launch, and browser open
+server.js                # Local files, autosave, and Notes Smart Merge backend
+index.html / app.js      # Universal Magazine + Unit web reader
+reader-core.js           # Interactive exercise parsing and Markdown write-back
 DESIGN.md                # Design rationale
 protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec, cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / modalities
@@ -109,22 +116,25 @@ review.md                # Grading retrospectives archive
 ## Scripts
 
 ```bash
-# Start the server (once browser server files are created)
-start.bat
+# One-click macOS launch (or double-click start.command)
+./start.command
+
+# Start only the server without opening a browser
+npm start
 
 # Validate interactive markdown + visual headers under content/
 node scripts/validate_content.js
 
 # Download imageQuery assets
-set BRAVE_API_KEY=your_key
-python scripts/download_images.py content/magazines/magazine01_xxx.md
+export BRAVE_API_KEY=your_key
+python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 ```
 
 ---
 
-## Not included yet
+## Built-in web reader
 
-The browser HTML/JS implementation files are not shipped in this repository. When building or copying your own browser viewer and server, refer to [`protocols/frontend_spec.md`](protocols/frontend_spec.md). It documents the complete merged specifications for both Textbook mode (inputs, textareas, checkboxes autosaved back to markdown) and Magazine mode (concept jumps, context-aware annotations with smart merge, and a visual layout).
+This branch ships the Universal Reader specified by [`protocols/frontend_spec.md`](protocols/frontend_spec.md): grouped Magazine/Unit navigation, persistent sorting, Markdown and Mermaid, autosaved blanks/answers/choices, per-document Notes, `context + contextOffset` jumps, and Smart Merge that preserves AI reviews. The server listens only on `127.0.0.1` and limits browser writes to the two learning-content directories plus `notes.json`.
 
 ---
 

@@ -1,7 +1,7 @@
 # Reader / Frontend Spec (frontend_spec.md)
 
 > Must-keep product details distilled from the English Learning previewer and Culture Magazine reader.  
-> This repo is Markdown + protocols first; when migrating or rebuilding the frontend, **accept against this file** — do not drop behaviors.
+> The macOS reader implementation lives in root-level `server.js`, `index.html`, `app.js`, and `reader-core.js`; all later changes must still be **accepted against this file** — do not drop behaviors.
 
 ---
 

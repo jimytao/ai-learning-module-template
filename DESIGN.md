@@ -210,7 +210,7 @@ wait for confirm
 2. AI asks subject, level, gaps, interests, time, **T/M/H/C modality**, etc. via `intake_checklist.md`, then shows a confirmation card.  
 3. You say “confirm” → AI writes the profile and **rewrites AGENT into this subject’s project**.  
 4. Say “schedule” → confirm proposal → “start generating”.  
-5. Read in the preview frontend (after migrate it must meet `frontend_spec.md`: sort, Notes jump, context locate, multi-doc isolation).  
+5. Read in the built-in Universal Reader (it meets `frontend_spec.md`: sort, Notes jump, context locate, multi-doc isolation).
 6. “Grade my work”; extra drills only after being asked and agreeing.
 
 ---
@@ -221,7 +221,7 @@ wait for confirm
 
 | Item | Why |
 | :--- | :--- |
-| Shipping the full preview frontend | Large, path-coupled; spec lives in `frontend_spec.md` — accept against the checklist on migrate |
+| Shipping the full preview frontend | Completed on the macOS branches as a local-only Universal Reader with a narrow file interface |
 | Audio / TTS / shadowing | English-specific; other subjects can add optional modules later |
 | Cross-repo hardcoded coupling | Subject projects should be self-contained; multi-subject via folder copy (`project_lifecycle.md`) |
 | Personal blog as profile source | Privacy and subject-irrelevant |
@@ -265,7 +265,7 @@ Both “one customized copy per course” and “related courses together” are
 
 ### Consciously deferred (known, not missing design)
 
-- [ ] Full preview frontend migrate (`index.html` / server / Mermaid) — spec ready  
+- [x] macOS branch includes the Universal Reader (`index.html` / `server.js` / Mermaid / Notes / autosave)
 - [ ] Math KaTeX (arsenal already has `formula`; engine optional)  
 - [ ] Audio / TTS (not default)  
 - [ ] Auto protocol-sync script between mother template and subject projects  

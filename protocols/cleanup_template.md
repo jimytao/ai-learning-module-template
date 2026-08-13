@@ -1,6 +1,6 @@
 # Template Cleanup Protocol (cleanup_template.md)
 
-> **Note**: This file is a **one-shot protocol**. After first initialization (Phase 0) completes, the user profile is written, and browser frontend/backend plus start scripts are ready, the user or AI triggers execution.  
+> **Note**: This file is a **one-shot protocol**. After first initialization (Phase 0) completes, the user profile is written, and the built-in reader plus macOS start script are verified, the user or AI triggers execution.
 > After execution, **this file must delete itself**.
 
 ---
@@ -9,8 +9,8 @@
 
 Read and run this file only when **all** of the following are true:
 1. **Phase 0 confirmation card passed**: user confirmed the profile, and data is written to `knowledge/profile.md`, `knowledge/desire.md`, etc.
-2. **Browser app built**: usable `server.js` and `index.html` (or equivalent runtime files) exist at repo root.
-3. **Start script works**: `start.bat` adjusted and tested.
+2. **Browser app works**: the built-in `server.js`, `index.html`, `app.js`, and reader dependencies load successfully.
+3. **Start script works**: `start.command` retains executable permission and has been tested on macOS.
 4. **User or AI issues the command**: “run cleanup via `cleanup_template.md`” or “clean up template boilerplate”.
 
 ---
@@ -51,4 +51,4 @@ To avoid line-number drift after edits, rewrite `AGENT.md` using semantics and a
 After cleanup, AI must give a short “project cleanliness report” including:
 1. **Deleted files list** (must include `cleanup_template.md` itself).
 2. **Preview of the simplified AGENT.md status**.
-3. **Next actions**: run `start.bat` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.
+3. **Next actions**: double-click `start.command` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.

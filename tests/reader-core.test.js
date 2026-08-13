@@ -1,0 +1,51 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const ReaderCore = require('../reader-core');
+
+test('scans interactive elements while ignoring fenced examples', () => {
+  const markdown = [
+    'Sentence: ___ and __saved__.',
+    '- [ ] option',
+    '* **[Your Answer]**:',
+    '    first line',
+    '    second line',
+    '```markdown',
+    '___ - [ ] **[Your Answer]**:',
+    '```',
+  ].join('\n');
+  const tokens = ReaderCore.scanInteractiveTokens(markdown);
+  assert.deepEqual(tokens.map((token) => token.type), ['blank', 'blank', 'checkbox', 'textarea']);
+  assert.equal(tokens.at(-1).value, 'first line\nsecond line');
+});
+
+test('updates blanks and multiline answers without changing their identity', () => {
+  let markdown = 'Answer: ___\n\n* **[Your Answer]**:';
+  markdown = ReaderCore.updateInteraction(markdown, 'blank', 0, 'alpha');
+  assert.match(markdown, /Answer: __alpha__/);
+  markdown = ReaderCore.updateInteraction(markdown, 'blank', 0, 'beta');
+  assert.match(markdown, /Answer: __beta__/);
+  markdown = ReaderCore.updateInteraction(markdown, 'textarea', 0, 'line one\nline two');
+  assert.match(markdown, /\* \*\*\[Your Answer\]\*\*:\n    line one\n    line two/);
+  assert.equal(ReaderCore.scanInteractiveTokens(markdown).find((token) => token.type === 'textarea').value, 'line one\nline two');
+});
+
+test('MCQ and T/F checkboxes behave as single-choice groups', () => {
+  const markdown = [
+    '#### MCQ-1',
+    '- [x] A. first',
+    '- [ ] B. second',
+    '#### MCQ-2',
+    '- [ ] A. another question',
+  ].join('\n');
+  const updated = ReaderCore.updateInteraction(markdown, 'checkbox', 1, true);
+  assert.match(updated, /MCQ-1\n- \[ \] A\. first\n- \[x\] B\. second/);
+  assert.match(updated, /MCQ-2\n- \[ \] A\. another question/);
+});
+
+test('sorts numbered content in either direction', () => {
+  const files = [{ name: 'unit02_b.md' }, { name: 'unit10_c.md' }, { name: 'unit01_a.md' }];
+  assert.deepEqual(ReaderCore.sortFiles(files, 'asc').map((file) => file.name), ['unit01_a.md', 'unit02_b.md', 'unit10_c.md']);
+  assert.deepEqual(ReaderCore.sortFiles(files, 'desc').map((file) => file.name), ['unit10_c.md', 'unit02_b.md', 'unit01_a.md']);
+});

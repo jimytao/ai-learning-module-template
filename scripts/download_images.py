@@ -2,8 +2,8 @@
 """Parse <!-- imageQuery: "..." | target: "..." --> from a markdown file and download via Brave Image Search.
 
 Usage:
-  set BRAVE_API_KEY=your_key
-  python scripts/download_images.py content/magazines/magazine01_xxx.md
+  export BRAVE_API_KEY=your_key
+  python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 """
 
 from __future__ import annotations
