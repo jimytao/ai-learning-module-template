@@ -94,9 +94,40 @@ if (!serverPath && !htmlPath) {
   process.exit(0);
 }
 
+/**
+ * 阅读器可能是单个自包含 HTML，也可能是页面加上配套脚本与样式表。跟随本地
+ * <script src> / <link rel=stylesheet>，使拆分式阅读器受到与内联式同等的检查。
+ * vendor/ 与 node_modules/ 下的第三方包跳过：它们的内容不属于本项目的契约。
+ */
+function linkedAssets(pageHtml, pageRel) {
+  if (!pageHtml) return [];
+  const baseDir = path.dirname(pageRel);
+  const refs = [
+    ...pageHtml.matchAll(/<script[^>]+src=["']([^"']+)["']/gi),
+    ...pageHtml.matchAll(/<link[^>]+href=["']([^"']+\.css)["'][^>]*>/gi),
+  ].map((m) => m[1]);
+
+  const out = [];
+  for (const ref of refs) {
+    if (/^(?:https?:)?\/\//.test(ref) || ref.startsWith('data:')) continue;   // 远程
+    if (/(^|\/)(?:vendor|node_modules)\//.test(ref)) continue;                // 第三方
+    const rel = ref.startsWith('/')
+      ? ref.slice(1)
+      : path.posix.join(baseDir === '.' ? '' : baseDir.replace(/\\/g, '/'), ref);
+    const body = read(rel);
+    if (body !== null) out.push({ rel, body: stripComments(body) });
+  }
+  return out;
+}
+
 const server = stripComments(serverPath ? read(serverPath) : '');
-const html = stripComments(htmlPath ? read(htmlPath) : '');
+const rawHtml = htmlPath ? read(htmlPath) : '';
+const assets = linkedAssets(rawHtml, htmlPath || 'index.html');
+// `html` 是阅读器的客户端侧：页面本身加上它引入的一切。
+const html = stripComments(rawHtml) + '\n' + assets.map((a) => a.body).join('\n');
 const all = server + '\n' + html;
+
+if (assets.length) pass('基础', `已扫描外链资源：${assets.map((a) => a.rel).join('、')}`);
 
 if (!serverPath) fail('基础', '存在服务器（server.js 或 scripts/preview_server.js）', 'start.bat 只会查找这两个路径');
 else pass('基础', `已找到服务器：${serverPath}`);
@@ -112,9 +143,10 @@ expect(S, html, /document\.documentElement\.setAttribute\(\s*['"]data-theme['"]/
   '主题载体为 html[data-theme]',
   '用 documentElement 的 data-theme，不要用 body 类 —— body 类无法在首次绘制前设置');
 
-expect(S, html, /\[data-theme\s*=\s*["']light["']\]/,
-  '存在亮色主题变量块',
-  '在 [data-theme="light"] 下覆盖同名 CSS 自定义属性');
+// 哪一套做基色都行，关键是存在另一套覆盖它。
+expect(S, html, /\[data-theme\s*=\s*["'](?:light|dark)["']\]/,
+  '存在第二套主题覆盖基础变量',
+  '在 :root 定义一套主题，并在 [data-theme="…"] 下覆盖同名自定义属性');
 
 forbid(S, html, /\.light-theme\b/,
   '不存在遗留的 body.light-theme 选择器',
@@ -197,20 +229,24 @@ expect(A, html, /data-primary/,
 expect(A, html, /contextOffset/, '读写了 contextOffset');
 
 // The <3 tolerance is the fingerprint of a correct primary test.
-expect(A, html, /Math\.abs\([^)]*contextOffset\s*\)\s*<\s*3|<\s*3\s*[;)&]/,
-  'primary 判定使用了 <3 字符的偏移容差',
+// 容差可以写成字面量，也可以放在具名常量里，但取值必须是 3。
+expect(A, html, /<\s*3\b|TOLERANCE\s*=\s*3\b/i,
+  'primary 判定使用了 3 字符的偏移容差',
   '§4.3：abs(matchIndex - contextOffset) < 3 —— 不是 ===0，也不能更宽');
 
 expect(A, html, /\.sort\(\s*\([^)]*\)\s*=>\s*b\.word\.length\s*-\s*a\.word\.length|length\s*-\s*a\.word\.length/,
   '注释模式按长度降序排列',
   '§4.3：否则短词会吞掉包含它的长短语');
 
-expect(A, html, /snapRange|snapSelection|WordBoundar/i,
+// 吸附可以扩展 DOM Range，也可以在 context 字符串的偏移域内完成；
+// 只要最终存下的词与偏移一致即可。
+expect(A, html, /snapRange|snapSelection|WordBoundar|wordChar/i,
   '选区吸附到单词边界',
   '§4.2：必须在计算 context/offset 之前吸附，否则存下的偏移与存下的词对不上');
 
+// 写成标签名（'PRE'）或 CSS 选择器列表（'pre, code, …'）都可以。
 for (const tag of ['PRE', 'CODE', 'TEXTAREA', 'INPUT']) {
-  expect(A, html, new RegExp(`['"\`]?${tag}['"\`]?`), `排除清单包含 ${tag}`,
+  expect(A, html, new RegExp(`\\b${tag}\\b`, 'i'), `排除清单包含 ${tag}`,
     '§4.3：绝不能在代码或表单控件内部包裹注释');
 }
 
@@ -245,8 +281,9 @@ if (server) {
 }
 
 const V = '自动保存 §6';
-expect(V, html, /setTimeout[\s\S]{0,120}(?:saveDocument|autoSave|triggerAutoSave)|debounce/i,
-  '自动保存做了防抖');
+expect(V, html, /setTimeout[\s\S]{0,160}(?:save|Save)|debounce|scheduleSave/i,
+  '自动保存做了防抖',
+  '§6.2：把连续输入合并后再 POST，否则每次按键都会打到服务器');
 expect(V, html, /method:\s*['"]POST['"]/, '客户端通过 POST 提交保存');
 
 // ---------------------------------------------------------------------------
