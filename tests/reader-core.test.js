@@ -100,6 +100,55 @@ test('regex-special characters in a word do not break matching', () => {
   assert.equal(matches[0].isPrimary, true);
 });
 
+test('two separate annotations sharing a word do not cross-attribute across blocks', () => {
+  // Regression: a naive "first annotation with this word" lookup made block B's
+  // occurrence inherit block A's note (wrong tooltip, wrong click target, and a real
+  // risk of overwriting the wrong note on save).
+  const blockA = 'I love coffee in the morning.';
+  const blockB = 'Australian coffee culture is intense.';
+  const annA = { id: 'ann-A', word: 'coffee', context: blockA, contextOffset: blockA.indexOf('coffee') };
+  const annB = { id: 'ann-B', word: 'coffee', context: blockB, contextOffset: blockB.indexOf('coffee') };
+  const annotations = [annA, annB];
+
+  const matchesA = ReaderCore.annotationMatches(blockA, annotations);
+  const matchesB = ReaderCore.annotationMatches(blockB, annotations);
+
+  assert.equal(matchesA[0].annotation.id, 'ann-A');
+  assert.equal(matchesB[0].annotation.id, 'ann-B');
+  assert.equal(matchesA[0].isPrimary, true);
+  assert.equal(matchesB[0].isPrimary, true);
+});
+
+test('the same word annotated twice within one block resolves each occurrence separately', () => {
+  const block = 'I love coffee. My coffee is French coffee.';
+  const firstOffset = block.indexOf('coffee');
+  const secondOffset = block.indexOf('coffee', firstOffset + 1);
+  const first = { id: 'first', word: 'coffee', context: block, contextOffset: firstOffset };
+  const second = { id: 'second', word: 'coffee', context: block, contextOffset: secondOffset };
+
+  const matches = ReaderCore.annotationMatches(block, [first, second]);
+
+  assert.equal(matches.length, 3);
+  assert.equal(matches[0].annotation.id, 'first');
+  assert.equal(matches[1].annotation.id, 'second');
+  assert.equal(matches[0].isPrimary, true);
+  assert.equal(matches[1].isPrimary, true);
+  assert.equal(matches[2].isPrimary, false, 'the unclaimed 3rd occurrence is never primary');
+});
+
+test('a common word with one real note still marks every echo with that note', () => {
+  // The frequent case: one annotation, and the word recurs elsewhere with no note of
+  // its own. Every occurrence should still resolve to the single real annotation.
+  const block = 'Espresso is strong. Espresso again.';
+  const ann = { id: 'only', word: 'Espresso', context: block, contextOffset: 0 };
+
+  const matches = ReaderCore.annotationMatches(block, [ann]);
+
+  assert.equal(matches.length, 2);
+  assert.equal(matches[0].annotation.id, 'only');
+  assert.equal(matches[1].annotation.id, 'only');
+});
+
 test('sorts numbered content in either direction', () => {
   const files = [{ name: 'unit02_b.md' }, { name: 'unit10_c.md' }, { name: 'unit01_a.md' }];
   assert.deepEqual(ReaderCore.sortFiles(files, 'asc').map((file) => file.name), ['unit01_a.md', 'unit02_b.md', 'unit10_c.md']);

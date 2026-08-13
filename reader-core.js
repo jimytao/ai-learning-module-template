@@ -212,8 +212,31 @@
 
     while ((match = regex.exec(blockText)) !== null) {
       if (match.index < lastEnd) continue;                 // keep matches non-overlapping
-      const annotation = sorted.find((ann) => ann.word.toLowerCase() === match[0].toLowerCase());
+      const word = match[0].toLowerCase();
+
+      // Two SEPARATE annotations can share the same word (e.g. "coffee" highlighted
+      // with one note in paragraph 1 and a different note in paragraph 5). Picking
+      // "the first annotation with this word" would cross-attribute paragraph 5's
+      // occurrence to paragraph 1's note — wrong tooltip, wrong click target, and a
+      // real risk of overwriting the wrong note on save. Prefer whichever candidate's
+      // own context is THIS block; among same-block candidates (the word annotated
+      // more than once in one block), prefer whichever offset is closest to this
+      // exact match. Only fall back to "any annotation with this word" when no
+      // candidate belongs to this block at all (the common case: one real note, and
+      // this is just another place the same word happens to occur).
+      const candidates = sorted.filter((ann) => ann.word.toLowerCase() === word);
+      const sameBlock = candidates.filter(
+        (ann) => ann.context && blockText.trim() === String(ann.context).trim(),
+      );
+      const annotation = sameBlock.length > 1
+        ? sameBlock.reduce((best, ann) => {
+          const distance = Math.abs(match.index - Number(ann.contextOffset));
+          const bestDistance = Math.abs(match.index - Number(best.contextOffset));
+          return distance < bestDistance ? ann : best;
+        })
+        : (sameBlock[0] || candidates[0]);
       if (!annotation) continue;
+
       const offset = Number(annotation.contextOffset);
       const isPrimary = Boolean(
         annotation.context
