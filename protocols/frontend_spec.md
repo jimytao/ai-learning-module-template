@@ -21,29 +21,106 @@ Once generated, do not casually rename paths; if you must, sync every matching `
 
 ---
 
-## 2. TOC sort (newest first / oldest first)
+## 2. TOC sort (oldest first / newest first)
 
 | Rule | Note |
 | :--- | :--- |
-| Toggleable | Sidebar sort button: `old → new` / `new → old` |
-| Default | **new → old** (`desc`) for continuing the latest issue/unit |
-| Persist | `localStorage` (suggested key: `ltm_sort_order`) |
+| Toggleable | Sidebar sort button: `old → new` / `new → old`, with a visible label and arrow icon |
+| Default | **old → new** (`asc`) |
+| Persist | `localStorage` key `ltm_sort_order`, values `asc` \| `desc` |
 | Sort key | Prefer `magazineNN` / `unitNN` in filename; else mtime |
+| Scope | Applies to the Contents tab; hide the control on tabs where it is meaningless (Notes, Concepts) |
 
-Both source projects implemented this toggle; keep the same interaction on migrate.
+> **Default is `asc` on purpose.** Both source readers default to oldest-first (`sortOrder = 'asc'`,
+> `currentSortOrder = 'old-to-new'`) because curricula and magazine issues are both read forward, and
+> landing on issue 01 is the correct first-run experience. Do not "fix" this to newest-first.
+
+### 2.1 Preference persistence (applies to every stored preference)
+
+A default is what a **new** user gets. Once the user has chosen, their choice wins — forever, on every
+reload, until they change it again. Being handed back the default on each open is a bug, not a reset.
+
+| Rule | Requirement |
+| :--- | :--- |
+| Write on change | Every toggle writes `localStorage` in the same handler that changes the state — no "save on exit", no batching |
+| Restore before first render | Read all four keys during startup and apply them **before** the first list/body render, so nothing visibly flips after paint |
+| Default only when absent | Apply the documented default only when `getItem` returns `null`. An explicitly stored value that happens to equal the default is still the user's choice |
+| Control reflects state | After restore, the sort button label/icon, theme icon, sidebar collapse state, and Notes-scope button must show the restored value, not the default |
+| Never reset silently | Do not clear these keys on error, on version change, or when a document fails to load |
+
+Applies to `ltm_sort_order`, `ltm_theme`, `ltm_sidebar_collapsed`, and `ltm_notes_show_all` (§7.3).
 
 ---
 
-## 3. Sidebar structure (suggested three tabs)
+## 2.5 Theme contract — light / dark (required)
+
+Both source readers ship a light and a dark theme. This is **not** optional polish; a reader that only
+does dark mode fails acceptance.
+
+### 2.5.1 Locked mechanism
+
+| Rule | Requirement |
+| :--- | :--- |
+| Carrier | `<html data-theme="dark">` / `data-theme="light"` on the **root element** |
+| Do **not** use | A `body.light-theme` class. The magazine reader does this and it cannot be applied before `<body>` exists — that is what causes the white flash |
+| Colors | Every color goes through CSS custom properties on `:root`; `[data-theme="light"]` overrides the same variable names. No hard-coded hex outside the variable blocks |
+| Default | `dark` when nothing is stored |
+| Persist | `localStorage` key `ltm_theme`, values `light` \| `dark` |
+| Toggle | One control in the top bar; icon reflects the **target** state |
+
+### 2.5.2 FOUC guard (mandatory, exact placement)
+
+The theme must be applied **before first paint** — an inline script in `<head>`, above every
+stylesheet, not in `DOMContentLoaded`:
+
+```html
+<script>
+  (function () {
+    var t = localStorage.getItem('ltm_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+```
+
+### 2.5.3 Third-party themes must follow
+
+Anything with its own baked-in dark styling has to be swapped on toggle, not left behind:
+
+- **highlight.js** — keep the stylesheet in a `<link id="hljs-theme-link">` and rewrite `href`
+  (`github.min.css` ⇄ `github-dark.min.css`) inside the toggle handler.
+- **Mermaid** — one global theme chosen at init (`visual_arsenal` contract). If the diagram theme
+  cannot follow the toggle, pick the neutral theme that is legible on both backgrounds rather than
+  re-rendering diagrams on every switch.
+
+### 2.5.4 What must be verified in both themes
+
+Annotation underline and highlight fills, tooltip/float panel backgrounds, interactive blank and
+textarea backgrounds, table zebra striping, `viz-*` block borders, and diagram text. These are exactly
+the places the source projects needed separate light overrides — a theme that only restyles the page
+background is incomplete.
+
+---
+
+## 3. Sidebar structure
 
 | Tab | Content | Behavior |
 | :--- | :--- | :--- |
 | **Contents** | Magazines + Units list | Click opens md; current item active |
-| **Concepts** | Concepts from current piece or `log.md` Concept Ledger | Click jumps to in-doc heading / anchor |
+| **Concepts** | Term / vocabulary library for the current piece, or `log.md` Concept Ledger | Click jumps to in-doc heading / anchor |
 | **Notes** | Highlights & notes for current file (or all) | Click jumps to annotation in body and opens edit float |
 
 - New note created → **appears immediately in Notes Tab** (refresh list after saving `notes.json`).  
 - Concepts / Notes jumps must be stable: depend on heading format and annotation spans; generators follow `tech_spec.md`.
+
+### 3.1 Sidebar search (required)
+
+Both source readers have a search input at the top of the sidebar, and it is used constantly. Filter
+the **active tab's** list as the user types: document titles in Contents, terms in Concepts, and both
+`word` and note text in Notes. Plain case-insensitive substring matching is enough — no fuzzy search.
+
+### 3.2 Collapse
+
+The sidebar collapses to give the body full width; persist in `localStorage` key `ltm_sidebar_collapsed`.
 
 ---
 
@@ -59,13 +136,76 @@ On create, the frontend must silently write:
 | `context` | **Full sentence or current block paragraph** (prefer whole sentence; at least the `<p>`/`<li>` text) |
 | `contextOffset` | Start char offset of `word` inside `context` |
 | `file` | Relative path of current doc |
+| `isHighlight` | `true` = pure highlight (no note text) · `false` = underlined annotation carrying a note |
 | `userNoteRaw` / `note` | User note (AI never overwrites raw) |
+| `aiReview` | Written by Phase 3 only; the frontend must never drop it (Smart Merge, §7.2) |
 
-Locate priority:
+### 4.1 Two annotation forms (both required)
 
-1. Find DOM block where `blockText === context`, then locate with `word` + `contextOffset`  
-2. If no `context` (legacy): fall back to full-doc search on `word` (ambiguous — avoid missing context on new data)  
-3. Notes list order: prefer document physical order; else by time
+The reader has **two** marking gestures and they are visually distinct:
+
+| Form | `isHighlight` | Classes | Meaning |
+| :--- | :--- | :--- | :--- |
+| Underlined annotation | `false` | `.annotated-word` | User wrote a note / question; hovering shows it, and Phase 3 grades it |
+| Pure highlight | `true` | `.annotated-word.custom-highlight` | "This matters / I'm unsure" with no text yet; still a gradable signal |
+
+A pure highlight must be upgradable to an annotation in place (open the float, type, save) without
+losing `id`, `context`, or `contextOffset`.
+
+### 4.2 Capture on selection — order matters
+
+1. Require a usable selection: non-empty, **no newline**, and **under 150 chars** (the source readers
+   allow whole phrases, not just single words).
+2. **Snap the range to word boundaries first** (`snapRangeToWordBoundaries`), then re-apply it to the
+   selection so the user sees what will actually be saved.
+3. **Only then** derive `word`, `context`, `contextOffset` from the snapped range. Computing the offset
+   before snapping produces an offset that no longer matches the stored `word` — silent mislocation later.
+4. `context` = `textContent` of the nearest enclosing block (`P LI TD TH H1–H6 BLOCKQUOTE DT DD DIV`,
+   stopping at the body container). `contextOffset` = length of a range spanning from the start of that
+   block to the start of the selection.
+5. If no enclosing block is found, store `context = ''` and `contextOffset = 0` rather than guessing.
+
+### 4.3 Rendering: mark every occurrence, but exactly one is primary
+
+This is the mechanism that makes a common word locatable. Do not simplify it away.
+
+```
+for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines):
+    collect text nodes in document order, skipping excluded subtrees
+    combined = concat(text node values)          # lets a phrase split across <em>/<strong> still match
+    match all annotation words against `combined` with one case-insensitive regex
+        - patterns sorted LONGEST FIRST  (stops "note" from eating "banknotes")
+        - add \b only on the side that starts/ends with a word char
+        - keep non-overlapping matches only
+    for each match:
+        isPrimary = ann.context && combined.trim() === ann.context.trim()
+                    && abs(matchIndex - ann.contextOffset) < 3
+    map matches back onto their text nodes, rebuild nodes in REVERSE order
+    wrap each matched segment in <span class="annotated-word[ custom-highlight]"
+          data-id data-word data-note [data-primary="true"]>
+```
+
+| Rule | Why |
+| :--- | :--- |
+| **All** occurrences get wrapped | The learner sees every place that word appears — that is the point of marking vocabulary |
+| **Only the matching occurrence** gets `data-primary="true"` | It is the one the note was actually written about, and the only correct jump target |
+| Tolerance `< 3` chars on the offset | Absorbs whitespace normalization between capture time and render time. Do not tighten to `=== 0`; do not widen |
+| Rebuild text nodes in reverse order | Forward rebuilding invalidates the offsets of later nodes in the same block |
+| Excluded subtrees | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`, anything already `.annotated-word`, and speaker labels. Annotating inside an input would destroy the answer |
+| Headings are allowed | Both source readers annotate inside headings; only code and form controls are off-limits |
+
+### 4.4 Locate priority (Notes sidebar → body)
+
+1. `data-id === note.id` **and** `data-primary === "true"` — the correct hit  
+2. `data-id === note.id` (any occurrence) — annotation exists but context drifted after an edit  
+3. First span whose text equals `word`, case-insensitive — legacy notes with no `context`  
+4. Nothing found → tell the user the anchor is gone; never scroll to a random occurrence silently
+
+On hit: `scrollIntoView({ behavior: 'smooth', block: 'center' })`, flash the accent color for ~2s, then
+restore. Notes list order: prefer document physical order; else by time.
+
+**Legacy tolerance**: `context` was added to the source projects mid-flight, so roughly half of the
+existing notes have none. New notes must always carry it; old ones must still open via rule 3.
 
 **Generation avoidances** (same as source projects):
 
@@ -83,6 +223,7 @@ Phase 3 grading: **must use `context` for situated explanation** — no dictiona
 | Click a Notes item | Scroll to body annotation → brief highlight flash → open edit float (if any) |
 | Click a Concepts item | Scroll to concept heading (Unit `### N. Name` or Mag Key Ideas anchor) |
 | Click a TOC item | Load that md; Notes/Concepts switch to that file’s data; never clear other files’ `notes.json` |
+| Jump targets a doc that is not open | Load that doc first, **await** the render, then locate — do not race the DOM |
 
 ---
 
@@ -159,20 +300,92 @@ On new-project init, the frontend must fuse **Magazine mode** and **Unit mode** 
 
 ---
 
+## 7.3 Locked names (do not rename — `verify_reader.js` asserts these)
+
+The two source readers each invented their own names, which is why nothing could be shared between
+them. The template picks one set. Everything below is a hard contract.
+
+### localStorage keys
+
+| Key | Values | Default |
+| :--- | :--- | :--- |
+| `ltm_theme` | `light` \| `dark` | `dark` |
+| `ltm_sort_order` | `asc` \| `desc` | `asc` |
+| `ltm_sidebar_collapsed` | `true` \| `false` | `false` |
+| `ltm_notes_show_all` | `true` \| `false` | `false` (current doc only) |
+
+### HTTP routes
+
+| Route | Method | Purpose |
+| :--- | :--- | :--- |
+| `/api/files` | GET | List readable docs under `content/magazines/` + `content/units/` only |
+| `/api/file?path=…` | GET | One doc's raw Markdown; path must resolve inside `content/` |
+| `/api/save` | POST | `{ path, content }` — full write-back of a doc |
+| `/api/notes` | GET / POST | Read / Smart-Merge write of `notes.json` |
+
+### DOM contract
+
+| Name | Role |
+| :--- | :--- |
+| `html[data-theme]` | Theme carrier (§2.5) |
+| `.annotated-word` | Any marked span |
+| `.custom-highlight` | Added when `isHighlight === true` |
+| `[data-id]` `[data-word]` `[data-note]` | Annotation identity on the span |
+| `[data-primary="true"]` | The single context-matched occurrence (§4.3) |
+| `.interactive-blank` `.interactive-textarea` `.interactive-checkbox` | Autosaved controls (§6.1) |
+| `.viz-*` `.sticky-note` | Visual arsenal (§11.3) |
+
+---
+
+## 7.4 Explicitly out of scope (do not build, even though the reference has it)
+
+The source readers accumulated extras that must **not** be carried into a fresh project reader:
+
+| Excluded | Why |
+| :--- | :--- |
+| **Git UI and all `/api/git/*` routes** | `Melbourne culture magazine/server.js` implements `/api/git/status`, `/api/git/history`, `/api/git/commit`, `/api/git/show` and a "Git" sidebar tab. **Do not port any of it.** Version control is the user's business outside the reader, many users of this template have no Git installed at all, and a commit button in a study app is a foot-gun |
+| Audio/TTS controls | Only meaningful for a language subject; add later per subject, never in the baseline |
+| Subject-specific tabs (slang library, cardpacks) | Generalized into the Concepts tab (§3) |
+| Any write route outside `content/` and `notes.json` | The reader must not be able to modify `protocols/`, `knowledge/`, or `state/` |
+
+If the user later asks for one of these, build it then — but it is never part of Step 3.5 acceptance.
+
+---
+
 ## 8. Migration & build references
 
-When building or migrating the browser frontend after Phase 0, integrate by module:
+**Start from `templates/reader_skeleton.html`.** It is the reference UI shell for this template:
+design tokens for both themes, the FOUC guard, preference persistence, sidebar tabs/search/sort/collapse,
+and working implementations of §4.2 capture, §4.3 `data-primary` rendering, and §4.4 jump. Copy it to
+the root as `index.html` and extend it; it is deliberately free of Git UI and subject-specific features.
 
-1. **Server & routes**: reference `Melbourne culture magazine/server.js` — static hosting, `/api/save` full save, Smart Merge for `notes.json`.  
-2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset`.  
-3. **Textbook interactive controls**: reference `English learning for Melbourne/scripts/preview.html` — convert `___`, `- [ ]`, `**[Your Answer]**` to interactive DOM with autosave.  
+Then integrate the remaining modules. **Port behavior, not files** — and apply §7.3 names and §7.4
+exclusions while porting:
+
+1. **Server & routes**: reference `Melbourne culture magazine/server.js` — static hosting, `/api/save` full save, Smart Merge for `notes.json`. **Stop before the `/api/git/*` handlers.**  
+2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset` (`applyAnnotations` / `jumpToWord` are the functions worth studying). Its theming uses `body.light-theme`; **use `html[data-theme]` instead** (§2.5).  
+3. **Textbook interactive controls**: reference `English learning for Melbourne/scripts/preview.html` — convert `___`, `- [ ]`, `**[Your Answer]**` to interactive DOM with autosave, and copy its `<head>` FOUC guard verbatim in spirit.  
 4. **Visual module**: import `scripts/viz.css` so blocks/SVG/Mermaid styles stay global and survive Markdown rendering.
+
+> Neither reference is available to a user who cloned only this template. Everything required to
+> rebuild from scratch is specified in §1–§7 and checked by `scripts/verify_reader.js`; the references
+> are an accelerator, not a dependency.
 
 ---
 
 ## 9. Acceptance checklist (frontend Ready)
 
-- [ ] TOC toggles **newest/oldest** and persists  
+> Run `node scripts/verify_reader.js` for the machine-checkable half of this list. It must pass before
+> `p0_bootstrap.md` Step 3.5 counts as done and before cleanup (Gate B) may run.
+
+- [ ] `node scripts/verify_reader.js` passes with no FAIL  
+- [ ] Light and dark both usable; toggle persists; **no white flash on reload in dark mode**  
+- [ ] Annotation underline, highlight fill, floats, blanks, tables, and `viz-*` all legible in **both** themes  
+- [ ] Highlighting a word that occurs many times marks them all, and the sidebar jumps to the right one  
+- [ ] A pure highlight can be upgraded to a note without losing its anchor  
+- [ ] No Git UI, no `/api/git/*` route exists  
+- [ ] Sidebar search filters the active tab  
+- [ ] TOC toggles **oldest/newest** and persists (default oldest-first)  
 - [ ] Internal md never appears in reading TOC  
 - [ ] Magazines vs Units grouped; notes never cross files  
 - [ ] Notes write `context` + `contextOffset`  

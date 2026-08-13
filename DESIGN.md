@@ -145,7 +145,16 @@ Keep inline HTML grading + notes.aiReview, and standardize:
 
 ### 3.6 Reader details must be kept
 
-See `protocols/frontend_spec.md`: TOC newest/oldest, Notes sidebar + click jump, multi-doc `file` isolation, annotations force full-sentence `context` + `contextOffset`, internal protocol files stay out of the reading TOC. Accept against that file when migrating the frontend.
+See `protocols/frontend_spec.md`: TOC sort (default **oldest first**, toggleable, remembered), Notes sidebar + click jump, multi-doc `file` isolation, annotations force full-sentence `context` + `contextOffset`, internal protocol files stay out of the reading TOC.
+
+Added after auditing both source readers:
+
+- **Light/dark is part of the contract**, carried on `html[data-theme]` with an inline `<head>` FOUC guard. The magazine reader's `body.light-theme` is the anti-pattern — it cannot apply before `<body>` exists.
+- **Every preference is remembered** (`ltm_theme`, `ltm_sort_order`, `ltm_sidebar_collapsed`, `ltm_notes_show_all`), restored before first render, and reflected in its control. A default is for new users only.
+- **The anchoring rule is written down**: mark every occurrence of a word, but give `data-primary="true"` to only the one whose block matches `context` and whose position is within 3 chars of `contextOffset`. This is what makes a common word locatable, and neither source project documented it — the textbook reader never implemented it at all (81 of its 86 notes store `context` with no `contextOffset`).
+- **Git is explicitly excluded.** The magazine reader grew `/api/git/*` routes and a Git sidebar tab; the template must not inherit them.
+
+Accept against that file — and against `scripts/verify_reader.js`, which mechanically checks the parts that rot silently.
 
 ---
 
@@ -154,7 +163,11 @@ See `protocols/frontend_spec.md`: TOC newest/oldest, Notes sidebar + click jump,
 ```
 [User] I want to learn 《subject》…
         ↓
-Phase 0  intake checklist → confirmation card → write profile/modality → rewrite AGENT as subject project
+Phase 0  intake checklist → confirmation card → write profile/modality
+        ↓
+   Gate A  rewrite AGENT as subject project  →  learning is unblocked here
+   Step 3.5  build the reader from templates/reader_skeleton.html → verify_reader.js
+   Gate B  template cleanup (deferred; never blocks studying)
         ↓
 Phase 1  propose by T/M/H/C + gaps/notes
         ↓ confirm
@@ -193,6 +206,8 @@ wait for confirm
 | (new) Intake confirm | `protocols/intake_checklist.md` |
 | p0–p3/tech_spec | `protocols/*` |
 | (new) Reader spec | `protocols/frontend_spec.md` |
+| (new) Reader UI shell | `templates/reader_skeleton.html` |
+| (new) Reader acceptance | `scripts/verify_reader.js` |
 | (new) Modality presets | `knowledge/modality_presets.md` |
 | plan user profile | `knowledge/profile.md` |
 | desire / calendar | `knowledge/desire.md` / `calendar.md` |
@@ -210,7 +225,7 @@ wait for confirm
 2. AI asks subject, level, gaps, interests, time, **T/M/H/C modality**, etc. via `intake_checklist.md`, then shows a confirmation card.  
 3. You say “confirm” → AI writes the profile and **rewrites AGENT into this subject’s project**.  
 4. Say “schedule” → confirm proposal → “start generating”.  
-5. Read in the preview frontend (after migrate it must meet `frontend_spec.md`: sort, Notes jump, context locate, multi-doc isolation).  
+5. Read in the reader. It is built in Step 3.5 from `templates/reader_skeleton.html` and must pass `node scripts/verify_reader.js` (theme, remembered preferences, sort, Notes jump, context locate, multi-doc isolation, no Git UI).  
 6. “Grade my work”; extra drills only after being asked and agreeing.
 
 ---
@@ -221,7 +236,7 @@ wait for confirm
 
 | Item | Why |
 | :--- | :--- |
-| Shipping the full preview frontend | Large, path-coupled; spec lives in `frontend_spec.md` — accept against the checklist on migrate |
+| Shipping a *finished* reader | Still not shipped, but no longer only prose: `templates/reader_skeleton.html` gives the UI shell, theme, persistence, and annotation anchoring; Step 3.5 fills the four extension points and `verify_reader.js` accepts the result |
 | Audio / TTS / shadowing | English-specific; other subjects can add optional modules later |
 | Cross-repo hardcoded coupling | Subject projects should be self-contained; multi-subject via folder copy (`project_lifecycle.md`) |
 | Personal blog as profile source | Privacy and subject-irrelevant |
@@ -265,7 +280,8 @@ Both “one customized copy per course” and “related courses together” are
 
 ### Consciously deferred (known, not missing design)
 
-- [ ] Full preview frontend migrate (`index.html` / server / Mermaid) — spec ready  
+- [x] Reader UI shell + acceptance harness (`templates/reader_skeleton.html`, `scripts/verify_reader.js`)  
+- [ ] Remaining reader work: Markdown rendering, interactive controls autosave, Concepts tab, Mermaid pipeline — extension points marked in the skeleton  
 - [ ] Math KaTeX (arsenal already has `formula`; engine optional)  
 - [ ] Audio / TTS (not default)  
 - [ ] Auto protocol-sync script between mother template and subject projects  

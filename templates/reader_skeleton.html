@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<!--
+  Universal Reader — reference skeleton (templates/reader_skeleton.html)
+
+  Starting point for the reader built in protocols/p0_bootstrap.md Step 3.5.
+  Copy to the project root as index.html, then fill the four EXTENSION POINTs at the bottom.
+
+  What is already done for you — do not rewrite these, they are the parts that go subtly wrong:
+    · html[data-theme] + FOUC guard, light/dark tokens          (frontend_spec §2.5)
+    · Preference restore-before-render for all four keys        (§2.1, §7.3)
+    · Sidebar chrome: tabs, search, sort toggle, collapse       (§2, §3)
+    · Annotation capture with snap-then-measure ordering        (§4.2)
+    · applyAnnotations: mark every occurrence, one data-primary (§4.3)
+    · jumpToAnnotation with the four-step fallback              (§4.4)
+
+  What you must add: Markdown rendering, interactive controls + autosave, the visual
+  arsenal pipeline, and the annotation edit UI. Each is marked EXTENSION POINT below.
+
+  Deliberately absent: any Git UI or /api/git route (§7.4). Do not add one.
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Reader</title>
+
+<!-- FOUC guard: must stay above every stylesheet (§2.5.2) -->
+<script>
+  (function () {
+    var t = localStorage.getItem('ltm_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+
+<link rel="stylesheet" href="scripts/viz.css">
+<style>
+  /* ---- Design tokens. Every color goes through a variable (§2.5.1) ---- */
+  :root {
+    --bg-app:      #0b0f19;
+    --bg-card:     #151d30;
+    --bg-sidebar:  #0e1424;
+    --border:      rgba(255, 255, 255, 0.08);
+    --text-main:   #f3f4f6;
+    --text-muted:  #9ca3af;
+    --accent:      #14b8a6;
+    --accent-hover:#0d9488;
+    --accent-soft: rgba(20, 184, 166, 0.12);
+    --mark:        #f59e0b;
+    --mark-soft:   rgba(245, 158, 11, 0.14);
+    --font-title: 'Outfit', system-ui, sans-serif;
+    --font-body:  'Inter', system-ui, sans-serif;
+    --speed: .25s;
+    --sidebar-w: 300px;
+  }
+  [data-theme="light"] {
+    --bg-app:      #f8fafc;
+    --bg-card:     #ffffff;
+    --bg-sidebar:  #f1f5f9;
+    --border:      rgba(0, 0, 0, 0.08);
+    --text-main:   #0f172a;
+    --text-muted:  #64748b;
+    --accent:      #0d9488;
+    --accent-hover:#0f766e;
+    --accent-soft: rgba(13, 148, 136, 0.10);
+    --mark:        #d97706;
+    --mark-soft:   rgba(217, 119, 6, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; height: 100vh; display: flex; flex-direction: column;
+    background: var(--bg-app); color: var(--text-main);
+    font-family: var(--font-body); line-height: 1.7;
+    transition: background var(--speed), color var(--speed);
+  }
+
+  /* ---- Header ---- */
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 20px; border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .brand { font-family: var(--font-title); font-weight: 700; letter-spacing: .3px; }
+  .doc-title { flex: 1; color: var(--text-muted); font-size: 14px; }
+  .save-status { font-size: 12px; color: var(--text-muted); min-width: 64px; text-align: right; }
+  .save-status[data-state="dirty"]  { color: var(--mark); }
+  .save-status[data-state="saved"]  { color: var(--accent); }
+  .save-status[data-state="failed"] { color: #ef4444; }
+
+  button {
+    font: inherit; font-size: 12px; cursor: pointer;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px;
+    transition: background var(--speed), color var(--speed);
+  }
+  button:hover { background: var(--accent-soft); color: var(--text-main); }
+
+  /* ---- Shell ---- */
+  .shell { flex: 1; display: flex; min-height: 0; }
+  .sidebar {
+    width: var(--sidebar-w); flex: 0 0 var(--sidebar-w);
+    display: flex; flex-direction: column; min-height: 0;
+    background: var(--bg-sidebar); border-right: 1px solid var(--border);
+    transition: margin-left var(--speed);
+  }
+  body[data-sidebar="collapsed"] .sidebar { margin-left: calc(var(--sidebar-w) * -1); }
+
+  .tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .tab {
+    flex: 1; border: 0; border-radius: 0; padding: 10px 4px;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-soft); }
+
+  .sidebar-controls { display: flex; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .search { flex: 1; min-width: 0; }
+  .search input {
+    width: 100%; font: inherit; font-size: 13px; padding: 6px 9px;
+    color: var(--text-main); background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  .search input::placeholder { color: var(--text-muted); }
+
+  .list { flex: 1; overflow-y: auto; padding: 8px; }
+  .group-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--text-muted); padding: 10px 8px 4px;
+  }
+  .item {
+    padding: 7px 10px; border-radius: 6px; font-size: 13px;
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .item:hover { background: var(--accent-soft); }
+  .item.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .item .sub { display: block; font-size: 11px; color: var(--text-muted); }
+  .empty { padding: 20px 10px; font-size: 13px; color: var(--text-muted); }
+
+  /* ---- Body ---- */
+  .viewport { flex: 1; overflow-y: auto; padding: 32px 40px 120px; }
+  .doc { max-width: 780px; margin: 0 auto; }
+  .doc :is(h1,h2,h3,h4) { font-family: var(--font-title); line-height: 1.3; }
+  .doc table { border-collapse: collapse; width: 100%; }
+  .doc :is(th,td) { border: 1px solid var(--border); padding: 6px 10px; }
+  .doc tbody tr:nth-child(even) { background: var(--accent-soft); }
+  .doc :is(pre,code) { background: var(--bg-card); border-radius: 6px; }
+  .doc pre { padding: 12px; overflow-x: auto; }
+
+  /* ---- Annotations (§4.1 — two visually distinct forms) ---- */
+  .annotated-word {
+    border-bottom: 2px dotted var(--accent);
+    cursor: pointer; transition: background var(--speed);
+  }
+  .annotated-word:hover { background: var(--accent-soft); }
+  .custom-highlight { background: var(--mark-soft); border-bottom-color: var(--mark); }
+  .annotated-word[data-primary="true"] { border-bottom-style: solid; }
+  .annotated-word.flash { background: var(--mark); color: #000; }
+
+  /* ---- Interactive controls (§6) ---- */
+  .interactive-blank {
+    font: inherit; color: var(--accent); text-align: center;
+    background: transparent; border: 0; border-bottom: 1px solid var(--accent);
+    min-width: 60px; padding: 0 4px;
+  }
+  .interactive-textarea {
+    display: block; width: 100%; font: inherit; resize: none; overflow: hidden;
+    color: var(--text-main); background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+  }
+  .interactive-checkbox { accent-color: var(--accent); width: 15px; height: 15px; }
+
+  /* ---- Floating annotation panels ---- */
+  .float {
+    position: absolute; z-index: 40; display: none; width: 300px; padding: 10px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .float.open { display: block; }
+  .float textarea {
+    width: 100%; height: 68px; font: inherit; font-size: 13px; resize: vertical;
+    color: var(--text-main); background: var(--bg-app);
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px;
+  }
+  .float-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
+  .float-actions .primary { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <button id="btn-collapse" title="Toggle sidebar">☰</button>
+  <span class="brand">Universal Reader</span>
+  <span class="doc-title" id="doc-title">No document open</span>
+  <span class="save-status" id="save-status" data-state="idle"></span>
+  <button id="btn-theme" title="Toggle light / dark">◐</button>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="tabs">
+      <button class="tab active" data-tab="contents">Contents</button>
+      <button class="tab" data-tab="concepts">Concepts</button>
+      <button class="tab" data-tab="notes">Notes</button>
+    </div>
+
+    <div class="sidebar-controls">
+      <div class="search"><input id="search" type="search" placeholder="Search…" autocomplete="off"></div>
+      <button id="btn-sort" title="Toggle order">↑ Old → New</button>
+      <button id="btn-notes-scope" title="Notes scope" hidden>This doc</button>
+    </div>
+
+    <div class="list" id="list"></div>
+  </aside>
+
+  <main class="viewport" id="viewport">
+    <article class="doc" id="doc"></article>
+  </main>
+</div>
+
+<!-- Create annotation -->
+<div class="float" id="float-add">
+  <textarea id="add-note" placeholder="Your note or guess (leave empty to just highlight)…"></textarea>
+  <div class="float-actions">
+    <button id="add-highlight">Highlight only</button>
+    <button class="primary" id="add-save">Save note</button>
+  </div>
+</div>
+
+<!-- Edit annotation -->
+<div class="float" id="float-edit">
+  <textarea id="edit-note"></textarea>
+  <div class="float-actions">
+    <button id="edit-delete">Delete</button>
+    <button class="primary" id="edit-save">Save</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   State
+   ===================================================================== */
+const state = {
+  docs: [],            // [{ path, group, label }]
+  notes: [],           // notes.json
+  activePath: null,
+  tab: 'contents',
+  sortOrder: 'asc',
+  notesShowAll: false,
+  query: '',
+};
+
+const $ = (id) => document.getElementById(id);
+
+/* =====================================================================
+   Preferences — restore BEFORE first render, default only when absent (§2.1)
+   ===================================================================== */
+const PREF = {
+  theme:     'ltm_theme',
+  sort:      'ltm_sort_order',
+  collapsed: 'ltm_sidebar_collapsed',
+  notesAll:  'ltm_notes_show_all',
+};
+
+function restorePreferences() {
+  const theme = localStorage.getItem(PREF.theme) || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const sort = localStorage.getItem(PREF.sort);
+  state.sortOrder = sort === 'desc' ? 'desc' : 'asc';       // stored value wins
+
+  const collapsed = localStorage.getItem(PREF.collapsed) === 'true';
+  document.body.setAttribute('data-sidebar', collapsed ? 'collapsed' : 'open');
+
+  state.notesShowAll = localStorage.getItem(PREF.notesAll) === 'true';
+
+  syncControls();   // controls must show the RESTORED value, never the default
+}
+
+function syncControls() {
+  $('btn-sort').textContent = state.sortOrder === 'asc' ? '↑ Old → New' : '↓ New → Old';
+  $('btn-notes-scope').textContent = state.notesShowAll ? 'All docs' : 'This doc';
+  $('btn-theme').title = document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'Switch to light' : 'Switch to dark';
+}
+
+$('btn-theme').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(PREF.theme, next);
+  syncControls();
+  // EXTENSION POINT D: swap the highlight.js stylesheet href here (§2.5.3).
+});
+
+$('btn-sort').addEventListener('click', () => {
+  state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+  localStorage.setItem(PREF.sort, state.sortOrder);   // persist in the same handler
+  syncControls();
+  renderList();
+});
+
+$('btn-collapse').addEventListener('click', () => {
+  const collapsed = document.body.getAttribute('data-sidebar') !== 'collapsed';
+  document.body.setAttribute('data-sidebar', collapsed ? 'collapsed' : 'open');
+  localStorage.setItem(PREF.collapsed, String(collapsed));
+});
+
+$('btn-notes-scope').addEventListener('click', () => {
+  state.notesShowAll = !state.notesShowAll;
+  localStorage.setItem(PREF.notesAll, String(state.notesShowAll));
+  syncControls();
+  renderList();
+});
+
+/* =====================================================================
+   Sidebar
+   ===================================================================== */
+document.querySelectorAll('.tab').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b === btn));
+    state.tab = btn.dataset.tab;
+    // Sort applies to Contents only; Notes scope applies to Notes only (§2, §3.1)
+    $('btn-sort').hidden = state.tab !== 'contents';
+    $('btn-notes-scope').hidden = state.tab !== 'notes';
+    renderList();
+  });
+});
+
+$('search').addEventListener('input', (e) => {
+  state.query = e.target.value.trim().toLowerCase();
+  renderList();
+});
+
+const matches = (...fields) =>
+  !state.query || fields.some((f) => String(f || '').toLowerCase().includes(state.query));
+
+function sortKey(doc) {
+  const m = doc.path.match(/(?:magazine|unit)(\d+)/i);
+  return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+function renderList() {
+  const list = $('list');
+  list.innerHTML = '';
+
+  if (state.tab === 'contents') {
+    const docs = state.docs
+      .filter((d) => matches(d.label, d.path))
+      .sort((a, b) => (state.sortOrder === 'asc' ? sortKey(a) - sortKey(b) : sortKey(b) - sortKey(a)));
+
+    for (const group of ['magazines', 'units']) {
+      const inGroup = docs.filter((d) => d.group === group);
+      if (!inGroup.length) continue;
+      list.insertAdjacentHTML('beforeend', `<div class="group-label">${group}</div>`);
+      for (const doc of inGroup) {
+        const el = document.createElement('div');
+        el.className = 'item' + (doc.path === state.activePath ? ' active' : '');
+        el.textContent = doc.label;
+        el.addEventListener('click', () => openDoc(doc.path));
+        list.appendChild(el);
+      }
+    }
+    if (!docs.length) list.innerHTML = '<div class="empty">No documents yet. Generate one in Phase 2.</div>';
+    return;
+  }
+
+  if (state.tab === 'notes') {
+    const notes = state.notes
+      .filter((n) => state.notesShowAll || n.file === state.activePath)
+      .filter((n) => matches(n.word, n.userNoteRaw, n.note));
+    for (const n of notes) {
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `<strong>${escapeHtml(n.word)}</strong><span class="sub">${escapeHtml(
+        (n.userNoteRaw || stripHtml(n.note) || '(highlight)').slice(0, 80))}</span>`;
+      el.addEventListener('click', () => jumpToAnnotation(n));
+      list.appendChild(el);
+    }
+    if (!notes.length) list.innerHTML = '<div class="empty">No notes here yet.</div>';
+    return;
+  }
+
+  // EXTENSION POINT A: Concepts tab — list terms for the open doc (or log.md
+  // Concept Ledger) and scroll to the matching heading on click (§3, §5).
+  list.innerHTML = '<div class="empty">Concepts: not implemented yet.</div>';
+}
+
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const stripHtml = (s) => String(s ?? '').replace(/<[^>]*>/g, '');
+
+/* =====================================================================
+   Loading
+   ===================================================================== */
+async function loadIndex() {
+  const [docs, notes] = await Promise.all([
+    fetch('/api/files').then((r) => r.json()).catch(() => []),
+    fetch('/api/notes').then((r) => r.json()).catch(() => []),
+  ]);
+  state.docs = Array.isArray(docs) ? docs : [];
+  state.notes = Array.isArray(notes) ? notes : [];
+  renderList();
+}
+
+async function openDoc(path) {
+  const res = await fetch('/api/file?path=' + encodeURIComponent(path));
+  const markdown = await res.text();
+  state.activePath = path;
+  state.markdown = markdown;      // kept so annotations can re-render without refetching
+  $('doc-title').textContent = path;
+  renderDoc(markdown);
+  renderList();
+}
+
+function renderDoc(markdown) {
+  // EXTENSION POINT B: Markdown → HTML, then interactive controls (§6) and the
+  // visual arsenal pipeline (§11.2). Order is fixed: markdown → controls →
+  // diagrams → applyAnnotations → TOC (§10).
+  $('doc').textContent = markdown;
+
+  applyAnnotations($('doc'), state.notes.filter((n) => n.file === state.activePath));
+}
+
+/* =====================================================================
+   §4.3 Rendering annotations — every occurrence marked, exactly one primary
+   ===================================================================== */
+const BLOCK_TAGS = new Set(['P','LI','TD','TH','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','DT','DD']);
+const EXCLUDED_TAGS = new Set(['PRE','CODE','TEXTAREA','INPUT','BUTTON','SCRIPT','STYLE']);
+
+function applyAnnotations(container, annotations) {
+  const valid = (annotations || []).filter((n) => n && n.word);
+  if (!valid.length) return;
+
+  // Longest first, or a short word swallows the phrase that contains it.
+  const sorted = [...valid].sort((a, b) => b.word.length - a.word.length);
+  const patterns = sorted.map((ann) => {
+    let p = ann.word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    if (/^\w/.test(ann.word)) p = '\\b' + p;
+    if (/\w$/.test(ann.word)) p = p + '\\b';
+    return p;
+  });
+  const regex = new RegExp('(' + patterns.join('|') + ')', 'gi');
+
+  function excluded(node) {
+    for (let cur = node.parentNode; cur && cur !== container; cur = cur.parentNode) {
+      if (EXCLUDED_TAGS.has(cur.tagName) || cur.classList?.contains('annotated-word')) return true;
+    }
+    return false;
+  }
+
+  function processBlock(block) {
+    const textNodes = [];
+    (function collect(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.nodeValue && !excluded(node)) textNodes.push(node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(collect);
+      }
+    })(block);
+    if (!textNodes.length) return;
+
+    // Concatenate the block so a phrase split across <em>/<strong> still matches.
+    let offset = 0;
+    const segments = textNodes.map((n) => {
+      const seg = { node: n, start: offset, end: offset + n.nodeValue.length, text: n.nodeValue };
+      offset += n.nodeValue.length;
+      return seg;
+    });
+    const combined = segments.map((s) => s.text).join('');
+
+    regex.lastIndex = 0;
+    const found = [];
+    let lastEnd = 0, m;
+    while ((m = regex.exec(combined)) !== null) {
+      if (m.index < lastEnd) continue;                       // keep matches non-overlapping
+      const ann = sorted.find((a) => a.word.toLowerCase() === m[0].toLowerCase());
+      if (!ann) continue;
+      // THE anchor rule: same block text, and the offset lands within 3 chars (§4.3).
+      const isPrimary = !!(ann.context
+        && combined.trim() === String(ann.context).trim()
+        && Math.abs(m.index - Number(ann.contextOffset)) < 3);
+      found.push({ start: m.index, end: m.index + m[0].length, ann, isPrimary });
+      lastEnd = m.index + m[0].length;
+    }
+    if (!found.length) return;
+
+    const perSegment = segments.map(() => []);
+    for (const match of found) {
+      segments.forEach((seg, i) => {
+        if (seg.end <= match.start || seg.start >= match.end) return;
+        perSegment[i].push({
+          localStart: Math.max(match.start, seg.start) - seg.start,
+          localEnd: Math.min(match.end, seg.end) - seg.start,
+          ann: match.ann,
+          isPrimary: match.isPrimary,
+        });
+      });
+    }
+
+    // Reverse order: rebuilding forward would invalidate later offsets.
+    for (let i = segments.length - 1; i >= 0; i--) {
+      const hits = perSegment[i];
+      if (!hits.length) continue;
+      const { node, text } = segments[i];
+      hits.sort((a, b) => a.localStart - b.localStart);
+
+      const frag = document.createDocumentFragment();
+      let cursor = 0;
+      for (const hit of hits) {
+        if (hit.localStart > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, hit.localStart)));
+        const span = document.createElement('span');
+        span.className = 'annotated-word' + (hit.ann.isHighlight ? ' custom-highlight' : '');
+        span.setAttribute('data-id', hit.ann.id || '');
+        span.setAttribute('data-word', hit.ann.word);
+        span.setAttribute('data-note', hit.ann.userNoteRaw || '');
+        if (hit.isPrimary) span.setAttribute('data-primary', 'true');
+        span.textContent = text.slice(hit.localStart, hit.localEnd);
+        frag.appendChild(span);
+        cursor = hit.localEnd;
+      }
+      if (cursor < text.length) frag.appendChild(document.createTextNode(text.slice(cursor)));
+      node.parentNode.replaceChild(frag, node);
+    }
+  }
+
+  (function walk(node) {
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    if (BLOCK_TAGS.has(node.tagName)) processBlock(node);
+    else Array.from(node.children).forEach(walk);
+  })(container);
+}
+
+/* =====================================================================
+   §4.4 Jump — four-step fallback, never scroll somewhere random
+   ===================================================================== */
+async function jumpToAnnotation(note) {
+  if (note.file !== state.activePath) {
+    await openDoc(note.file);            // await the render before locating
+  }
+  const spans = Array.from(document.querySelectorAll('.annotated-word'));
+  const target =
+    spans.find((s) => s.dataset.id === note.id && s.dataset.primary === 'true') ||
+    spans.find((s) => s.dataset.id === note.id) ||
+    spans.find((s) => s.textContent.trim().toLowerCase() === String(note.word).toLowerCase());
+
+  if (!target) {
+    setSaveStatus('failed', 'anchor lost');   // tell the user; do not guess
+    return;
+  }
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.add('flash');
+  setTimeout(() => target.classList.remove('flash'), 2000);
+}
+
+/* =====================================================================
+   §4.2 Capture — snap first, measure second
+   ===================================================================== */
+const SELECTION_BLOCK_TAGS = new Set([...BLOCK_TAGS, 'DIV']);
+let pending = null;   // { word, context, contextOffset }
+
+function snapRangeToWordBoundaries(range) {
+  const isWordChar = (ch) => ch && /[\wÀ-ÿ']/.test(ch);
+  if (range.startContainer.nodeType === Node.TEXT_NODE) {
+    const text = range.startContainer.nodeValue;
+    let start = range.startOffset;
+    while (start > 0 && isWordChar(text[start - 1])) start--;
+    range.setStart(range.startContainer, start);
+  }
+  if (range.endContainer.nodeType === Node.TEXT_NODE) {
+    const text = range.endContainer.nodeValue;
+    let end = range.endOffset;
+    while (end < text.length && isWordChar(text[end])) end++;
+    range.setEnd(range.endContainer, end);
+  }
+}
+
+document.addEventListener('mouseup', (e) => {
+  if (e.target.closest('.float')) return;
+  const selection = window.getSelection();
+  const raw = selection.toString().trim();
+
+  if (!raw || raw.includes('\n') || raw.length >= 150) { closeFloats(); return; }
+  if (!selection.rangeCount) { closeFloats(); return; }
+
+  const range = selection.getRangeAt(0);
+  if (!$('doc').contains(range.startContainer)) { closeFloats(); return; }
+
+  snapRangeToWordBoundaries(range);            // 1. snap
+  selection.removeAllRanges();
+  selection.addRange(range);                   // 2. show the user what will be saved
+
+  const word = range.toString().trim();        // 3. only now measure
+  let block = range.startContainer.nodeType === Node.ELEMENT_NODE
+    ? range.startContainer : range.startContainer.parentNode;
+  while (block && block !== $('doc') && !SELECTION_BLOCK_TAGS.has(block.tagName)) block = block.parentNode;
+
+  let context = '', contextOffset = 0;
+  if (block && block !== $('doc')) {
+    context = block.textContent;
+    const pre = range.cloneRange();
+    pre.selectNodeContents(block);
+    pre.setEnd(range.startContainer, range.startOffset);
+    contextOffset = pre.toString().length;
+  }
+
+  pending = { word, context, contextOffset };
+  openFloat($('float-add'), e.clientX, e.clientY);
+  $('add-note').value = '';
+  $('add-note').focus();
+});
+
+function openFloat(el, x, y) {
+  closeFloats();
+  el.style.left = Math.min(x, window.innerWidth - 320) + 'px';
+  el.style.top = (y + window.scrollY + 12) + 'px';
+  el.classList.add('open');
+}
+function closeFloats() { document.querySelectorAll('.float').forEach((f) => f.classList.remove('open')); }
+
+$('add-save').addEventListener('click', () => saveAnnotation($('add-note').value.trim(), false));
+$('add-highlight').addEventListener('click', () => saveAnnotation('', true));
+
+async function saveAnnotation(text, isHighlight) {
+  if (!pending || !pending.word) return;
+  const note = {
+    id: 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+    file: state.activePath,
+    word: pending.word,
+    context: pending.context,
+    contextOffset: pending.contextOffset,
+    userNoteRaw: text,
+    note: text,
+    isHighlight,
+    time: new Date().toISOString(),
+  };
+  state.notes.push(note);
+  closeFloats();
+  window.getSelection().removeAllRanges();
+  await persistNotes();
+  renderDoc(state.markdown || '');   // re-render so the new span appears
+  renderList();                      // new note shows in the sidebar immediately (§3)
+}
+
+async function persistNotes() {
+  setSaveStatus('saving');
+  try {
+    // Server does the Smart Merge — it must never drop an existing aiReview (§7.2).
+    const res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state.notes),
+    });
+    setSaveStatus(res.ok ? 'saved' : 'failed');
+  } catch {
+    setSaveStatus('failed');
+  }
+}
+
+function setSaveStatus(stateName, label) {
+  const el = $('save-status');
+  el.dataset.state = stateName;
+  el.textContent = label || { saving: 'saving…', saved: 'saved', dirty: 'unsaved', failed: 'save failed' }[stateName] || '';
+}
+
+// EXTENSION POINT C: clicking an .annotated-word opens #float-edit prefilled with
+// the note, and saving must preserve id / context / contextOffset / aiReview so a
+// pure highlight can be upgraded to a note in place (§4.1).
+
+/* =====================================================================
+   Start — preferences first, then data
+   ===================================================================== */
+restorePreferences();
+$('btn-notes-scope').hidden = true;
+loadIndex();
+</script>
+</body>
+</html>

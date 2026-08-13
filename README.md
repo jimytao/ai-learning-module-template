@@ -56,8 +56,10 @@ Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I
 ```
 
 4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, and Textbook/Magazine/Hybrid modality. The explanation language is used for difficult explanations and feedback even if you are studying English. Review the confirmation card and reply `confirm` only when it is accurate.
-5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files, prepares the reader files required by `protocols/frontend_spec.md`, and runs `protocols/cleanup_template.md`. That removes the one-time bootstrap prompt while retaining your saved preferences.
-6. Run **`start.bat`** after the browser/server files are ready. Then begin the recurring learning cycle below.
+5. After confirmation the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files, and rewrites `AGENT.md` into your subject's project. **At this point you can already start learning** — go to the cycle below.
+6. Separately, the AI prepares the reader files required by `protocols/frontend_spec.md` and tests **`start.bat`**. Only once that works (or you tell it you don't want a reader) does it run `protocols/cleanup_template.md`, which removes the one-time bootstrap prompt while retaining your saved preferences. This step is deliberately deferred — it never blocks studying.
+
+> **Git is optional.** If you have it, cleanup records a commit so every edit is reversible. If you don't, it saves a backup of `AGENT.md` under `state/` and asks you to confirm before editing. You will not be asked to install anything.
 
 ## Every learning cycle after setup
 
@@ -129,8 +131,8 @@ knowledge/               # profile / desire / calendar / domain_map / modalities
 state/                   # log / gaps / warehouse
 content/magazines/       # Long-form rich input
 content/units/           # Short lessons + exercises
-templates/               # Generation skeletons
-scripts/                 # Image download, validation, viz.css
+templates/               # Generation skeletons + reader_skeleton.html (reference UI shell)
+scripts/                 # Image download, content + reader validation, viz.css
 notes.json               # Annotations (full-sentence context)
 review.md                # Grading retrospectives archive
 ```
@@ -142,6 +144,8 @@ review.md                # Grading retrospectives archive
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | Hard syntax for flow / tree / blocks / SVG-lite… |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | Universal Reader specs (blanks/textarea autosaves, Notes jump, viz render) |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | Interactive Markdown validation |
+| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | Reference reader UI: themes, persistence, sidebar, annotation anchoring |
+| [`scripts/verify_reader.js`](scripts/verify_reader.js) | Reader acceptance harness — run after building the reader |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave image download (`BRAVE_API_KEY`) |
 
 ---
@@ -155,6 +159,9 @@ start.bat
 # Validate interactive markdown + visual headers under content/
 node scripts/validate_content.js
 
+# Check the reader against protocols/frontend_spec.md (must pass with no FAIL)
+node scripts/verify_reader.js
+
 # Download imageQuery assets
 set BRAVE_API_KEY=your_key
 python scripts/download_images.py content/magazines/magazine01_xxx.md
@@ -164,7 +171,9 @@ python scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## Not included yet
 
-The browser HTML/JS implementation files are not shipped in this repository. When building or copying your own browser viewer and server, refer to [`protocols/frontend_spec.md`](protocols/frontend_spec.md). It documents the complete merged specifications for both Textbook mode (inputs, textareas, checkboxes autosaved back to markdown) and Magazine mode (concept jumps, context-aware annotations with smart merge, and a visual layout).
+The browser HTML/JS implementation files are not shipped in this repository. When building or copying your own browser viewer and server, refer to [`protocols/frontend_spec.md`](protocols/frontend_spec.md). It documents the complete merged specifications for both Textbook mode (inputs, textareas, checkboxes autosaved back to markdown) and Magazine mode (concept jumps, context-aware annotations with smart merge, and a visual layout), plus the light/dark theme contract, the locked storage keys and routes, and the annotation anchoring rule that makes a repeated word locatable.
+
+After building it, run `node scripts/verify_reader.js`. It is the acceptance bar for the reader — it checks those contracts and the internal consistency of `notes.json`, and must report no FAIL.
 
 ---
 

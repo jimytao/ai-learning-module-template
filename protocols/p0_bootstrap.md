@@ -64,22 +64,67 @@ Use the “Confirmation card template” in `intake_checklist.md`.
 
 ---
 
-## Step 4: Rewrite AGENT.md (critical)
+## Step 3.5: Prepare the reader (owner of the browser/server files)
+
+> **This step owns reader creation.** No other protocol does. `cleanup_template.md` requires a working
+> reader, so if this step is skipped there is nothing to verify and cleanup can never legitimately run.
+
+1. Check whether a reader already exists: a `server.js` or `scripts/preview_server.js` at repo root,
+   plus the viewer page it serves.
+2. If **missing**, **start from `templates/reader_skeleton.html`** — copy it to the project root as
+   `index.html` and extend it. It already implements the theme contract, preference persistence,
+   sidebar chrome, annotation capture, and the `data-primary` anchoring rule; rebuilding those from
+   prose is where readers go wrong. Fill its four marked EXTENSION POINTs (Markdown rendering,
+   interactive controls + autosave, Concepts tab, annotation edit UI) and write the matching server.
+   Ask the user before pulling files from any outside source.
+3. Verify by running `start.bat` and opening the page. An empty TOC is expected before Phase 2 —
+   "loads without error" is the acceptance bar here, not "shows lessons".
+4. **Run `node scripts/verify_reader.js`. It must report no FAIL.** It checks the contracts that
+   silently rot: theme carrier and FOUC guard, locked storage keys and routes, the `data-primary`
+   anchoring rule, excluded features (no Git UI), and `notes.json` consistency. Fix every FAIL against
+   `frontend_spec.md` rather than editing the checks.
+5. If the user does not want a reader right now (Markdown-only workflow is legitimate), record
+   `Reader: skipped by user` in `knowledge/profile.md` §Reader preferences and continue.
+
+Outcome of this step decides Gate B in Step 4 below.
+
+---
+
+## Step 4: Rewrite AGENT.md (critical) — two gates
+
+The rewrite happens in **two independent gates**. Gate A converts the project and unblocks learning;
+Gate B only removes one-shot template text. **Never make Gate B a precondition for learning** — the
+Bootstrap block is inert prompt text, and leaving it in place costs the user nothing.
+
+### Gate A — immediately after the confirmation card passes (mandatory)
 
 Follow `AGENT.md` section **“Post-Bootstrap rewrite”** strictly:
 
 1. Title includes subject name  
 2. Status area: Subject + modality + `Phase 1 ready`  
 3. Remove blank-template boilerplate; write one-line subject goal  
-4. Narrow Phase 0 routing to “fill TBD / update profile” only  
+4. **Narrow the Phase 0 routing row** to “fill TBD / update profile” only, and add the re-entry guard
+   (see `AGENT.md` golden rule on Phase 0 re-entry)  
 5. Note default proposal bias by modality  
-6. **Load and execute `protocols/cleanup_template.md`**, strip the Phase 0 interview guidance, retain confirmed profile data (including explanation language), and self-delete that cleanup file.
 
-After rewrite, this repo is a **subject learning project**, not a blank template.
+Gate A owns every edit above. `cleanup_template.md` deliberately does **not** touch the routing table,
+so if Gate A skips item 4 nothing else will do it.
+
+**After Gate A the project is a subject learning project, and Phase 1 / Phase 2 are unblocked.**
+
+### Gate B — after the reader is verified (deferred, not urgent)
+
+Run only when Step 3.5 produced a working reader and `start.bat` was tested (or the user explicitly
+declined a reader). Then **load and execute `protocols/cleanup_template.md`**: it strips the one-shot
+Phase 0 interview guidance from `AGENT.md`, retains all confirmed profile data (including explanation
+language), and self-deletes.
+
+If Gate B cannot run yet, say so in one line and move on to Phase 1 — do not stall the user, and do
+not run cleanup with unmet preconditions.
 
 ---
 
-## Step 5: Bootstrap summary (send once after rewrite)
+## Step 5: Bootstrap summary (send once after Gate A)
 
 | Field | Content |
 | :--- | :--- |
@@ -88,7 +133,9 @@ After rewrite, this repo is a **subject learning project**, not a blank template
 | Domain map | Top-level themes |
 | Next 5 queued | Mag/Unit labeled by modality |
 | Initial gaps | 3–5 items |
-| AGENT | Converted to subject-project mode ✅ |
+| AGENT | Converted to subject-project mode ✅ (Gate A) |
+| Reader | built / copied / skipped by user |
+| Template cleanup | done (Gate B) / deferred until the reader is verified |
 | Pending TBD | … |
 
 Next prompt: say “what should I study today” or “schedule” → Phase 1.

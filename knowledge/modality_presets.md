@@ -60,7 +60,7 @@ Write the raw rules into `profile.md` §Learning modality. AI must not change ru
 | Hook narrative | Optional | **Required** | Mag required / Unit optional |
 | Literature/data stickies | Few | **Encouraged** | Mag encouraged |
 | Cold-start recall | **Every Unit** | Optional | Every Unit |
-| Default TOC sort tip | Newest first | Newest first | Newest first |
+| Default TOC sort tip | Oldest first | Oldest first | Oldest first |
 
 ---
 

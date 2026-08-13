@@ -108,7 +108,7 @@ User choice: `T / M / H / C` → ______
 
 | # | Ask | Default | Write to |
 | :--- | :--- | :--- | :--- |
-| G1 | TOC default sort | **Newest first** (switchable to oldest first) | profile §Reader prefs |
+| G1 | TOC default sort | **Oldest first** (switchable to newest first) | profile §Reader prefs |
 | G2 | Notes sidebar default | Only notes for the **currently open doc** (switchable to “all”) | same |
 | G3 | Grading tone | Concise / detailed | same |
 
