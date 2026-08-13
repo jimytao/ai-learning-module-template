@@ -160,9 +160,9 @@ losing `id`, `context`, or `contextOffset`.
    selection so the user sees what will actually be saved.
 3. **Only then** derive `word`, `context`, `contextOffset` from the snapped range. Computing the offset
    before snapping produces an offset that no longer matches the stored `word` — silent mislocation later.
-4. `context` = `textContent` of the nearest enclosing block (`P LI TD TH H1–H6 BLOCKQUOTE DT DD DIV`,
-   stopping at the body container). `contextOffset` = length of a range spanning from the start of that
-   block to the start of the selection.
+4. `context` = `textContent` of the nearest enclosing block (`P LI TD TH H1–H6 BLOCKQUOTE DT DD`, plus
+   `.viz-block-body` — see §4.3's note below — stopping at the body container). `contextOffset` = length
+   of a range spanning from the start of that block to the start of the selection.
 5. If no enclosing block is found, store `context = ''` and `contextOffset = 0` rather than guessing.
 
 ### 4.3 Rendering: mark every occurrence, but exactly one is primary
@@ -170,7 +170,7 @@ losing `id`, `context`, or `contextOffset`.
 This is the mechanism that makes a common word locatable. Do not simplify it away.
 
 ```
-for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines):
+for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines and `.viz-block-body`):
     collect text nodes in document order, skipping excluded subtrees
     combined = concat(text node values)          # lets a phrase split across <em>/<strong> still match
     match all annotation words against `combined` with one case-insensitive regex
@@ -199,6 +199,8 @@ for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines
 | Rebuild text nodes in reverse order | Forward rebuilding invalidates the offsets of later nodes in the same block |
 | Excluded subtrees | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`, anything already `.annotated-word`, and speaker labels. Annotating inside an input would destroy the answer |
 | Headings are allowed | Both source readers annotate inside headings; only code and form controls are off-limits |
+| **`.viz-block-body` counts as a block; other `viz-*` wrapper `div`s do not** | Per `visual_arsenal.md`, `.viz-caption` is a `<p>` (already covered above) but `.viz-block-body` is a `<div>`, and `div` is deliberately *not* generic block-level here — see the next row. Treating only `.viz-block-body` as a block (by class, not by making all `div`s block-level) lets text inside a flowchart/block-diagram box be selected and highlighted, without breaking the row below |
+| `div` is not block-level in general | So the walker recurses *through* `.viz-blocks` / `.viz-blocks-row` / `.viz-block` / `.sticky-note` wrapper `div`s down to whatever they contain (their own `<p>`, or a `.viz-block-body`), instead of swallowing an entire diagram's text into one match. Making `.viz-block-body` block-level is an explicit, narrow exception to this — not a general "treat divs as blocks" rule |
 
 > **Do not port `sortedAnnotations.find(a => a.word === word)` from the magazine reference
 > implementation** (`index.html` around the `applyAnnotations` function) — it has exactly the

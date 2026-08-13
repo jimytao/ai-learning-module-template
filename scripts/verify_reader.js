@@ -256,6 +256,11 @@ for (const tag of ['PRE', 'CODE', 'TEXTAREA', 'INPUT']) {
 
 expect(A, html, /scrollIntoView/, 'Jump scrolls the target into view');
 
+expect(A, html, /viz-block-body/,
+  'Diagram/flowchart box text (.viz-block-body) is annotatable',
+  '§4.3: it is a <div>, and div is not block-level in general here, so it needs an explicit ' +
+  'class check — otherwise text inside a viz-arsenal box can never be selected or highlighted');
+
 // ---------------------------------------------------------------------------
 // §7.4 Exclusions
 // ---------------------------------------------------------------------------
