@@ -154,8 +154,9 @@
    实际将被保存的范围。
 3. **然后才**从吸附后的 range 取 `word`、`context`、`contextOffset`。先算偏移再吸附，会得到一个
    与所存 `word` 不再对应的偏移 —— 后续就是静默定位错误。
-4. `context` = 最近的祖先块级元素的 `textContent`（`P LI TD TH H1–H6 BLOCKQUOTE DT DD DIV`，
-   到正文容器为止）。`contextOffset` = 从该块起点到选区起点的 range 长度。
+4. `context` = 最近的祖先块级元素的 `textContent`（`P LI TD TH H1–H6 BLOCKQUOTE DT DD`，
+   加上 `.viz-block-body`——见 §4.3 下方说明，到正文容器为止）。`contextOffset` = 从该块起点到
+   选区起点的 range 长度。
 5. 找不到祖先块时，存 `context = ''` 和 `contextOffset = 0`，不要猜。
 
 ### 4.3 渲染：全部出现都标记，但只有一处是 primary
@@ -163,7 +164,7 @@
 这就是让常见词可定位的机制。不要为了省事把它简化掉。
 
 ```
-对每个块级元素（P LI TD TH H1–H6 BLOCKQUOTE DT DD，以及对话行）：
+对每个块级元素（P LI TD TH H1–H6 BLOCKQUOTE DT DD，以及对话行和 `.viz-block-body`）：
     按文档顺序收集 text node，跳过被排除的子树
     combined = 拼接全部 text node 的值        # 让被 <em>/<strong> 劈开的短语仍能匹配
     用一条大小写不敏感的正则，把所有注释词在 combined 上全部匹配出来
@@ -192,6 +193,8 @@
 | 逆序重建 text node | 正序重建会让同一块内后续节点的偏移全部失效 |
 | 排除的子树 | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`、已经是 `.annotated-word` 的元素、以及说话人标签。在输入框内加标注会毁掉作答内容 |
 | 标题内允许标注 | 两个源阅读器都在标题里做过标注；只有代码和表单控件是禁区 |
+| **`.viz-block-body` 算块级元素，其它 `viz-*` 外层 `div` 不算** | 按 `visual_arsenal.md`，`.viz-caption` 是 `<p>`（上面已覆盖），但 `.viz-block-body` 是 `<div>`，而 `div` 在这里刻意**不**被当作通用块级元素——见下一行。只把 `.viz-block-body` 按类名单独识别为块级（而不是把所有 `div` 都算块级），既能让流程图/方框图里的文字可以被划选和高亮，又不破坏下一行说的规则 |
+| `div` 整体上不算块级元素 | 因此遍历会**穿过** `.viz-blocks` / `.viz-blocks-row` / `.viz-block` / `.sticky-note` 这些外层 `div` 容器，往下钻到它们实际包着的内容（自己的 `<p>`，或者 `.viz-block-body`），而不是把整张图的文字混成一整块去匹配。把 `.viz-block-body` 算作块级是对这条规则的一个明确、窄范围的例外，不是"所有 div 都算块级"这种笼统规则 |
 
 > **不要照搬 magazine 参考实现（`index.html` 的 `applyAnnotations` 函数附近）里的
 > `sortedAnnotations.find(a => a.word === word)`** —— 它就是上面这个串号 bug 的源头。

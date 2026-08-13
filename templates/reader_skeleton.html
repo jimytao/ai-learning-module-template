@@ -427,6 +427,16 @@ function renderDoc(markdown) {
 const BLOCK_TAGS = new Set(['P','LI','TD','TH','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','DT','DD']);
 const EXCLUDED_TAGS = new Set(['PRE','CODE','TEXTAREA','INPUT','BUTTON','SCRIPT','STYLE']);
 
+// visual_arsenal .viz-caption is a <p>, so BLOCK_TAGS already covers it. .viz-block-body
+// is a plain <div> (visual_arsenal.md §"blocks"), and DIV is deliberately NOT block-level
+// in general — see walk() below — so it needs an explicit class check here. Without this,
+// diagram captions render fine (they're already <p>) but text inside a flowchart/block box
+// can never be selected or highlighted: capture would find no ancestor block, so any
+// selection there was silently dropped (frontend_spec §4.2/§4.3).
+function isAnnotatableBlock(el) {
+  return !!el && (BLOCK_TAGS.has(el.tagName) || el.classList?.contains('viz-block-body'));
+}
+
 function applyAnnotations(container, annotations) {
   const valid = (annotations || []).filter((n) => n && n.word);
   if (!valid.length) return;
@@ -543,7 +553,7 @@ function applyAnnotations(container, annotations) {
 
   (function walk(node) {
     if (node.nodeType !== Node.ELEMENT_NODE) return;
-    if (BLOCK_TAGS.has(node.tagName)) processBlock(node);
+    if (isAnnotatableBlock(node)) processBlock(node);
     else Array.from(node.children).forEach(walk);
   })(container);
 }
@@ -573,7 +583,6 @@ async function jumpToAnnotation(note) {
 /* =====================================================================
    §4.2 捕获 —— 先吸附，后测量
    ===================================================================== */
-const SELECTION_BLOCK_TAGS = new Set([...BLOCK_TAGS, 'DIV']);
 let pending = null;   // { word, context, contextOffset }
 
 function snapRangeToWordBoundaries(range) {
@@ -610,7 +619,7 @@ document.addEventListener('mouseup', (e) => {
   const word = range.toString().trim();        // 3. 此时才测量
   let block = range.startContainer.nodeType === Node.ELEMENT_NODE
     ? range.startContainer : range.startContainer.parentNode;
-  while (block && block !== $('doc') && !SELECTION_BLOCK_TAGS.has(block.tagName)) block = block.parentNode;
+  while (block && block !== $('doc') && !isAnnotatableBlock(block)) block = block.parentNode;
 
   let context = '', contextOffset = 0;
   if (block && block !== $('doc')) {
