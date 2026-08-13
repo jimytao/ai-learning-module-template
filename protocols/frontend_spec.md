@@ -178,6 +178,11 @@ for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines
         - add \b only on the side that starts/ends with a word char
         - keep non-overlapping matches only
     for each match:
+        word = matched text, lowercased
+        candidates = every annotation whose word equals `word`
+        sameBlock = candidates whose own context equals `combined` (trimmed)
+        ann = sameBlock.length > 1 ? whichever sameBlock offset is closest to matchIndex
+            : sameBlock[0] || candidates[0]      # see disambiguation rule below
         isPrimary = ann.context && combined.trim() === ann.context.trim()
                     && abs(matchIndex - ann.contextOffset) < 3
     map matches back onto their text nodes, rebuild nodes in REVERSE order
@@ -189,10 +194,16 @@ for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines
 | :--- | :--- |
 | **All** occurrences get wrapped | The learner sees every place that word appears — that is the point of marking vocabulary |
 | **Only the matching occurrence** gets `data-primary="true"` | It is the one the note was actually written about, and the only correct jump target |
+| **Disambiguate by context before picking `ann`** | Two separate annotations can share a word — "coffee" highlighted with one note in paragraph 1 and a different note in paragraph 5. Picking "the first annotation with this word" cross-attributes paragraph 5's occurrence to paragraph 1's note: wrong tooltip, wrong click target, and a real risk of overwriting the wrong note on save. Prefer a candidate whose own `context` is this exact block; among same-block candidates (the word annotated twice in one block) prefer the closest offset; only fall back to "any annotation with this word" when nothing belongs to this block at all — the common case of one real note and several unrelated echoes |
 | Tolerance `< 3` chars on the offset | Absorbs whitespace normalization between capture time and render time. Do not tighten to `=== 0`; do not widen |
 | Rebuild text nodes in reverse order | Forward rebuilding invalidates the offsets of later nodes in the same block |
 | Excluded subtrees | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`, anything already `.annotated-word`, and speaker labels. Annotating inside an input would destroy the answer |
 | Headings are allowed | Both source readers annotate inside headings; only code and form controls are off-limits |
+
+> **Do not port `sortedAnnotations.find(a => a.word === word)` from the magazine reference
+> implementation** (`index.html` around the `applyAnnotations` function) — it has exactly the
+> cross-attribution bug described above. It was fixed in `templates/reader_skeleton.html` and this
+> branch's `reader-core.js`; match those versions, not the original reference.
 
 ### 4.4 Locate priority (Notes sidebar → body)
 
@@ -363,7 +374,7 @@ Then integrate the remaining modules. **Port behavior, not files** — and apply
 exclusions while porting:
 
 1. **Server & routes**: reference `Melbourne culture magazine/server.js` — static hosting, `/api/save` full save, Smart Merge for `notes.json`. **Stop before the `/api/git/*` handlers.**  
-2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset` (`applyAnnotations` / `jumpToWord` are the functions worth studying). Its theming uses `body.light-theme`; **use `html[data-theme]` instead** (§2.5).  
+2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset` (`applyAnnotations` / `jumpToWord` are the functions worth studying, **except** its word-to-annotation lookup — see the §4.3 warning above). Its theming uses `body.light-theme`; **use `html[data-theme]` instead** (§2.5).  
 3. **Textbook interactive controls**: reference `English learning for Melbourne/scripts/preview.html` — convert `___`, `- [ ]`, `**[Your Answer]**` to interactive DOM with autosave, and copy its `<head>` FOUC guard verbatim in spirit.  
 4. **Visual module**: import `scripts/viz.css` so blocks/SVG/Mermaid styles stay global and survive Markdown rendering.
 
