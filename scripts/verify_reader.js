@@ -97,9 +97,41 @@ if (!serverPath && !htmlPath) {
   process.exit(0);
 }
 
+/**
+ * A reader may be one self-contained HTML file or a page plus companion scripts and
+ * stylesheets. Follow local <script src> / <link rel=stylesheet> so a split reader is
+ * checked as thoroughly as an inline one. Third-party bundles under vendor/ or
+ * node_modules/ are skipped: their contents are not this project's contract.
+ */
+function linkedAssets(pageHtml, pageRel) {
+  if (!pageHtml) return [];
+  const baseDir = path.dirname(pageRel);
+  const refs = [
+    ...pageHtml.matchAll(/<script[^>]+src=["']([^"']+)["']/gi),
+    ...pageHtml.matchAll(/<link[^>]+href=["']([^"']+\.css)["'][^>]*>/gi),
+  ].map((m) => m[1]);
+
+  const out = [];
+  for (const ref of refs) {
+    if (/^(?:https?:)?\/\//.test(ref) || ref.startsWith('data:')) continue;   // remote
+    if (/(^|\/)(?:vendor|node_modules)\//.test(ref)) continue;                // third-party
+    const rel = ref.startsWith('/')
+      ? ref.slice(1)
+      : path.posix.join(baseDir === '.' ? '' : baseDir.replace(/\\/g, '/'), ref);
+    const body = read(rel);
+    if (body !== null) out.push({ rel, body: stripComments(body) });
+  }
+  return out;
+}
+
 const server = stripComments(serverPath ? read(serverPath) : '');
-const html = stripComments(htmlPath ? read(htmlPath) : '');
+const rawHtml = htmlPath ? read(htmlPath) : '';
+const assets = linkedAssets(rawHtml, htmlPath || 'index.html');
+// `html` is the client side of the reader: the page plus everything it pulls in.
+const html = stripComments(rawHtml) + '\n' + assets.map((a) => a.body).join('\n');
 const all = server + '\n' + html;
+
+if (assets.length) pass('setup', `Linked assets scanned: ${assets.map((a) => a.rel).join(', ')}`);
 
 if (!serverPath) fail('setup', 'A server exists (server.js or scripts/preview_server.js)', 'start.bat looks for these two paths only');
 else pass('setup', `Server found: ${serverPath}`);
@@ -115,9 +147,10 @@ expect(S, html, /document\.documentElement\.setAttribute\(\s*['"]data-theme['"]/
   'Theme is carried on html[data-theme]',
   'Use documentElement data-theme, not a body class — a body class cannot be set before first paint');
 
-expect(S, html, /\[data-theme\s*=\s*["']light["']\]/,
-  'A light-theme variable block exists',
-  'Override the same CSS custom properties under [data-theme="light"]');
+// Either theme may be the base; what matters is that a second one overrides it.
+expect(S, html, /\[data-theme\s*=\s*["'](?:light|dark)["']\]/,
+  'A second theme overrides the base variables',
+  'Define one theme on :root and override the same custom properties under [data-theme="…"]');
 
 forbid(S, html, /\.light-theme\b/,
   'No legacy body.light-theme selectors',
@@ -199,21 +232,25 @@ expect(A, html, /data-primary/,
 
 expect(A, html, /contextOffset/, 'contextOffset is read and written');
 
-// The <3 tolerance is the fingerprint of a correct primary test.
-expect(A, html, /Math\.abs\([^)]*contextOffset\s*\)\s*<\s*3|<\s*3\s*[;)&]/,
-  'Offset tolerance of <3 chars used in the primary test',
+// The <3 tolerance is the fingerprint of a correct primary test. It may be written
+// inline or held in a named constant, but the value must be 3.
+expect(A, html, /<\s*3\b|TOLERANCE\s*=\s*3\b/i,
+  'Offset tolerance of 3 chars used in the primary test',
   '§4.3: abs(matchIndex - contextOffset) < 3 — not ===0, not a wider window');
 
 expect(A, html, /\.sort\(\s*\([^)]*\)\s*=>\s*b\.word\.length\s*-\s*a\.word\.length|length\s*-\s*a\.word\.length/,
   'Annotation patterns sorted longest-first',
   '§4.3: otherwise a short word swallows the longer phrase containing it');
 
-expect(A, html, /snapRange|snapSelection|WordBoundar/i,
+// Snapping may extend a DOM Range or walk the offsets in the context string; both
+// are fine as long as the stored word and offset end up consistent.
+expect(A, html, /snapRange|snapSelection|WordBoundar|wordChar/i,
   'Selection snaps to word boundaries',
   '§4.2: snap BEFORE computing context/offset, or the stored offset will not match the stored word');
 
+// Written either as tag names ('PRE') or as a CSS selector list ('pre, code, …').
 for (const tag of ['PRE', 'CODE', 'TEXTAREA', 'INPUT']) {
-  expect(A, html, new RegExp(`['"\`]?${tag}['"\`]?`), `Exclusion list mentions ${tag}`,
+  expect(A, html, new RegExp(`\\b${tag}\\b`, 'i'), `Exclusion list mentions ${tag}`,
     '§4.3: never wrap annotations inside code or form controls');
 }
 
@@ -248,8 +285,9 @@ if (server) {
 }
 
 const V = 'autosave §6';
-expect(V, html, /setTimeout[\s\S]{0,120}(?:saveDocument|autoSave|triggerAutoSave)|debounce/i,
-  'Autosave is debounced');
+expect(V, html, /setTimeout[\s\S]{0,160}(?:save|Save)|debounce|scheduleSave/i,
+  'Autosave is debounced',
+  '§6.2: batch rapid edits before POSTing, or every keystroke hits the server');
 expect(V, html, /method:\s*['"]POST['"]/, 'Client POSTs saves to the server');
 
 // ---------------------------------------------------------------------------
