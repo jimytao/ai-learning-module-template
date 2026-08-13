@@ -23,6 +23,7 @@
 | :--- | :--- | :--- | :--- |
 | "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
+| "修改解释语言" / "用我的母语解释" | **Phase 0 · 补丁** | `intake_checklist.md`（只问语言槽）+ `profile.md` | — |
 | "改成 textbook / magazine / 混合" / "改模态" | **模态切换** | `knowledge/modality_presets.md` + `knowledge/profile.md` + 本文件状态区 | — |
 | "开新科目" / "复制模板" / "新增轨道" / "怎么归档" | **Lifecycle** | `protocols/project_lifecycle.md` + 必要时 `domain_map.md` | `intake_checklist`（只补新轨道槽） |
 | "查知识地图" / "这个概念" / "我弱项有哪些" | **Knowledge Query** | 对应 `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
@@ -77,6 +78,7 @@
 - [ ] 状态区无「未设定」  
 - [ ] 模态预设已写  
 - [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
+- [ ] `profile.md` 已分别确认主要解释语言与学习内容语言
 - [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（该清理文件已被自动删除）  
 - [ ] 下一步指向 Phase 1  
 <!-- TEMPLATE_BOOTSTRAP_END -->
@@ -159,7 +161,7 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 5. **notes 字段边界**：AI 只写允许字段；保留 `context`；不覆盖用户原始注释。  
 6. **严谨评估、禁止吹捧**：MCQ/T-F 全对 ≠ 能应用。  
 7. **模态预设驱动**：Phase 1/2 遵守 `profile` 中的 T/M/H/C；改模态需用户明示或确认。  
-8. **空白模板纪律（仅模板态）**：不得预填真实个人信息；Phase 0 确认后本条改为「以 profile 为准、不编造」。  
+8. **空白模板纪律（仅模板态）**：不得预填真实个人信息；Phase 0 确认后本条改为「以 profile 为准、不编造」。确认后的主要解释语言是持久画像数据：清理只删除访谈 prompt，不删除已保存偏好。
 9. **订正后再出题必须先问**：未获明确同意禁止出新题。  
 10. **采集必须确认**：Phase 0 必须走 `intake_checklist` 确认卡；未确认不得生成正文、不得提前改写本 AGENT 为科目态。  
 11. **前端细节不丢**：迁入/调试阅读器时以 `frontend_spec.md` 为准（排序、侧栏 Notes、整句 context 定位、多文档隔离、**图示渲染契约**）。  

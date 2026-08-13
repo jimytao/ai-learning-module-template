@@ -30,9 +30,11 @@ Distilled from battle-tested textbook and magazine learning systems: routing, sc
 
 ---
 
-## What this is
+## What this is — and what it is not
 
-An operating system for “learn any subject with an AI coach”:
+This is a folder-based learning system for an AI coding agent. The AI reads `AGENT.md`, learns your goals and preferences, proposes a sequence, writes lessons as Markdown, and later grades your answers and uses your notes to plan review. It is not a prewritten course or a model/API subscription; you bring an agent that can edit this folder.
+
+The four phases are:
 
 1. **Phase 0** — Intake: subject, level, gaps, interests, time budget, learning modality (writes only after you confirm)  
 2. **Phase 1** — Propose the next Magazine / Unit / mix from calendar + desires + gaps  
@@ -43,21 +45,24 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 
 ---
 
-## Quick start
+## First-time setup and the recurring loop
 
 1. Clone this repo, or copy the folder (keep a clean mother template if you like).  
-2. Open it in Cursor (or a similar AI coding agent) and say:
+2. Open the whole folder in an AI coding agent and say:
 
 ```text
-Follow AGENT.md and run Phase 0 / bootstrap.
+Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I confirm the intake card.
 ```
 
 (Chinese also works: `按 AGENT.md 做 Phase 0 / 初始化。`)
 
-3. After you confirm the profile and modality and set up your browser server files:
+3. Confirm the intake card only after subject, goals, level, gaps, time, primary explanation language, content language, and modality are correct. The one-time cleanup removes the interview prompt but retains those saved preferences.
+4. After your browser server files are ready:
    * Run the root **`start.bat`** script to launch the local web server with one click.
    * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"** (or `执行 protocols/cleanup_template.md 清理`). The AI will automatically clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
-4. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
+5. Every cycle: say “schedule” → confirm the proposal → “generate” → study/highlight → “grade my work” → ask what to study next.
+
+For current setup links for Cursor, Devin, Hermes Agent, Codex, Claude Code, Antigravity, Tavily, and Brave Search, see the detailed Chinese guide above in [`README.zh-CN.md`](README.zh-CN.md). Plans change; follow official pricing pages. Devin currently offers limited Free-plan usage rather than a separately named free Agent model. A search MCP returns results/URLs; the bundled image downloader separately requires `BRAVE_API_KEY`.
 
 ### Learning modality presets
 
