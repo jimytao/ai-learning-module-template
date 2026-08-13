@@ -168,9 +168,14 @@
     combined = 拼接全部 text node 的值        # 让被 <em>/<strong> 劈开的短语仍能匹配
     用一条大小写不敏感的正则，把所有注释词在 combined 上全部匹配出来
         - 模式按长度降序排列（防止 "note" 吃掉 "banknotes"）
-        - 只在以词字符开头/结尾的那一侧加 
+        - 只在以词字符开头/结尾的那一侧加 \b
         - 只保留互不重叠的匹配
     对每个匹配：
+        word = 匹配到的文本，转小写
+        candidates = 所有 word 与之相等的注释
+        sameBlock = candidates 中 context（去空白后）等于 combined 的那些
+        ann = 若 sameBlock.length > 1，取偏移最接近 matchIndex 的那条
+            : 否则取 sameBlock[0] || candidates[0]      # 见下方消歧规则
         isPrimary = ann.context && combined.trim() === ann.context.trim()
                     && abs(matchIndex - ann.contextOffset) < 3
     把匹配映射回各自的 text node，**逆序**重建这些节点
@@ -182,10 +187,15 @@
 | :--- | :--- |
 | **全部**出现都包起来 | 学习者能看到这个词出现的每一处 —— 这正是标记词汇的意义 |
 | **只有命中那一处**拿 `data-primary="true"` | 它才是这条注释真正针对的位置，也是唯一正确的跳转目标 |
+| **选 `ann` 前先按 context 消歧** | 两条独立的注释可能共用同一个词——"coffee" 在第 1 段和第 5 段各自写了不同备注。取「数组里第一个同词注释」会把第 5 段的出现错误关联到第 1 段的注释：悬浮提示错、点击编辑目标错，保存时还可能覆盖那条不相关的注释。优先选自身 `context` 就是当前块的候选；同一块内同一个词被标注多次时，优先选偏移最接近的那条；只有没有任何候选属于当前块时，才退回「任意一条同词注释」——对应最常见的情形：只有一条真实备注，这个词在别处只是重复出现的回声 |
 | 偏移容差 `< 3` 字符 | 吸收捕获与渲染之间的空白归一化差异。不要收紧成 `=== 0`，也不要放宽 |
 | 逆序重建 text node | 正序重建会让同一块内后续节点的偏移全部失效 |
 | 排除的子树 | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`、已经是 `.annotated-word` 的元素、以及说话人标签。在输入框内加标注会毁掉作答内容 |
 | 标题内允许标注 | 两个源阅读器都在标题里做过标注；只有代码和表单控件是禁区 |
+
+> **不要照搬 magazine 参考实现（`index.html` 的 `applyAnnotations` 函数附近）里的
+> `sortedAnnotations.find(a => a.word === word)`** —— 它就是上面这个串号 bug 的源头。
+> `templates/reader_skeleton.html` 里已经修好了，请对照那个版本，而不是原始参考实现。
 
 ### 4.4 定位优先级（Notes 侧栏 → 正文）
 
@@ -354,7 +364,7 @@ FOUC 守卫、偏好持久化、侧边栏标签/搜索/排序/折叠，以及 §
 其余模块按下列方式整合。**移植的是行为，不是文件** —— 移植时同步套用 §7.3 命名与 §7.4 排除项：
 
 1. **服务器与路由基础**：参考 `Melbourne culture magazine/server.js`，保留其静态文件托管、`/api/save` 全量保存以及 `notes.json` 的 Smart Merge 逻辑。**读到 `/api/git/*` 处理函数就停。**
-2. **多期目录与注释跳转**：参考 `Melbourne culture magazine/index.html` 中的 Notes 高亮创建、Floating Panel 浮层编辑、基于 `context` + `contextOffset` 的精确定位逻辑（值得研读的是 `applyAnnotations` / `jumpToWord` 两个函数）。它的主题用的是 `body.light-theme`，**请改用 `html[data-theme]`**（§2.5）。
+2. **多期目录与注释跳转**：参考 `Melbourne culture magazine/index.html` 中的 Notes 高亮创建、Floating Panel 浮层编辑、基于 `context` + `contextOffset` 的精确定位逻辑（值得研读的是 `applyAnnotations` / `jumpToWord` 两个函数，**但词到注释的查找逻辑除外**——见上方 §4.3 的警告）。它的主题用的是 `body.light-theme`，**请改用 `html[data-theme]`**（§2.5）。
 3. **课本交互控件与作答渲染**：参考 `English learning for Melbourne/scripts/preview.html` 中将 `___`、`- [ ]`、`**[Your Answer]**` 动态转换为交互 DOM 并在发生变化时触发自动保存的 Javascript 逻辑，并照搬其 `<head>` 中 FOUC 守卫的做法。
 4. **可视化模块**：引入 `scripts/viz.css` 以保证工程框图、SVG 和 Mermaid 样式全局统一，且不被 Markdown 渲染引擎破坏。
 

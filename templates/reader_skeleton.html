@@ -473,8 +473,26 @@ function applyAnnotations(container, annotations) {
     let lastEnd = 0, m;
     while ((m = regex.exec(combined)) !== null) {
       if (m.index < lastEnd) continue;                       // 保持匹配互不重叠
-      const ann = sorted.find((a) => a.word.toLowerCase() === m[0].toLowerCase());
+      const word = m[0].toLowerCase();
+
+      // 两条**独立**的注释可能共用同一个词（比如 "coffee" 在第 1 段和第 5 段
+      // 各自写了不同的备注）。取"数组里第一个同词注释"会把第 5 段的出现错误
+      // 关联到第 1 段的注释——悬浮提示、点击编辑目标全部指向错处，保存时还会
+      // 覆盖那条不相关的注释。优先选"自身 context 就是当前块"的候选；同一块内
+      // 同一个词被标注多次时，优先选偏移最接近这次匹配位置的那条。只有当没有
+      // 任何候选属于当前块时，才退回"任意一条同词注释"——对应最常见的情形：
+      // 只有一条真实备注，这个词在别处只是重复出现的回声。
+      const candidates = sorted.filter((a) => a.word.toLowerCase() === word);
+      const sameBlock = candidates.filter((a) => a.context && combined.trim() === String(a.context).trim());
+      const ann = sameBlock.length > 1
+        ? sameBlock.reduce((best, a) => {
+          const d = Math.abs(m.index - Number(a.contextOffset));
+          const bd = Math.abs(m.index - Number(best.contextOffset));
+          return d < bd ? a : best;
+        })
+        : (sameBlock[0] || candidates[0]);
       if (!ann) continue;
+
       // 核心锚定规则：块文本相同，且偏移落在 3 字符以内（§4.3）。
       const isPrimary = !!(ann.context
         && combined.trim() === String(ann.context).trim()
