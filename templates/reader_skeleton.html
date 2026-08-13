@@ -473,8 +473,27 @@ function applyAnnotations(container, annotations) {
     let lastEnd = 0, m;
     while ((m = regex.exec(combined)) !== null) {
       if (m.index < lastEnd) continue;                       // keep matches non-overlapping
-      const ann = sorted.find((a) => a.word.toLowerCase() === m[0].toLowerCase());
+      const word = m[0].toLowerCase();
+
+      // Two SEPARATE annotations can share a word (e.g. "coffee" highlighted with one
+      // note in paragraph 1 and a different note in paragraph 5). Taking "the first
+      // annotation with this word" would cross-attribute paragraph 5's occurrence to
+      // paragraph 1's note. Prefer a candidate whose own context is THIS block; among
+      // same-block candidates (the word annotated twice in one block), prefer whichever
+      // offset is closest to this match. Only fall back to "any annotation with this
+      // word" when nothing belongs to this block — the common case of one real note
+      // and several unrelated echoes of the word elsewhere.
+      const candidates = sorted.filter((a) => a.word.toLowerCase() === word);
+      const sameBlock = candidates.filter((a) => a.context && combined.trim() === String(a.context).trim());
+      const ann = sameBlock.length > 1
+        ? sameBlock.reduce((best, a) => {
+          const d = Math.abs(m.index - Number(a.contextOffset));
+          const bd = Math.abs(m.index - Number(best.contextOffset));
+          return d < bd ? a : best;
+        })
+        : (sameBlock[0] || candidates[0]);
       if (!ann) continue;
+
       // THE anchor rule: same block text, and the offset lands within 3 chars (§4.3).
       const isPrimary = !!(ann.context
         && combined.trim() === String(ann.context).trim()
