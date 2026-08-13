@@ -57,8 +57,10 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
 4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言和学习模态。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。
-5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，准备符合 `frontend_spec.md` 的阅读器文件，并执行 `cleanup_template.md` 删除一次性的前期配置 prompt；已经保存的个人偏好不会被删除。
-6. 浏览器/服务器文件就绪后双击 `start.bat`，然后进入下面的日常循环。
+5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并把 `AGENT.md` 改造成你这个科目的项目。**到这一步就已经可以开始学了** —— 直接进入下面的日常循环。
+6. 阅读器是另一条线：AI 从 `templates/reader_skeleton.html` 出发准备符合 `frontend_spec.md` 的阅读器文件，跑通 `start.bat`，并用 `node scripts/verify_reader.js` 验收。只有验收通过（或你明确表示不需要阅读器）后，才执行 `cleanup_template.md` 删除一次性的前期配置 prompt；已经保存的个人偏好不会被删除。这一步刻意推迟，它不会阻塞学习。
+
+> **Git 是可选的。** 装了 Git，清理会记录一次提交，所有改动都可回退；没装也没关系，它会把 `AGENT.md` 备份到 `state/` 并在修改前请你确认。不会要求你去安装任何东西。
 
 ## 初始化后的每一次学习
 
@@ -142,6 +144,8 @@ review.md                # 批改复盘存档
 | [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | 一次性初始化后模板清理与精简协议（执行后自毁） |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | 流程/树/框图/SVG 等硬语法 |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | 通用阅读器验收规范（含填空/问答自动写回、Notes 跳转、图示渲染） |
+| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | 参考阅读器 UI：主题、偏好记忆、侧边栏、注释锚定 |
+| [`scripts/verify_reader.js`](scripts/verify_reader.js) | 阅读器验收脚本 —— 构建阅读器后运行 |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | 交互 Markdown 校验 |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave 图片下载（需 `BRAVE_API_KEY`） |
 
@@ -165,7 +169,9 @@ python scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## 尚未包含
 
-本仓库目前不直接包含网页端/浏览器的 HTML/JS 实现代码。在后续迁入或开发您的阅读器和服务器时，请严格参考 [`protocols/frontend_spec.md`](protocols/frontend_spec.md)。该文档制定了 Textbook 模式（填空、选择、文本框输入实时回写保存至源文件）与 Magazine 模式（目录排序、基于 context 定位的高亮标注、Smart Merge 智能合并）相融合的完整规范。
+本仓库目前不直接包含**完整**的网页端 HTML/JS 实现，但提供了参考 UI 外壳 [`templates/reader_skeleton.html`](templates/reader_skeleton.html)：它已实现亮/暗主题契约、偏好记忆、侧边栏外壳，以及让常见词可精确定位的注释锚定逻辑。在此基础上扩展时请严格参考 [`protocols/frontend_spec.md`](protocols/frontend_spec.md)，该文档制定了 Textbook 模式（填空、选择、文本框输入实时回写保存至源文件）与 Magazine 模式（目录排序、基于 context 定位的高亮标注、Smart Merge 智能合并）相融合的完整规范，以及锁定的存储键、路由与明确排除的功能。
+
+做完之后运行 `node scripts/verify_reader.js`。它是阅读器的验收标准 —— 检查上述契约和 `notes.json` 的内部一致性，必须无 FAIL。
 
 ---
 

@@ -145,7 +145,16 @@
 
 ### 3.6 阅读器细节必须保留
 
-见 `protocols/frontend_spec.md`：目录新到旧/旧到新、Notes 侧栏与点击跳转、多文档 `file` 隔离、标注强制带整句 `context` + `contextOffset`、内部协议文件不进阅读目录。迁入前端时按该文件验收。
+见 `protocols/frontend_spec.md`：目录排序（默认**旧到新**，可切换、可记忆）、Notes 侧栏与点击跳转、多文档 `file` 隔离、标注强制带整句 `context` + `contextOffset`、内部协议文件不进阅读目录。
+
+审计两个源阅读器后补充的部分：
+
+- **亮/暗主题属于契约**，载体是 `html[data-theme]`，配 `<head>` 内联 FOUC 守卫。magazine 阅读器的 `body.light-theme` 是反面教材 —— 它无法在 `<body>` 存在之前生效。
+- **每个偏好都要记住**（`ltm_theme`、`ltm_sort_order`、`ltm_sidebar_collapsed`、`ltm_notes_show_all`），首次渲染前恢复，并反映到对应控件上。默认值只属于新用户。
+- **锚定规则被写了下来**：一个词的全部出现都标记，但只有块文本等于 `context`、且位置与 `contextOffset` 相差 3 字符以内的那一处拿到 `data-primary="true"`。这正是常见词可精确定位的原因，而两个源项目都没把它写成文档 —— textbook 阅读器甚至从未实现（它 86 条注释里有 81 条只存了 `context` 而没有 `contextOffset`）。
+- **Git 被明确排除。** magazine 阅读器后来长出了 `/api/git/*` 路由和 Git 侧栏标签页；模板不得继承。
+
+按该文件验收 —— 同时按 `scripts/verify_reader.js` 验收，它机械地检查那些会静默腐化的部分。
 
 ---
 
@@ -154,7 +163,11 @@
 ```
 [用户] 我要学《科目》…
         ↓
-Phase 0  intake 清单 → 确认卡 → 写入画像/模态 → 改造 AGENT 为科目项目
+Phase 0  intake 清单 → 确认卡 → 写入画像/模态
+        ↓
+   闸 A     改造 AGENT 为科目项目  →  学习在此解锁
+   Step 3.5 从 templates/reader_skeleton.html 构建阅读器 → verify_reader.js
+   闸 B     模板清理（可推迟；绝不阻塞学习）
         ↓
 Phase 1  按 T/M/H/C 预设 + gaps/notes 提案
         ↓ 确认
@@ -193,6 +206,8 @@ wait for confirm
 | （新）采集确认 | `protocols/intake_checklist.md` |
 | p0–p3/tech_spec | `protocols/*` |
 | （新）阅读器规范 | `protocols/frontend_spec.md` |
+| （新）阅读器 UI 外壳 | `templates/reader_skeleton.html` |
+| （新）阅读器验收 | `scripts/verify_reader.js` |
 | （新）模态预设 | `knowledge/modality_presets.md` |
 | plan 用户画像 | `knowledge/profile.md` |
 | desire / calendar | `knowledge/desire.md` / `calendar.md` |
@@ -210,7 +225,7 @@ wait for confirm
 2. AI 会按 `intake_checklist.md` 问你科目、水平、弱项、兴趣、时间、**T/M/H/C 模态**等，并出具确认卡。  
 3. 你说「确认」→ AI 写入画像并**改写 AGENT 为本科目项目**。  
 4. 说「排期」→ 确认提案 → 「开始生成」。  
-5. 用预览前端阅读（迁入后需满足 `frontend_spec.md`：排序、Notes 跳转、context 定位、多文档隔离）。  
+5. 用阅读器阅读。它在 Step 3.5 中从 `templates/reader_skeleton.html` 构建，并且必须通过 `node scripts/verify_reader.js`（主题、偏好记忆、排序、Notes 跳转、context 定位、多文档隔离、无 Git UI）。  
 6. 「帮我批改」；加练须先被询问并同意。
 
 ---
@@ -221,7 +236,7 @@ wait for confirm
 
 | 项 | 原因 |
 | :--- | :--- |
-| 预览前端整包迁入 | 体积大、路径耦合；规范已写在 `frontend_spec.md`，迁入时按验收清单 |
+| 发布**成品**阅读器 | 仍未随仓库发布，但已不只是文字规范：`templates/reader_skeleton.html` 提供了 UI 外壳、主题、偏好持久化与注释锚定；Step 3.5 补齐四个扩展点，`verify_reader.js` 负责验收 |
 | 音频 / TTS / 影子跟读 | 英语专项；其它科目按需再加可选模块 |
 | 跨仓库硬编码联动 | 科目项目应自包含；多科目用文件夹复制（`project_lifecycle.md`） |
 | 个人博客画像源 | 隐私与科目无关 |
@@ -265,7 +280,8 @@ wait for confirm
 
 ### 有意延后（已知，不是漏设计）
 
-- [ ] 预览前端整包迁入（`index.html` / server / Mermaid 接入）— 规范已写好  
+- [x] 阅读器 UI 外壳与验收脚本（`templates/reader_skeleton.html`、`scripts/verify_reader.js`）
+- [ ] 阅读器剩余工作：Markdown 渲染、交互控件自动保存、Concepts 标签页、Mermaid 管线 —— 扩展点已在骨架中标注  
 - [ ] 数学公式 KaTeX（武器库已留 `formula`；引擎可选）  
 - [ ] 音频 / TTS（非默认）  
 - [ ] 母模板与科目项目的自动协议同步脚本  

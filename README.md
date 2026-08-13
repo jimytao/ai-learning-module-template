@@ -56,10 +56,13 @@ Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I
 
 (Chinese also works: `按 AGENT.md 做 Phase 0 / 初始化。`)
 
-3. Confirm the intake card only after subject, goals, level, gaps, time, primary explanation language, content language, and modality are correct. The one-time cleanup removes the interview prompt but retains those saved preferences.
+3. Confirm the intake card only after subject, goals, level, gaps, time, primary explanation language, content language, and modality are correct. The one-time cleanup removes the interview prompt but retains those saved preferences. **Once the card is confirmed you can already start learning** — the reader is prepared on a separate, deferred track.
 4. After your browser server files are ready:
    * Run the root **`start.bat`** script to launch the local web server with one click.
+   * Run `node scripts/verify_reader.js` — it must report no FAIL before cleanup may run.
    * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"** (or `执行 protocols/cleanup_template.md 清理`). The AI will automatically clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
+
+> **Git is optional.** With it, cleanup records a commit so edits are reversible; without it, it backs `AGENT.md` up under `state/` and asks you to confirm first. You will never be asked to install it.
 5. Every cycle: say “schedule” → confirm the proposal → “generate” → study/highlight → “grade my work” → ask what to study next.
 
 For current setup links for Cursor, Devin, Hermes Agent, Codex, Claude Code, Antigravity, Tavily, and Brave Search, see the detailed Chinese guide above in [`README.zh-CN.md`](README.zh-CN.md). Plans change; follow official pricing pages. Devin currently offers limited Free-plan usage rather than a separately named free Agent model. A search MCP returns results/URLs; the bundled image downloader separately requires `BRAVE_API_KEY`.
@@ -123,6 +126,9 @@ start.bat
 
 # Validate interactive markdown + visual headers under content/
 node scripts/validate_content.js
+
+# Check the reader against protocols/frontend_spec.md (must pass with no FAIL)
+node scripts/verify_reader.js
 
 # Download imageQuery assets
 set BRAVE_API_KEY=your_key
