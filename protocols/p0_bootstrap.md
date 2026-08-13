@@ -64,22 +64,59 @@
 
 ---
 
-## Step 4：改造 AGENT.md（关键）
+## Step 3.5：校验阅读器（浏览器/服务器文件的唯一归属）
+
+> **本分支自带可用的阅读器**（`index.html`、`app.js`、`reader-core.js`、`server.js`、`styles.css`），
+> 因此本步骤是**校验**而非构建。`cleanup_template.md` 要求阅读器通过校验，本步骤一旦被跳过，
+> 清理就永远无法合法执行。
+
+1. 需要时先安装依赖（`npm install`），然后用 `start.command` 启动并打开页面。Phase 2 之前目录为空
+   是正常的 —— 这一步的验收标准是「能正常加载」，不是「能显示课文」。
+2. **运行 `npm test`。** 测试覆盖交互式 Markdown 的往返写回、服务器路径安全、Smart Merge，
+   以及注释锚定规则（`ReaderCore.annotationMatches`）。
+3. **运行 `node scripts/verify_reader.js`，必须无 FAIL。** 它检查那些会静默腐化的契约：主题载体与
+   FOUC 守卫、锁定的存储键与路由、`data-primary` 锚定规则、被排除的功能（无 Git UI），以及
+   `notes.json` 的一致性。出现 FAIL 时按 `frontend_spec.md` 修实现，而不是改检查项。
+4. `templates/reader_skeleton.html` 在本分支作为**参考外壳**保留，不需要复制过来 —— 自带阅读器
+   已经实现了它所演示的内容。扩展 UI 时可以参考它。
+5. 若 `start.command` 在复制后丢失可执行权限，用 `chmod +x start.command` 恢复。
+
+本步骤的结果决定下面 Step 4 的闸 B。
+
+---
+
+## Step 4：改造 AGENT.md（关键）—— 两道闸
+
+改造分**两道独立的闸**执行。闸 A 完成项目转换并解锁学习；闸 B 只是删除一次性模板文本。
+**绝不能把闸 B 当作学习的前置条件** —— Bootstrap 区块只是惰性提示文本，留着不会有任何代价。
+
+### 闸 A —— 确认卡通过后立即执行（强制）
 
 严格执行 `AGENT.md` 章节 **「Bootstrap 后改造」**：
 
 1. 标题改为含科目名  
 2. 状态区写入 Subject + 模态 + `Phase 1 就绪`  
 3. 去掉空白模板套话；写入本科目一句话目标  
-4. 调整 Phase 0 路由为「仅补全 / 更新画像」  
+4. **收窄 Phase 0 路由**为「仅补全 / 更新画像」，并加入重入护栏（见 `AGENT.md` 关于 Phase 0 重入的黄金规则）  
 5. 按模态注明默认提案倾向  
-6. **读取并执行 `protocols/cleanup_template.md` 协议**，清除 Phase 0 前期访谈提示、保留已确认画像（包括解释语言），并自我删除该清理文件。
 
-改造完成后，本仓库即视为**该科目的学习项目**，不再是无用空白模。
+以上每一处编辑都归闸 A 所有。`cleanup_template.md` 刻意**不触碰**路由表，所以闸 A 若跳过第 4 项，
+就没有任何环节会补上它。
+
+**闸 A 完成后，本项目即为该科目的学习项目，Phase 1 / Phase 2 解锁。**
+
+### 闸 B —— 阅读器验收通过后执行（可推迟，不紧急）
+
+仅当 Step 3.5 校验通过时执行：`start.command` 能启动阅读器、`npm test` 全绿、且 `verify_reader.js` 无 FAIL。
+此时**读取并执行 `protocols/cleanup_template.md`**：它会清除 `AGENT.md` 中一次性的 Phase 0 访谈
+指引，保留全部已确认画像数据（包括解释语言），并自我删除。
+
+闸 B 暂时无法执行时，用一句话说明并继续进入 Phase 1 —— 不要让用户干等，也不要在前置条件未满足时
+执行清理。
 
 ---
 
-## Step 5：Bootstrap 摘要（改造后再发一次）
+## Step 5：Bootstrap 摘要（闸 A 完成后发一次）
 
 | 栏目 | 内容 |
 | :--- | :--- |
@@ -88,7 +125,9 @@
 | 知识地图 | 一级主题 |
 | 前 5 期待排 | 已按模态标注 Mag/Unit |
 | 初始弱项 | 3–5 条 |
-| AGENT | 已改为科目项目态 ✅ |
+| AGENT | 已改为科目项目态 ✅（闸 A） |
+| 阅读器 | 自带阅读器已校验（start.command · npm test · verify_reader） |
+| 模板清理 | 已完成（闸 B）/ 待阅读器验收后执行 |
 | 待确认 TBD | … |
 
 下一步提示：说「今天学什么」或「排期」→ Phase 1。

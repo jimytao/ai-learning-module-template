@@ -182,5 +182,52 @@
     });
   }
 
-  return { markdownWithInteractiveHtml, scanInteractiveTokens, sortFiles, updateInteraction };
+  // --- Annotation anchoring (frontend_spec §4.3) -----------------------------
+  // Pure half of the algorithm: given one block's text, return every occurrence of
+  // every annotation word, flagging the single occurrence the note was written about.
+  // The DOM half lives in app.js; keeping this pure is what makes it testable.
+
+  const ANCHOR_TOLERANCE = 3;   // chars of drift absorbed between capture and render
+
+  function annotationRegex(annotations) {
+    const patterns = annotations.map((ann) => {
+      let pattern = ann.word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+      if (/^[\p{L}\p{N}]/u.test(ann.word)) pattern = `\\b${pattern}`;
+      if (/[\p{L}\p{N}]$/u.test(ann.word)) pattern = `${pattern}\\b`;
+      return pattern;
+    });
+    return new RegExp(`(${patterns.join('|')})`, 'giu');
+  }
+
+  function annotationMatches(blockText, annotations) {
+    const valid = (annotations || []).filter((ann) => ann && ann.word);
+    if (!blockText || !valid.length) return [];
+
+    // Longest first, so a short word cannot swallow the phrase containing it.
+    const sorted = [...valid].sort((a, b) => b.word.length - a.word.length);
+    const regex = annotationRegex(sorted);
+    const matches = [];
+    let lastEnd = 0;
+    let match;
+
+    while ((match = regex.exec(blockText)) !== null) {
+      if (match.index < lastEnd) continue;                 // keep matches non-overlapping
+      const annotation = sorted.find((ann) => ann.word.toLowerCase() === match[0].toLowerCase());
+      if (!annotation) continue;
+      const offset = Number(annotation.contextOffset);
+      const isPrimary = Boolean(
+        annotation.context
+        && blockText.trim() === String(annotation.context).trim()
+        && Number.isFinite(offset)
+        && Math.abs(match.index - offset) < ANCHOR_TOLERANCE,
+      );
+      matches.push({ start: match.index, end: match.index + match[0].length, annotation, isPrimary });
+      lastEnd = match.index + match[0].length;
+    }
+    return matches;
+  }
+
+  return {
+    annotationMatches, markdownWithInteractiveHtml, scanInteractiveTokens, sortFiles, updateInteraction,
+  };
 });

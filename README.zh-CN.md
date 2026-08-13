@@ -59,8 +59,10 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
 4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言和学习模态。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。
-5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并执行 `cleanup_template.md` 删除一次性的前期配置 prompt；已经保存的个人偏好不会被删除。
-6. 安装 Node.js 20+，然后双击 **`start.command`**。第一次运行会安装本地依赖并打开完整网页阅读器。若 macOS 首次阻止启动，在终端执行 `chmod +x start.command && ./start.command`。
+5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并把 `AGENT.md` 改造成你这个科目的项目。**到这一步就已经可以开始学了。** 用 `cleanup_template.md` 删除一次性前期配置 prompt 的动作会推迟到阅读器校验通过之后；已经保存的个人偏好不会被删除。
+6. 安装 Node.js 20+，然后双击 **`start.command`**。第一次运行会安装本地依赖并打开完整网页阅读器。若 macOS 首次阻止启动，在终端执行 `chmod +x start.command && ./start.command`。随后运行 `npm test` 与 `node scripts/verify_reader.js`，两者都干净之后，上一步的清理才允许执行。
+
+> **Git 是可选的。** 装了 Git，清理会记录一次提交，所有改动都可回退；没装也没关系，它会把 `AGENT.md` 备份到 `state/` 并在修改前请你确认。不会要求你去安装任何东西。
 
 ## 初始化后的每一次学习
 

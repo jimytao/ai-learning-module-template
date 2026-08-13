@@ -44,6 +44,62 @@ test('MCQ and T/F checkboxes behave as single-choice groups', () => {
   assert.match(updated, /MCQ-2\n- \[ \] A\. another question/);
 });
 
+test('marks every occurrence of a word but only one is primary', () => {
+  const context = 'The note about banknotes explains why a note is not a banknote.';
+  const matches = ReaderCore.annotationMatches(context, [
+    { id: 'n1', word: 'note', context, contextOffset: 4 },
+  ]);
+  assert.equal(matches.length, 2, 'both standalone "note" occurrences are marked');
+  assert.deepEqual(matches.map((match) => match.isPrimary), [true, false]);
+  assert.equal(context.slice(matches[0].start, matches[0].end), 'note');
+});
+
+test('longer phrases win over the short words inside them', () => {
+  const context = 'They bail up tourists; getting bailed up is common.';
+  const matches = ReaderCore.annotationMatches(context, [
+    { id: 'short', word: 'up', context, contextOffset: 10 },
+    { id: 'long', word: 'bail up', context, contextOffset: 5 },
+  ]);
+  assert.equal(matches[0].annotation.id, 'long');
+  assert.equal(context.slice(matches[0].start, matches[0].end), 'bail up');
+});
+
+test('primary tolerates small offset drift but not a different block', () => {
+  const context = 'Espresso is the base for a long black.';
+  const near = ReaderCore.annotationMatches(context, [
+    { id: 'n', word: 'Espresso', context, contextOffset: 2 },
+  ]);
+  assert.equal(near[0].isPrimary, true, 'within the 3-char tolerance');
+
+  const far = ReaderCore.annotationMatches(context, [
+    { id: 'n', word: 'Espresso', context, contextOffset: 9 },
+  ]);
+  assert.equal(far[0].isPrimary, false, 'beyond the tolerance');
+
+  const otherBlock = ReaderCore.annotationMatches('Espresso again, elsewhere.', [
+    { id: 'n', word: 'Espresso', context, contextOffset: 0 },
+  ]);
+  assert.equal(otherBlock[0].isPrimary, false, 'right word, wrong block');
+});
+
+test('annotations without context still match, but never claim primary', () => {
+  const matches = ReaderCore.annotationMatches('A legacy note with no context stored.', [
+    { id: 'legacy', word: 'legacy' },
+  ]);
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].isPrimary, false);
+});
+
+test('regex-special characters in a word do not break matching', () => {
+  const context = 'Use the C++ (not C) toolchain.';
+  const matches = ReaderCore.annotationMatches(context, [
+    { id: 'x', word: 'C++', context, contextOffset: 8 },
+  ]);
+  assert.equal(matches.length, 1);
+  assert.equal(context.slice(matches[0].start, matches[0].end), 'C++');
+  assert.equal(matches[0].isPrimary, true);
+});
+
 test('sorts numbered content in either direction', () => {
   const files = [{ name: 'unit02_b.md' }, { name: 'unit10_c.md' }, { name: 'unit01_a.md' }];
   assert.deepEqual(ReaderCore.sortFiles(files, 'asc').map((file) => file.name), ['unit01_a.md', 'unit02_b.md', 'unit10_c.md']);

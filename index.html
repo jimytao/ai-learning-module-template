@@ -1,16 +1,24 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>AI Learning Module Reader</title>
+  <title>AI 学习模块阅读器</title>
+  <!-- FOUC guard: applies the saved theme before first paint. Must stay above every
+       stylesheet — running this on DOMContentLoaded is what causes the white flash. -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('ltm_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/scripts/viz.css">
 </head>
 <body>
   <header class="app-header">
-    <button id="sidebarToggle" class="icon-button mobile-only" type="button" aria-label="打开侧栏">☰</button>
+    <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏">☰</button>
     <div class="brand">
       <span class="brand-mark">L</span>
       <div><strong>Learning Reader</strong><small>Magazine + Unit</small></div>
@@ -28,12 +36,16 @@
       <nav class="tabs" aria-label="阅读器侧栏">
         <button class="tab active" type="button" data-tab="contents">目录</button>
         <button class="tab" type="button" data-tab="concepts">概念</button>
-        <button class="tab" type="button" data-tab="notes">Notes</button>
+        <button class="tab" type="button" data-tab="notes">注释</button>
       </nav>
+
+      <div class="sidebar-search">
+        <input id="sidebarSearch" type="search" placeholder="搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
+      </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
-          <button id="sortButton" type="button">新 → 旧</button>
+          <button id="sortButton" type="button">↑ 旧 → 新</button>
           <button id="refreshButton" type="button">刷新</button>
         </div>
         <div id="contentsList" class="contents-list"></div>

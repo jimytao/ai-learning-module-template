@@ -58,8 +58,8 @@ Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I
 ```
 
 4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, and Textbook/Magazine/Hybrid modality. The explanation language is the language used for difficult explanations and feedback even if you are studying English. Review the confirmation card and reply `confirm` only when it is accurate.
-5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files. It then removes the one-time bootstrap prompt through `protocols/cleanup_template.md`; your saved preferences are retained and can later be changed with `update profile`.
-6. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader.
+5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files and rewrites `AGENT.md` into your subject's project. **You can already start learning at this point.** Removing the one-time bootstrap prompt through `protocols/cleanup_template.md` happens later, once the reader is verified; your saved preferences are retained and can later be changed with `update profile`.
+6. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader. Then run `npm test` and `node scripts/verify_reader.js` — both must be clean before the cleanup step above may run.
    * If macOS blocks the first launch, run `chmod +x start.command && ./start.command` in Terminal.
    * The reader includes navigation, Markdown/Mermaid rendering, answer autosave, highlights, Notes, and Smart Merge.
 
@@ -153,6 +153,8 @@ review.md                # Grading retrospectives archive
 | :--- | :--- |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 intake confirmation checklist |
 | [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | One-time post-initialization cleanup instructions (deletes itself) |
+| [`scripts/verify_reader.js`](scripts/verify_reader.js) | Reader acceptance harness — checks the `frontend_spec.md` contract |
+| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | Reference reader shell, kept for porting the UI to other branches |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | Hard syntax for flow / tree / blocks / SVG-lite… |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | Universal Reader specs (blanks/textarea autosaves, Notes jump, viz render) |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | Interactive Markdown validation |
@@ -165,6 +167,10 @@ review.md                # Grading retrospectives archive
 ```bash
 # One-click macOS launch (or double-click start.command)
 ./start.command
+
+# Reader acceptance: unit tests, then the frontend_spec contract check
+npm test
+node scripts/verify_reader.js
 
 # Start only the server without opening a browser
 npm start

@@ -21,7 +21,7 @@
 
 | 用户指令关键词 | 触发 Phase | 必须加载 | 按需加载 |
 | :--- | :--- | :--- | :--- |
-| "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
+| "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 —— **仅限本项目尚未初始化时；见黄金规则 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
 | "修改解释语言" / "用我的母语解释" | **Phase 0 · 补丁** | `intake_checklist.md`（只问语言槽）+ `profile.md` | — |
 | "改成 textbook / magazine / 混合" / "改模态" | **模态切换** | `knowledge/modality_presets.md` + `knowledge/profile.md` + 本文件状态区 | — |
@@ -39,8 +39,10 @@
 <!-- TEMPLATE_BOOTSTRAP_START -->
 ## Bootstrap 后改造（空白模板 → 本科目学习项目）
 
-> Phase 0 用户确认卡通过后，AI **必须**改写本 `AGENT.md`（及下列清理），让仓库从「通用模板」变成「该科目的学习项目」。  
-> 改造完成前，不得进入 Phase 2 生成正文。
+> Phase 0 用户确认卡通过后，AI **必须**改写本 `AGENT.md`，让仓库从「通用模板」变成「该科目的学习项目」。  
+> 该改造分**两道闸**执行（见 `protocols/p0_bootstrap.md` Step 4）：  
+> **闸 A** —— 下方的改写，确认卡一通过就做。闸 A 完成前不得进入 Phase 2 生成正文。  
+> **闸 B** —— 模板清理，推迟到阅读器验收通过后再做。闸 B 不阻塞任何事：未清理的 Bootstrap 区块只是惰性提示文本，**绝不能让用户等它**。
 
 ### 必须改写的部分
 
@@ -53,7 +55,10 @@
 | 黄金规则第 8 条 | 模板态的「不得预填个人信息」改为：「画像以 profile 为准；勿编造未提供信息」 |
 
 > [!IMPORTANT]
-> **自动清理步骤**：在 Phase 0 确认卡通过、内置阅读器可由 `start.command` 正常启动后，AI **必须**主动加载并读取 `protocols/cleanup_template.md`，执行其定义的模板精简与文件清理程序，使项目彻底转为科目专属态，并在完成后**自我删除**该清理协议文件。
+> **闸 B —— 清理**：本分支**自带可用的阅读器**，因此 `p0_bootstrap.md` **Step 3.5** 是校验它而不是构建它。当 `start.command` 能启动、`npm test` 通过、且 `node scripts/verify_reader.js` 无 FAIL 后，AI 才加载 `protocols/cleanup_template.md`，执行模板清理，并让它**自我删除**。尚未完成校验时，用一句话说明并继续进入 Phase 1；**不得在前置条件未满足时执行清理**。
+
+> [!NOTE]
+> **初始化痕迹**：本改造清单位于清理时会被删除的区块内，因此无法记录自身的完成状态。清理在删除任何内容之前，必须先向 `state/log.md` 追加一行 `Initialized …` 并更新状态栏。那一行——而非本清单——才是项目已初始化的持久证据，也是阻止后续会话重跑 Phase 0 的幂等标记。
 
 ### 可以精简 / 归档的部分
 
@@ -74,13 +79,20 @@
 
 ### 改造完成检查
 
+**闸 A（阻塞项 —— 进入 Phase 2 前必须完成）：**
+
 - [ ] 标题含科目名  
 - [ ] 状态区无「未设定」  
 - [ ] 模态预设已写  
+- [ ] Phase 0 路由已收窄为「补全 TBD / 更新画像」，并已加入重入护栏（黄金规则 18）  
 - [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
 - [ ] `profile.md` 已分别确认主要解释语言与学习内容语言
-- [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（该清理文件已被自动删除）  
 - [ ] 下一步指向 Phase 1  
+
+**闸 B（推迟项 —— 不阻塞任何事）：**
+
+- [ ] 自带阅读器已校验：`start.command` 可启动、`npm test` 通过、`verify_reader.js` 无 FAIL  
+- [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（`Initialized …` 行已写入 `state/log.md`；该清理文件已被自动删除）  
 <!-- TEMPLATE_BOOTSTRAP_END -->
 
 ---
@@ -90,7 +102,6 @@
 ```
 AGENT.md                          ← 入口路由（本文件；Bootstrap 后会改写）
 start.command                     ← macOS 浏览器与本地服务器一键启动脚本
-server.js · index.html            ← 内置通用阅读器后端与页面入口
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0：采集确认清单（强制）
@@ -115,8 +126,8 @@ server.js · index.html            ← 内置通用阅读器后端与页面入�
 ├── state/          log.md · gaps.md · warehouse.md
 ├── content/        magazines/ · units/
 ├── images/
-├── scripts/        download_images.py · validate_content.js · viz.css
-├── templates/      magazine_skeleton · unit_skeleton
+├── scripts/        download_images.py · validate_content.js · verify_reader.js …
+├── templates/      magazine_skeleton · unit_skeleton · reader_skeleton.html
 ├── notes.json
 ├── review.md                     ← Phase3 复盘长文存档（按期追加）
 ├── DESIGN.md
@@ -172,6 +183,10 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 15. **项目组织余量**：单科 / 同项目多轨道（相近课）/ 复制文件夹（不相近课）均可，见 `project_lifecycle.md`。Digital Health 这类可先同项目多轨道，画像清晰后再加 Track。  
 16. **图示只用武器库**：Phase 2 只使用 `visual_arsenal.md` 登记的 Type；禁止自创语法导致渲染不一致或崩坏。  
 17. **填空与开放题互斥**：同一题禁止同时使用行内 `___` / `__已填__` 与 `**[Your Answer]**`（双重输入框会导致批改读错）。生成遵守 tech_spec §1.1；批改优先读行内填空（见 `p3_review.md` §1.1）；`validate_content.js` 会报 dual input。
+18. **Phase 0 重入护栏 —— 禁止静默重跑初始化**：执行 Phase 0 前先判断本项目是否已初始化。满足**任一**条件即视为已初始化：`state/log.md` 含 `Initialized …` 行、状态栏已写入科目、或 `knowledge/profile.md` 的科目与模态不是 `TBD`。  
+    * **已初始化** → Phase 0 降级为**仅补丁**。只补 `TBD` 槽位和用户指名要改的内容。**禁止**覆盖已确认值、清空 `desire` / `gaps` / `calendar` / `domain_map`，也禁止在未明说「本项目已经是**[科目]**了，你是想改几个字段，还是开一个全新科目？」并得到答复前重跑完整访谈。同一文件夹换新科目走 `project_lifecycle.md` 的归档流程，不是重跑 Phase 0。  
+    * **未初始化** → 正常执行 Phase 0。  
+    * 已初始化的项目里用户说「我要学 X」，绝大多数是 Phase 1 请求而非重新初始化。先问，别猜。
 
 ---
 

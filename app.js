@@ -9,7 +9,8 @@
     rawMarkdown: '',
     dirty: false,
     saveTimer: null,
-    sortOrder: localStorage.getItem('ltm_sort_order') || 'desc',
+    sortOrder: localStorage.getItem('ltm_sort_order') === 'desc' ? 'desc' : 'asc',
+    query: '',
     pendingSelection: null,
     editingNoteId: null,
   };
@@ -19,7 +20,7 @@
     title: $('#documentTitle'), saveStatus: $('#saveStatus'), sortButton: $('#sortButton'), exportButton: $('#exportButton'),
     addNote: $('#addNoteButton'), noteDialog: $('#noteDialog'), noteForm: $('#noteForm'), noteWord: $('#noteWord'),
     noteText: $('#noteText'), deleteNote: $('#deleteNoteButton'), showAllNotes: $('#showAllNotes'), sidebar: $('#sidebar'),
-    toast: $('#toast'),
+    toast: $('#toast'), search: $('#sidebarSearch'),
   };
 
   window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
@@ -47,6 +48,12 @@
     elements.saveStatus.className = `save-status ${mode}`.trim();
   }
 
+  // §3.1 — plain case-insensitive substring filter over the active tab's list.
+  function matchesQuery(...fields) {
+    if (!state.query) return true;
+    return fields.some((field) => String(field || '').toLowerCase().includes(state.query));
+  }
+
   function switchTab(name) {
     document.querySelectorAll('.tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === name));
     document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === name));
@@ -54,7 +61,7 @@
 
   function renderContents() {
     elements.contentsList.replaceChildren();
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '新 → 旧' : '旧 → 新';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
     const labels = { magazines: 'Magazines', units: 'Units' };
     let count = 0;
     for (const groupName of ['magazines', 'units']) {
@@ -63,7 +70,8 @@
       const heading = document.createElement('h3');
       heading.textContent = labels[groupName];
       section.append(heading);
-      const files = ReaderCore.sortFiles(state.files[groupName], state.sortOrder);
+      const files = ReaderCore.sortFiles(state.files[groupName], state.sortOrder)
+        .filter((file) => matchesQuery(file.title, file.name));
       if (!files.length) {
         const empty = document.createElement('p');
         empty.className = 'empty-list';
@@ -164,10 +172,11 @@
 
   function generateConcepts() {
     elements.conceptsList.replaceChildren();
-    const headings = [...elements.reader.querySelectorAll('h2, h3, h4')];
+    const headings = [...elements.reader.querySelectorAll('h2, h3, h4')]
+      .filter((heading) => matchesQuery(heading.textContent));
     if (!headings.length) {
       elements.conceptsList.className = 'concepts-list empty-list';
-      elements.conceptsList.textContent = state.activePath ? '当前文档没有章节标题' : '尚未打开文档';
+      elements.conceptsList.textContent = state.activePath ? '当前文档没有小节标题' : '尚未打开文档';
       return;
     }
     elements.conceptsList.className = 'concepts-list';
@@ -197,7 +206,7 @@
         const details = document.createElement('details');
         details.className = 'mermaid-error';
         const summary = document.createElement('summary');
-        summary.textContent = '图示渲染失败（展开查看源码）';
+        summary.textContent = 'Diagram failed to render (expand to view source)';
         const sourceBlock = document.createElement('pre');
         sourceBlock.className = 'mermaid-error';
         sourceBlock.textContent = source;
@@ -224,47 +233,69 @@
     return nodes;
   }
 
-  function markNote(note) {
-    const block = noteCandidates().find((candidate) => candidate.textContent === note.context);
-    if (!block) return false;
-    const offset = Number(note.contextOffset);
-    if (!Number.isFinite(offset) || block.textContent.slice(offset, offset + note.word.length) !== note.word) return false;
+  // §4.3 — mark EVERY occurrence of an annotated word, but flag only the one the
+  // note was written about. Marking a single occurrence hides the other places the
+  // learner needs to see; matching too strictly makes the note vanish silently.
+  function markBlock(block, annotations) {
     const nodes = textNodes(block);
-    let traversed = 0;
-    let startNode; let startOffset; let endNode; let endOffset;
-    for (const node of nodes) {
-      const next = traversed + node.data.length;
-      if (!startNode && offset >= traversed && offset <= next) {
-        startNode = node; startOffset = offset - traversed;
-      }
-      const noteEnd = offset + note.word.length;
-      if (noteEnd >= traversed && noteEnd <= next) {
-        endNode = node; endOffset = noteEnd - traversed; break;
-      }
-      traversed = next;
+    if (!nodes.length) return;
+
+    // Concatenate the block so a phrase split across <em>/<strong> still matches.
+    let running = 0;
+    const segments = nodes.map((node) => {
+      const segment = { node, start: running, end: running + node.data.length, text: node.data };
+      running = segment.end;
+      return segment;
+    });
+    const blockText = segments.map((segment) => segment.text).join('');
+    const matches = ReaderCore.annotationMatches(blockText, annotations);
+    if (!matches.length) return;
+
+    const perSegment = segments.map(() => []);
+    for (const match of matches) {
+      segments.forEach((segment, index) => {
+        if (segment.end <= match.start || segment.start >= match.end) return;
+        perSegment[index].push({
+          localStart: Math.max(match.start, segment.start) - segment.start,
+          localEnd: Math.min(match.end, segment.end) - segment.start,
+          annotation: match.annotation,
+          isPrimary: match.isPrimary,
+        });
+      });
     }
-    if (!startNode || !endNode) return false;
-    try {
-      const range = document.createRange();
-      range.setStart(startNode, startOffset);
-      range.setEnd(endNode, endOffset);
-      const mark = document.createElement('mark');
-      mark.className = 'reader-note';
-      mark.dataset.noteId = note.id;
-      mark.title = note.userNoteRaw || note.note || 'Note';
-      range.surroundContents(mark);
-      mark.addEventListener('click', () => openExistingNote(note.id));
-      return true;
-    } catch {
-      return false;
+
+    // Reverse order: rebuilding forward invalidates the offsets of later nodes.
+    for (let index = segments.length - 1; index >= 0; index -= 1) {
+      const hits = perSegment[index];
+      if (!hits.length) continue;
+      const { node, text } = segments[index];
+      hits.sort((a, b) => a.localStart - b.localStart);
+
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const hit of hits) {
+        if (hit.localStart > cursor) fragment.append(text.slice(cursor, hit.localStart));
+        const mark = document.createElement('mark');
+        mark.className = `annotated-word${hit.annotation.isHighlight ? ' custom-highlight' : ''}`;
+        mark.dataset.id = hit.annotation.id || '';
+        mark.dataset.word = hit.annotation.word;
+        mark.dataset.note = hit.annotation.userNoteRaw || hit.annotation.note || '';
+        if (hit.isPrimary) mark.dataset.primary = 'true';
+        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || '高亮';
+        mark.textContent = text.slice(hit.localStart, hit.localEnd);
+        mark.addEventListener('click', () => openExistingNote(hit.annotation.id));
+        fragment.append(mark);
+        cursor = hit.localEnd;
+      }
+      if (cursor < text.length) fragment.append(text.slice(cursor));
+      node.parentNode.replaceChild(fragment, node);
     }
   }
 
   function applyAnnotations() {
-    const notes = state.notes
-      .filter((note) => note.file === state.activePath && note.word && note.context)
-      .sort((a, b) => Number(b.contextOffset || 0) - Number(a.contextOffset || 0));
-    notes.forEach(markNote);
+    const annotations = state.notes.filter((note) => note.file === state.activePath && note.word);
+    if (!annotations.length) return;
+    for (const block of noteCandidates()) markBlock(block, annotations);
   }
 
   async function renderActiveFile() {
@@ -286,7 +317,9 @@
   function renderNotes() {
     elements.notesList.replaceChildren();
     const showAll = elements.showAllNotes.checked;
-    const notes = state.notes.filter((note) => note.type !== 'content_summary' && (showAll || note.file === state.activePath));
+    const notes = state.notes
+      .filter((note) => note.type !== 'content_summary' && (showAll || note.file === state.activePath))
+      .filter((note) => matchesQuery(note.word, note.userNoteRaw, note.note));
     if (!notes.length) {
       elements.notesList.className = 'notes-list empty-list';
       elements.notesList.textContent = '暂无注释';
@@ -313,12 +346,24 @@
     }
   }
 
+  // §4.4 — prefer the context-matched occurrence, then any occurrence of the same
+  // note, then a bare text match for legacy notes with no context. Never scroll to
+  // an arbitrary occurrence silently: if nothing matches, say so.
   function jumpToNote(id) {
-    const mark = elements.reader.querySelector(`mark[data-note-id="${CSS.escape(id)}"]`);
-    if (!mark) return;
-    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    mark.classList.remove('flash');
-    requestAnimationFrame(() => mark.classList.add('flash'));
+    const note = state.notes.find((item) => item.id === id);
+    const escaped = CSS.escape(id);
+    const marks = [...elements.reader.querySelectorAll('mark.annotated-word')];
+    const target = elements.reader.querySelector(`mark[data-id="${escaped}"][data-primary="true"]`)
+      || elements.reader.querySelector(`mark[data-id="${escaped}"]`)
+      || (note && marks.find((mark) => mark.textContent.trim().toLowerCase() === String(note.word).toLowerCase()));
+
+    if (!target) {
+      toast('这条注释已与正文对不上 —— 锚点失效。');
+      return;
+    }
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.remove('flash');
+    requestAnimationFrame(() => target.classList.add('flash'));
   }
 
   function selectionBlock(node) {
@@ -389,15 +434,21 @@
     let note;
     if (state.editingNoteId) {
       const previous = state.notes.find((item) => item.id === state.editingNoteId);
-      note = { ...previous, note: elements.noteText.value, userNoteRaw: elements.noteText.value };
-      delete note.aiReview;
+      // Keep aiReview: Phase 3 wrote it, and editing your own note is not a reason
+      // to discard the grading attached to it (§7.2 Smart Merge).
+      note = {
+        ...previous,
+        note: elements.noteText.value,
+        userNoteRaw: elements.noteText.value,
+        isHighlight: !elements.noteText.value.trim(),
+      };
     } else {
       note = {
         id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         ...state.pendingSelection,
         note: elements.noteText.value,
         userNoteRaw: elements.noteText.value,
-        isHighlight: true,
+        isHighlight: !elements.noteText.value.trim(),
         time: new Date().toISOString(),
       };
       delete note.rect;
@@ -445,7 +496,16 @@
   elements.deleteNote.addEventListener('click', () => deleteCurrentNote().catch((error) => toast(error.message)));
   $('#closeNoteDialog').addEventListener('click', () => elements.noteDialog.close());
   $('#cancelNoteButton').addEventListener('click', () => elements.noteDialog.close());
-  elements.showAllNotes.addEventListener('change', renderNotes);
+  elements.showAllNotes.addEventListener('change', () => {
+    localStorage.setItem('ltm_notes_show_all', String(elements.showAllNotes.checked));
+    renderNotes();
+  });
+  elements.search.addEventListener('input', (event) => {
+    state.query = event.target.value.trim().toLowerCase();
+    renderContents();
+    renderNotes();
+    generateConcepts();
+  });
   document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
   elements.sortButton.addEventListener('click', () => {
     state.sortOrder = state.sortOrder === 'desc' ? 'asc' : 'desc';
@@ -453,7 +513,10 @@
     renderContents();
   });
   $('#refreshButton').addEventListener('click', () => refreshFiles().catch((error) => toast(error.message)));
-  $('#sidebarToggle').addEventListener('click', () => elements.sidebar.classList.toggle('open'));
+  $('#sidebarToggle').addEventListener('click', () => {
+    const collapsed = elements.sidebar.classList.toggle('collapsed');
+    localStorage.setItem('ltm_sidebar_collapsed', String(collapsed));
+  });
   $('#themeButton').addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
@@ -473,8 +536,15 @@
     event.returnValue = '';
   });
 
-  const savedTheme = localStorage.getItem('ltm_theme');
-  if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  // §2.1 — restore every preference before the first render, and make the controls
+  // show the restored value. A default is only for someone who has never chosen.
+  function restorePreferences() {
+    document.documentElement.dataset.theme = localStorage.getItem('ltm_theme') || 'dark';
+    elements.showAllNotes.checked = localStorage.getItem('ltm_notes_show_all') === 'true';
+    elements.sidebar.classList.toggle('collapsed', localStorage.getItem('ltm_sidebar_collapsed') === 'true');
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
+  }
+  restorePreferences();
 
   (async () => {
     await refreshNotes();
