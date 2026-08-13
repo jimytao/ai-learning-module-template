@@ -6,19 +6,20 @@
 
 | 分支 | 语言 | 适用对象 |
 | :--- | :--- | :--- |
-| **`Chinese`** | 以中文为主的文档（可夹杂英文术语） | Windows 基线 / 中文用户 |
-| **`English`** | 全英文文档 | 英文用户 |
-| **`macos-chinese`**（本分支） | 中文模板 + 完整 macOS 阅读器 | 中文为主的 macOS 用户 |
+| **`macos-chinese`**（本分支） | 中文为主的模板 + 完整 macOS 阅读器 | 中文为主的 macOS 用户 |
+| **`Chinese`** | 中文为主的 Windows 基线文档 | 中文用户 |
+| **`macos-english`** | 全英文模板 + 完整 macOS 阅读器 | 英文为主的 macOS 用户 |
+| **`English`** | 全英文 Windows 基线文档 | 英文用户 |
 
 ```bash
-# 中文文档（本分支）
-git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+# 中文为主的完整 macOS 阅读器（本分支）
+git clone -b macos-chinese https://github.com/jimytao/ai-learning-module-template.git
 
 # 全英文文档
 git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-克隆后也可：`git checkout Chinese` / `git checkout English`。
+克隆后也可：`git checkout macos-chinese` / `git checkout macos-english`。
 
 ---
 
@@ -30,9 +31,13 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ---
 
-## 这是什么
+## 这是什么，以及它不是什么
 
-把「跟 AI 学一门课」收成可复制的操作系统：
+这是一个基于文件夹的 AI 学习系统。AI 编程代理先读 `AGENT.md`，了解你的目标和偏好，提出学习顺序，把新课程写成 Markdown；之后再批改答案、解释 Notes，并用弱项安排复习。画像、内容、进度和注释都以可读文件保存在项目里。
+
+它**不是**预先写好的课程，也不附送大模型或 API 订阅。你需要选择一个能读取和修改整个项目文件夹的 AI 代理。本分支已带完整的 macOS 本地网页阅读器；Windows 基线分支保留各自原有的启动流程。
+
+学习闭环分四个阶段：
 
 1. **Phase 0** — 采集科目 / 水平 / 弱项 / 兴趣 / 时间 / 学习模态（确认卡通过后才写入）  
 2. **Phase 1** — 按日历 + 意愿 + 弱项提案（Magazine / Unit / 混合）  
@@ -43,23 +48,55 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ---
 
-## 快速开始
+## 第一次使用
 
 1. Clone 或把本仓库复制为新文件夹（推荐保留一份干净母模板）。  
-2. 用 Cursor 打开，对 AI 说：
+2. 用 Cursor、Codex、Claude Code、Devin、Hermes Agent、Antigravity 或其它能编辑文件的代理打开**整个文件夹**。不要只把一个 Markdown 文件贴给普通聊天机器人。
+3. 对 AI 说：
 
 ```text
-按 AGENT.md 做 Phase 0 / 初始化。
+先读 AGENT.md，执行 Phase 0 / 初始化。在我确认采集卡之前不要生成课程正文。
 ```
 
-（英文也可以：`Follow AGENT.md and run Phase 0 / bootstrap.`）
+4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言和学习模态。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。
+5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并执行 `cleanup_template.md` 删除一次性的前期配置 prompt；已经保存的个人偏好不会被删除。
+6. 安装 Node.js 20+，然后双击 **`start.command`**。第一次运行会安装本地依赖并打开完整网页阅读器。若 macOS 首次阻止启动，在终端执行 `chmod +x start.command && ./start.command`。
 
-3. 安装好 Node.js 20+ 后，双击根目录的 **`start.command`**。首次启动会安装本地依赖，随后打开完整网页阅读器。
-   * 如果 macOS 阻止首次双击，可在终端运行 `chmod +x start.command && ./start.command`。
-   * 阅读器内置目录、Markdown/Mermaid 渲染、答题自动写回、Notes 高亮与 Smart Merge。
-4. 在确认画像与模态后：
-   * 对 AI 说：**「执行 protocols/cleanup_template.md 清理」**（或英文 `execute cleanup using protocols/cleanup_template.md`）。AI 会自动根据 HTML 注释锚点彻底清除 `AGENT.md` 中的初始化模板套话，并将清理协议文件自身删除。
-5. 正式开始学习：说「排期」→「开始生成」→ 学习 / 高亮 →「帮我批改」。
+## 初始化后的每一次学习
+
+1. **提案**：说「今天学什么」或「提议下一个 Unit」。AI 读取日历、兴趣与弱项后先给提案，不直接写正文。
+2. **确认并生成**：需要时修改提案，然后说「确认提案并生成」。AI 创建新的 Magazine/Unit、运行校验并更新日历。
+3. **学习**：打开阅读器，阅读、答题、做 Notes/高亮。
+4. **批改**：说「批改我的答案并解释高亮」。AI 按语境批改并更新 gaps/progress；出加练前必须先征得同意。
+5. **重复**：再次说「今天学什么」。下一次提案应把新内容与弱项复现结合起来。
+
+常用维护指令还有：「更新画像」「修改解释语言」「切换模态」「查看进度」「调试阅读器」。
+
+## 选择一个 AI 编程代理
+
+套餐和限额会变化，订阅前请查看官方页面。一般只需要选择其中一个。
+
+| 工具 | 是什么 | 怎么获得 / 是否需要 API |
+| :--- | :--- | :--- |
+| [Cursor](https://cursor.com/download) | AI 优先的代码编辑器，对熟悉 VS Code 的用户最直观 | [Hobby](https://cursor.com/pricing) 有有限的免费 Agent 用量。使用内置模型不需要自己的模型 API key；付费套餐提高限额。 |
+| [Devin](https://app.devin.ai/) | 带 shell、编辑器和浏览器的云端自主软件工程代理 | 注册后连接仓库。官方目前提供有限用量的 [Free plan](https://docs.devin.ai/admin/billing/self-serve)，不是单独命名的「免费 Agent 模型」；付费套餐增加用量，MCP 可用性可能取决于套餐。 |
+| [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) | 带记忆、skills 和终端/桌面界面的开源个人代理 | 软件采用 MIT 许可，但推理仍需要 Nous Portal 订阅、模型供应商 API key/OAuth，或兼容的本地模型端点。 |
+| [OpenAI Codex](https://learn.chatgpt.com/docs/quickstart) | OpenAI 的编程代理，可用于 ChatGPT 桌面、CLI、IDE 和云端 | 使用符合条件的 ChatGPT 套餐登录；[当前 Codex 套餐](https://learn.chatgpt.com/docs/pricing)包含有限的 Free 用量。CLI/IDE 也可改用按量计费的 OpenAI API key，但部分云功能可能不同。 |
+| [Claude Code](https://code.claude.com/docs/en/setup) | Anthropic 的终端、IDE、桌面和网页编程代理 | 使用包含 Claude Code 的付费 Claude 套餐，或启用 API 计费的 Anthropic Console 账户；查看[当前价格](https://claude.com/pricing)。 |
+| [Google Antigravity](https://antigravity.google/download) | Google 的 agent-first IDE/平台 | 用 Google 账户登录。[Individual](https://antigravity.google/pricing) 当前从 $0 起，有基础周限额；Google AI/Cloud 付费方案提高限额。 |
+
+只授权所选代理访问本项目文件夹，大改动前先审阅计划，并用 Git 保留可检查、可恢复的历史。
+
+## 可选：联网搜索和图片下载
+
+有些代理自带 web search；没有时可按官方说明安装可信 MCP：
+
+- [Tavily MCP](https://docs.tavily.com/documentation/mcp)：在 [app.tavily.com](https://app.tavily.com/) 获取 key；当前免费 Researcher 档有有限的月度 credits，且不要求信用卡。
+- [Brave Search API](https://brave.com/search/api/)：在 [Brave dashboard](https://api-dashboard.search.brave.com/) 获取 token。当前有月度免费额度，但即使免费方案也需要信用卡作反滥用验证；Brave 提供[官方 MCP server](https://github.com/brave/brave-search-mcp-server)。
+
+如果官方文档没有列出你的客户端，可以直接问 AI：「根据 Tavily/Brave 官方 MCP 文档，在这个软件中配置它，不要把 API key 提交到 Git。」Key 应放在软件的 secrets/environment 设置或被 Git 忽略的本地 `.env`，绝不能写进 Markdown、`AGENT.md`、会提交的 MCP 配置或截图。
+
+联网搜索与下载图片不是一回事：MCP 通常只返回网页或图片 URL；本仓库的 `scripts/download_images.py` 才会实际搜索并下载到 `images/`，而且当前只支持 `BRAVE_API_KEY`，Tavily 不能直接替代。能下载也不代表有版权或复用许可，请检查图片来源与许可证。
 
 ### 学习模态预设
 
@@ -88,10 +125,10 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ```
 AGENT.md                 # AI 唯一入口路由 (初始化清理后会自动移除模板说明)
-start.command            # macOS 一键安装依赖、启动服务器并打开浏览器
-server.js                # 本地文件、自动保存、Notes Smart Merge 后端
+start.command            # macOS 首次安装、启动服务器并打开浏览器
+server.js                # 本地文件、答案自动保存与 Notes Smart Merge 后端
 index.html / app.js      # Magazine + Unit 通用网页阅读器
-reader-core.js           # 交互题解析与 Markdown 写回逻辑
+reader-core.js           # 交互题解析与 Markdown 回写
 DESIGN.md                # 设计逻辑
 protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec、cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / 模态预设
@@ -121,7 +158,7 @@ review.md                # 批改复盘存档
 # macOS 一键启动（也可双击 start.command）
 ./start.command
 
-# 仅启动服务器，不自动打开浏览器
+# 只启动服务器，不自动打开浏览器
 npm start
 
 # 校验 content 下交互格式与图示声明头
@@ -136,11 +173,10 @@ python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 
 ## 内置网页阅读器
 
-本分支已经按 [`protocols/frontend_spec.md`](protocols/frontend_spec.md) 内置完整通用阅读器：Magazine / Unit 分组目录、升降序持久化、Markdown 与 Mermaid、填空/问答/选择题自动保存、按文档隔离的 Notes、基于 `context + contextOffset` 的跳转，以及保留 AI 批注的 Smart Merge。服务器仅监听 `127.0.0.1`，并且只允许网页写入两个 `content/` 学习目录和 `notes.json`。
+本分支已经实现 [`protocols/frontend_spec.md`](protocols/frontend_spec.md) 规定的 Universal Reader：Magazine/Unit 分组导航、持久排序、Markdown 与 Mermaid 渲染、填空/问答/选择自动保存、每篇文档独立 Notes、基于 `context + contextOffset` 的跳转，以及保留 AI review 的 Smart Merge。服务器只监听 `127.0.0.1`，浏览器写入范围限制为两个学习内容目录与 `notes.json`。
 
 ---
 
 ## License
 
 [MIT](LICENSE) — 可自由使用、修改、分发。
-
