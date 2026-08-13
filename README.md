@@ -30,9 +30,13 @@ Distilled from battle-tested textbook and magazine learning systems: routing, sc
 
 ---
 
-## What this is
+## What this is — and what it is not
 
-An operating system for “learn any subject with an AI coach”:
+This is a folder-based learning system for an AI coding agent. The AI reads `AGENT.md`, learns your goals and preferences, proposes a sequence, writes lessons as Markdown, and later grades your answers and uses your notes to plan review. Your profile, progress, content, and annotations remain as readable files in this project.
+
+It is **not** a prewritten course or a model/API subscription. You bring an AI agent with permission to read and edit this folder. The macOS branches also include a local web reader; the Windows baseline branches keep their existing Windows workflow.
+
+The learning loop has four phases:
 
 1. **Phase 0** — Intake: subject, level, gaps, interests, time budget, learning modality (writes only after you confirm)  
 2. **Phase 1** — Propose the next Magazine / Unit / mix from calendar + desires + gaps  
@@ -43,21 +47,64 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 
 ---
 
-## Quick start
+## First-time setup
 
 1. Clone this repo (prefer the branch for your language), or copy the folder (keep a clean mother template if you like).  
-2. Open it in Cursor (or a similar AI coding agent) and say:
+2. Open the **whole folder** in Cursor, Codex, Claude Code, Devin, Hermes Agent, Antigravity, or another file-editing agent. Do not paste only one Markdown file into a normal chatbot.
+3. Tell the agent:
 
 ```text
-Follow AGENT.md and run Phase 0 / bootstrap.
+Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I confirm the intake card.
 ```
 
-3. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader.
+4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, and Textbook/Magazine/Hybrid modality. The explanation language is the language used for difficult explanations and feedback even if you are studying English. Review the confirmation card and reply `confirm` only when it is accurate.
+5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files. It then removes the one-time bootstrap prompt through `protocols/cleanup_template.md`; your saved preferences are retained and can later be changed with `update profile`.
+6. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader.
    * If macOS blocks the first launch, run `chmod +x start.command && ./start.command` in Terminal.
    * The reader includes navigation, Markdown/Mermaid rendering, answer autosave, highlights, Notes, and Smart Merge.
-4. After you confirm the profile and modality:
-   * Tell the AI to: **"execute cleanup using protocols/cleanup_template.md"**. The AI will clean up the template setup instructions in `AGENT.md` using anchor markers and delete the cleanup file itself.
-5. Go ahead and start learning: say “schedule” → “generate” → study / highlight → “grade my work”.
+
+## Every learning cycle after setup
+
+Use short commands; `AGENT.md` routes them to the correct protocol:
+
+1. **Plan:** `What should I study today?` or `Propose the next unit.` The AI reads your calendar, interests, and gaps, then presents a proposal. It does not write the lesson yet.
+2. **Approve and generate:** revise the proposal if needed, then say `Confirm the proposal and generate it.` The AI creates a new Magazine/Unit Markdown file, validates it, and updates the calendar.
+3. **Study:** open the local reader, read, answer questions, and add Notes/highlights. Inputs autosave into the source Markdown.
+4. **Review:** say `Grade my answers and explain my highlights.` The AI grades in context and updates gaps/progress. It must ask before creating extra drills.
+5. **Repeat:** say `What should I study today?` again. The next proposal should mix new material with spaced recurrence of your weak points.
+
+Useful maintenance commands include `update profile`, `change explanation language`, `change modality`, `show progress`, and `debug the reader`.
+
+## Choose an AI coding agent
+
+Plans and limits change. Follow the official link before subscribing; most people only need **one** of these tools.
+
+| Tool | What it is | How to get it / account requirements |
+| :--- | :--- | :--- |
+| [Cursor](https://cursor.com/download) | AI-first code editor; easiest visual starting point for users familiar with VS Code | Its [Hobby plan](https://cursor.com/pricing) has limited free Agent usage and needs no credit card. Built-in model usage does not require your own model API key; paid plans increase limits. |
+| [Devin](https://app.devin.ai/) | Cloud autonomous software engineer with its own shell, editor, and browser | Sign up in the web app and connect the repository. Devin currently offers a limited [Free plan](https://docs.devin.ai/admin/billing/self-serve) — this is free plan usage, not a separately named “free Agent model.” Paid plans increase usage; MCP availability can depend on plan. |
+| [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) | Open-source, self-improving personal agent with memory, skills, and terminal/desktop surfaces | Install Hermes Desktop or its CLI. The software is MIT-licensed, but inference still needs a provider: a Nous Portal subscription, a supported provider API key/OAuth, or a compatible local endpoint. |
+| [OpenAI Codex](https://learn.chatgpt.com/docs/quickstart) | OpenAI coding agent in the ChatGPT desktop app, CLI, IDE extension, and cloud | Sign in with an eligible ChatGPT plan; [current Codex plans and limits](https://learn.chatgpt.com/docs/pricing) include a limited Free tier. CLI/IDE can alternatively use a billed OpenAI API key, but some cloud features may differ. |
+| [Claude Code](https://code.claude.com/docs/en/setup) | Anthropic coding agent for terminal, IDE, desktop, and web workflows | Sign in with a paid Claude plan that includes Claude Code, or use an Anthropic Console account with active API billing. See [current pricing](https://claude.com/pricing). Free Claude chat alone should not be assumed to include Claude Code. |
+| [Google Antigravity](https://antigravity.google/download) | Google's agent-first IDE/platform with editor, terminal, browser, CLI, and multi-agent workflows | Sign in with a Google account. The [Individual plan](https://antigravity.google/pricing) currently starts at $0 with basic weekly limits; Google AI Pro/Ultra or Google Cloud options raise limits. A personal Gemini API key is not required for ordinary Individual use. |
+
+Whichever you choose, give it access only to this project folder, review its plan before large edits, and keep the project under Git so changes can be inspected or reverted.
+
+## Optional online search and image setup
+
+An agent needs current web access to verify sources and recommend real articles, videos, or data. Some agents already include web search. If yours does not, add a trusted search MCP:
+
+- [Tavily](https://docs.tavily.com/documentation/mcp): create a key at [app.tavily.com](https://app.tavily.com/). Its current free Researcher tier provides limited monthly credits without a card. Use Tavily's client-specific instructions for Cursor or Claude Code; for other agents, ask: `Using the official Tavily MCP documentation, configure it in this app without committing my API key.`
+- [Brave Search API](https://brave.com/search/api/): create a subscription token in the [Brave dashboard](https://api-dashboard.search.brave.com/). It currently includes monthly free credit but requires a card for anti-fraud verification. Brave publishes an [official MCP server](https://github.com/brave/brave-search-mcp-server). Ask your agent to install it using the official instructions for that client.
+
+Store keys in the agent's secret/environment settings or a local `.env` ignored by Git. **Never paste a real key into Markdown, `AGENT.md`, an MCP config that will be committed, or a screenshot.**
+
+Search and image download are separate capabilities:
+
+- A Tavily/Brave MCP usually gives the AI current results and image URLs; it does not automatically save an image into this repository.
+- This template's `scripts/download_images.py` actually searches and downloads a candidate into `images/`, and currently requires `BRAVE_API_KEY`; Tavily is not a drop-in replacement for that script.
+- On macOS: `export BRAVE_API_KEY=...` and run the command in the Scripts section. On Windows PowerShell use `$env:BRAVE_API_KEY='...'` for the current terminal session.
+- Search access does not grant copyright or reuse rights. Check the source and licence before keeping a downloaded image.
 
 ### Learning modality presets
 

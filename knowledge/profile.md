@@ -47,7 +47,8 @@
 | :--- | :--- |
 | Weekly time budget | `TBD` |
 | Single study window | `TBD` (affects size) |
-| Content language | Chinese / English / bilingual · `TBD` |
+| Primary explanation language / strongest language | `TBD` — use for difficult explanations, corrections, and feedback even if the subject is another language |
+| Learning-content language | English / another language / bilingual · `TBD` |
 | Literature depth | Popular / textbook / needs guideline or paper phrasing · `TBD` |
 | Preferred case types | `TBD` |
 | Content to avoid | `TBD` |
@@ -85,3 +86,4 @@
 3. Obey the current modality preset; switching requires explicit user intent.  
 4. Unprovided slots stay TBD; go through intake confirmation — do not invent.  
 5. Extra drills after correction require asking first.
+6. Use the confirmed primary explanation language for difficult explanations and feedback unless the user asks otherwise in the current task.

@@ -15,8 +15,9 @@ Minimum required:
 1. Subject + testable goals  
 2. Level + known strengths + weak spots  
 3. Interests (can be short) + time constraints  
-4. **Learning modality preset T / M / H / C** (see `modality_presets.md`)  
-5. (Recommended) Reader sort / Notes scope preferences  
+4. **Primary explanation language / strongest language**, separately from the learning-content language
+5. **Learning modality preset T / M / H / C** (see `modality_presets.md`)
+6. (Recommended) Reader sort / Notes scope preferences
 
 Rules:
 
@@ -39,7 +40,7 @@ Use the “Confirmation card template” in `intake_checklist.md`.
 
 | Write target | Content source |
 | :--- | :--- |
-| `knowledge/profile.md` | Subject, goals, level, known, constraints, **modality preset**, reader prefs |
+| `knowledge/profile.md` | Subject, goals, level, known, constraints, **explanation + content languages**, modality preset, reader prefs |
 | `knowledge/desire.md` | Interests and topics to cover (`[ ]`) |
 | `state/gaps.md` | Initial weak-spot Kanban |
 | `knowledge/domain_map.md` | Draft subject tree; mark known nodes Covered |
@@ -72,7 +73,7 @@ Follow `AGENT.md` section **“Post-Bootstrap rewrite”** strictly:
 3. Remove blank-template boilerplate; write one-line subject goal  
 4. Narrow Phase 0 routing to “fill TBD / update profile” only  
 5. Note default proposal bias by modality  
-6. **Load and execute `protocols/cleanup_template.md`**, strip template guidance, and self-delete that cleanup file.  
+6. **Load and execute `protocols/cleanup_template.md`**, strip the Phase 0 interview guidance, retain confirmed profile data (including explanation language), and self-delete that cleanup file.
 
 After rewrite, this repo is a **subject learning project**, not a blank template.
 

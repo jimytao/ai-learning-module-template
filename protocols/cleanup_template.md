@@ -36,6 +36,9 @@ To avoid line-number drift after edits, rewrite `AGENT.md` using semantics and a
    * Replace the whole rule with: “*8. **Profile discipline**: Treat `profile` as authoritative; do not invent information the user did not provide.*”
 5. **Slim document responsibility boundaries**:
    * Keep only active files for this subject in the responsibility table; remove temporary Phase 0 field descriptions.
+6. **Retain confirmed personal preferences**:
+   * Removing the Phase 0 interview prompt must never remove confirmed values from `knowledge/profile.md`, including primary explanation language, learning-content language, accessibility needs, time constraints, or learning preferences.
+   * Keep the “update profile” route so the learner can change these values later without rerunning the full bootstrap.
 
 ### 2.2 Clean and delete template files
 1. **Delete this protocol file**:
@@ -51,4 +54,5 @@ To avoid line-number drift after edits, rewrite `AGENT.md` using semantics and a
 After cleanup, AI must give a short “project cleanliness report” including:
 1. **Deleted files list** (must include `cleanup_template.md` itself).
 2. **Preview of the simplified AGENT.md status**.
-3. **Next actions**: double-click `start.command` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.
+3. **Persistent profile check**: confirm that explanation language and the other accepted personal preferences remain in `knowledge/profile.md`.
+4. **Next actions**: double-click `start.command` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.
