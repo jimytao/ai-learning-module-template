@@ -458,5 +458,6 @@ markdown → marked HTML
 ### 11.5 与注释系统
 
 - Mermaid 渲染后的 SVG 内文字：**默认不可高亮标注**（与 code 块同等排除），避免 DOM 被 Mermaid 重写后定位失败。  
-- `viz-caption`、`viz-block-body` 内普通文本：**允许**标注。  
+- `viz-caption`、`viz-block-body` 内普通文本：**允许**标注（实现方式见 §4.3——`.viz-block-body`
+  是 `<div>`，需要按类名单独识别为块级元素，不能只靠通用标签清单）。  
 - `viz-svg` 内 `<text>`：建议排除标注。
