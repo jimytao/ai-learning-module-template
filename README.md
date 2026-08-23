@@ -57,11 +57,43 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I confirm the intake card.
 ```
 
-4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, and Textbook/Magazine/Hybrid modality. The explanation language is the language used for difficult explanations and feedback even if you are studying English. Review the confirmation card and reply `confirm` only when it is accurate.
-5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files and rewrites `AGENT.md` into your subject's project. **You can already start learning at this point.** Removing the one-time bootstrap prompt through `protocols/cleanup_template.md` happens later, once the reader is verified; your saved preferences are retained and can later be changed with `update profile`.
-6. Install Node.js 20+, then double-click **`start.command`**. On its first run it installs local dependencies and opens the complete web reader. Then run `npm test` and `node scripts/verify_reader.js` — both must be clean before the cleanup step above may run.
-   * If macOS blocks the first launch, run `chmod +x start.command && ./start.command` in Terminal.
-   * The reader includes navigation, Markdown/Mermaid rendering, answer autosave, highlights, Notes, and Smart Merge.
+4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, Textbook/Magazine/Hybrid modality, and **§Content Format Preferences (image density, visual diagram tier, sticky note types, exercise types: MCQ, MSQ, blanks, open Q&A, T/F)**. Review the confirmation card and reply `confirm` when accurate. These preferences are saved in `knowledge/profile.md` for Phase 2 generation.
+5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and other knowledge/state files, and rewrites `AGENT.md` into your subject's project. **You can already start learning at this point.** Removing the one-time bootstrap prompt through `protocols/cleanup_template.md` happens later, once the reader is verified; your saved preferences and re-entry guards are strictly retained.
+6. Install Node.js 20+, then double-click **`start.command`** (or `start.bat` on Windows). On first run it installs local dependencies and opens the web reader. Then run `npm test` and `node scripts/verify_reader.js` — both must pass before the cleanup step above may run.
+
+---
+
+## 🎨 Browser JS Rendering & Bi-directional Auto-Save Architecture
+
+This project pairs **AI Markdown content creation + local browser JS rendering + bi-directional interaction write-back**:
+
+```text
+  [AI Generates Markdown Lessons] ──> Saved to content/magazines/ or content/units/
+                                                    │
+                                                    ▼
+  [Run start.command / start.bat] ──> Starts local Node Server (127.0.0.1:4173)
+                                                    │
+                                                    ▼
+  [Browser JS Engine (app.js + reader-core.js)]
+   ├── 1. Converts Markdown to HTML (via Marked.js + DOMPurify security filtering)
+   ├── 2. Transforms interactive tokens: ___ to inputs / open Q&A to textareas / [ ] to checkboxes
+   ├── 3. Renders Visual Arsenal diagrams & Mermaid charts
+   └── 4. Real-time Auto-Save:
+          Editing inputs/answers/checkboxes triggers debounced POST /api/save directly back to .md files!
+```
+
+### Top-Right Save Status Indicator & Manual Save (`saveStatus`)
+
+The top-right header features a live status button:
+* **Visual Statuses**:
+  * `○ Ready`: No unsaved changes.
+  * `● Saving soon`: Input/answer changed; queued for debounced save.
+  * `◌ Saving…`: Writing answers back to the Markdown file on disk.
+  * `✓ Saved`: File successfully written and in sync with disk.
+  * `⚠ Save failed`: Error saving (displays toast notification).
+* **Manual Save**: Click the top-right save icon or press `⌘S` / `Ctrl+S` at any time to force an immediate save to disk.
+
+---
 
 ## Every learning cycle after setup
 

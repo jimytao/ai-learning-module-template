@@ -24,6 +24,7 @@
 | “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
 | “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
+| “change images” / “change question types” / “more diagrams” / “no open Q&A” / “change layout preferences” | **Phase 0 · patch** | `intake_checklist.md` (section H only) + `knowledge/profile.md` §Content format preferences | `visual_arsenal` / `tech_spec` |
 | “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
 | “new subject” / “copy template” / “add track” / “how to archive” | **Lifecycle** | `protocols/project_lifecycle.md` + `domain_map.md` if needed | `intake_checklist` (new-track slots only) |
 | “check knowledge map” / “this concept” / “what are my gaps” | **Knowledge Query** | matching `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
@@ -187,6 +188,7 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
     * **Already initialized** → Phase 0 is **patch-only**. Fill `TBD` slots and change what the user asked about. **Never** overwrite a confirmed value, wipe `desire` / `gaps` / `calendar` / `domain_map`, or re-run the full interview without saying plainly “this project is already set up for *[subject]* — do you want to update a few fields, or start a completely new subject?” and getting an answer. Starting a new subject in the same folder is the archive route in `project_lifecycle.md`, not a Phase 0 rerun.  
     * **Not initialized** → run Phase 0 normally.  
     * A user saying “I want to learn X” in an initialized project is far more often a Phase 1 request than a re-bootstrap. Ask; do not assume.
+19. **Content format preferences drive Phase 2**: Image density, visual diagram tier, sticky note callouts, and exercise selection are governed by `knowledge/profile.md` section §Content format preferences (see execution details in `p2_generate.md` §0.5). If unchosen, use defaults and inform the user they can be changed; **no preference set may reduce exercise types to a single category** (violating rule 6).
 
 ---
 
