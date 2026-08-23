@@ -198,7 +198,8 @@
 
 > **不要照搬 magazine 参考实现（`index.html` 的 `applyAnnotations` 函数附近）里的
 > `sortedAnnotations.find(a => a.word === word)`** —— 它就是上面这个串号 bug 的源头。
-> `templates/reader_skeleton.html` 里已经修好了，请对照那个版本，而不是原始参考实现。
+> `templates/reader_skeleton.html` 和本分支的 `reader-core.js` 里都已经修好了，请对照那两个版本，
+> 而不是原始参考实现。
 
 ### 4.4 定位优先级（Notes 侧栏 → 正文）
 
@@ -266,6 +267,36 @@ Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典
 5. **批改面板渲染**：
    * 批改结果使用 `details.feedback-panel`（折叠反馈面板）包裹。
    * 文本错误标注使用 `<span class="err">错误词</span>` (红色中划线/背景) 与 `<span class="fix">修改词</span>` (绿色下划线/背景) 渲染，前端需要对这些特定的 HTML 标签予以保留和渲染。
+
+---
+
+### 6.3 保存状态指示器（必需）
+
+自动保存最大的问题不是丢数据，而是**用户不知道有没有保存**。所以状态必须一直可见，
+并且必须存在一个「我现在就要保存」的出口 —— 不放心自动保存的人一定会去找它。
+
+| 要求 | 硬契约 |
+| :--- | :--- |
+| 位置 | 页头右上角（与主题、导出按钮同一组） |
+| 载体 | **`<button class="save-status">`** —— 是按钮不是纯文字标签；必须可点击、可聚焦 |
+| 结构 | 内含 `.save-icon`（一眼扫的图标）与 `.save-label`（文字说明） |
+| 状态 | `idle` / `dirty` / `saving` / `saved` / `error`，同时写入 `data-state` 与 class |
+| 图标 | 空心圆 / 实心圆 / 虚线圆（可动） / 对勾 / 警告，五个状态互相可分辨 |
+| 手动保存 | **点击指示器**立即保存；**`⌘S` / `Ctrl+S`** 同效，且必须 `preventDefault()` 掉浏览器的「保存网页」 |
+| 干净文档 | 手动保存时若无改动，也要给回应（状态置 `saved` + 一句 toast）—— 静默会被读成「没生效」 |
+| 单一写入口 | 手动保存必须走与自动保存**同一个函数**；禁止再写一条 POST 路径 |
+| 窄屏 | 可以只留图标隐藏文字，**不得整个隐藏** —— 它是手动保存的唯一入口 |
+| 可访问性 | `aria-live="polite"` + `aria-label`；`title` 写明快捷键 |
+
+状态语义（文案可按界面语言改，状态机不可改）：
+
+```
+idle    ○  就绪 —— 尚未打开文档或无改动
+dirty   ●  待保存 —— 已改动，防抖计时中
+saving  ◌  保存中 —— POST /api/save 进行中
+saved   ✓  已保存 —— 服务器已确认写盘
+error   ⚠  保存失败 —— 保留 dirty=true，下次输入会重试
+```
 
 ---
 
@@ -339,6 +370,7 @@ Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典
 | `[data-id]` `[data-word]` `[data-note]` | span 上的注释身份 |
 | `[data-primary="true"]` | 唯一的语境命中处（§4.3） |
 | `.interactive-blank` `.interactive-textarea` `.interactive-checkbox` | 自动保存的控件（§6.1） |
+| `.save-status` `.save-icon` `.save-label` | 保存状态指示器兼手动保存按钮（§6.3） |
 | `.viz-*` `.sticky-note` | 可视化武器库（§11.3） |
 
 ---
@@ -461,3 +493,27 @@ markdown → marked HTML
 - `viz-caption`、`viz-block-body` 内普通文本：**允许**标注（实现方式见 §4.3——`.viz-block-body`
   是 `<div>`，需要按类名单独识别为块级元素，不能只靠通用标签清单）。  
 - `viz-svg` 内 `<text>`：建议排除标注。
+
+---
+
+## 12. UI/UX 视觉与排版设计规范 (UI/UX Design & Layout Standards)
+
+为保证生成内容与前端呈现始终保持如 Magazine / Drill 教案般的高品质视觉体验，前端与 AI 生成正文时必须遵守以下 UI/UX 规范：
+
+### 12.1 色彩与设计 Token
+* **主色调 (Primary Accent)**：湛蓝 / 亮青 (`#38bdf8` 暗色 / `#0284c7` 亮色)，用于交互焦点、目录选中态与操作按钮。
+* **辅助点缀色 (Secondary Accent)**：琥珀金 / 暖黄 (`#fbbf24` 暗色 / `#d97706` 亮色)，用于重点高亮、高质感 Logo 渐变与便利贴卡片边框。
+* **背景与玻璃质感 (Glassmorphic Atmosphere)**：
+  * 使用双色径向渐变（Radial Gradient）铺设渐进式背景层。
+  * 顶栏与侧边栏采用 `backdrop-filter: blur(16px)` 毛玻璃半透明效果。
+  * 内容卡片采用 `rgba(21, 29, 48, 0.75)`（暗色）/ `rgba(255, 255, 255, 0.88)`（亮色），带有 `1px` 细微高亮边框。
+
+### 12.2 字形与版式 (Typography)
+* **标题 / 品牌 / 卡片头**：采用 `Outfit` 与 `Noto Sans TC` 搭配，字体加粗（`font-weight: 700 / 800`），具备现代杂志出版物视效。
+* **正文阅读**：采用 `Inter`，行高锁定为 `1.7`–`1.78`，字符间距舒展，保证长时间阅读舒适度。
+
+### 12.3 容器与部件 (Components & Cards)
+* **便利贴 / 旁注卡片 (`.sticky-note`)**：必须为圆角卡片，左侧带有金/蓝双色渐变指示条，内容结构清晰。
+* **工程图示与步骤 (`.viz-block`, `.viz-steps`)**：卡片居中，微阴影浮起感，图表在亮/暗双色背景下均清晰可辨。
+* **保存状态指示器 (`.save-status`)**：Button 形态，带有圆角胶囊边框、状态图标（`○` 就绪 / `●` 待保存 / `◌` 保存中 / `✓` 已保存 / `⚠` 失败）以及脉冲微动效，支持快捷操作。
+
