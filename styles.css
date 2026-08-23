@@ -1,42 +1,57 @@
 :root {
-  --bg: #f4f2ed;
-  --surface: #fffefa;
-  --surface-2: #eeece5;
-  --text: #24231f;
-  --muted: #706d64;
-  --border: #d8d4c9;
-  --accent: #1e6655;
-  --accent-soft: #dcece6;
-  --danger: #a63d40;
-  --highlight: #ffe88a;
-  --shadow: 0 18px 50px rgba(44, 41, 33, 0.09);
-  --header-height: 64px;
-  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-:root[data-theme="dark"] {
-  --bg: #171a18;
-  --surface: #202522;
-  --surface-2: #2a302c;
-  --text: #eef1ed;
-  --muted: #adb5ae;
-  --border: #3a433d;
-  --accent: #72cdb1;
-  --accent-soft: #263e36;
+  --bg: #070b13;
+  --surface: rgba(21, 29, 48, 0.75);
+  --surface-2: rgba(30, 41, 67, 0.6);
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.12);
+  --accent-gold: #fbbf24;
+  --accent-gold-soft: rgba(251, 191, 36, 0.12);
   --danger: #ff9295;
   --highlight: #705f16;
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --header-height: 64px;
+  --font-title: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
+}
+
+:root[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.88);
+  --surface-2: rgba(241, 245, 249, 0.92);
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: rgba(0, 0, 0, 0.09);
+  --accent: #0284c7;
+  --accent-soft: rgba(2, 132, 199, 0.1);
+  --accent-gold: #d97706;
+  --accent-gold-soft: rgba(217, 119, 6, 0.1);
+  --danger: #a63d40;
+  --highlight: #ffe88a;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; color: var(--text); background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.05) 0%, transparent 45%);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 button, input, textarea { font: inherit; }
 button {
   border: 1px solid var(--border); border-radius: 8px; padding: 0.48rem 0.72rem;
   color: var(--text); background: var(--surface); cursor: pointer;
+  transition: all 0.2s ease;
 }
-button:hover { border-color: var(--accent); }
+button:hover { border-color: var(--accent); background: var(--accent-soft); }
 button:disabled { cursor: not-allowed; opacity: 0.45; }
 button.primary { color: white; border-color: var(--accent); background: var(--accent); }
 button.danger { color: var(--danger); }
@@ -45,18 +60,37 @@ button.danger { color: var(--danger); }
   position: fixed; inset: 0 0 auto 0; z-index: 20; height: var(--header-height);
   display: grid; grid-template-columns: 270px minmax(0, 1fr) auto; align-items: center;
   gap: 1rem; padding: 0 1.1rem; border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .brand { display: flex; align-items: center; gap: 0.7rem; }
-.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: white; background: var(--accent); font-weight: 800; }
-.brand strong, .brand small { display: block; }
-.brand small { margin-top: 0.1rem; color: var(--muted); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.document-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-family: Georgia, serif; font-weight: 700; }
+.brand-mark {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px;
+  color: white; background: linear-gradient(135deg, var(--accent), var(--accent-gold));
+  font-family: var(--font-title); font-weight: 800; font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+}
+.brand strong { font-family: var(--font-title); font-weight: 800; font-size: 1rem; letter-spacing: 0.02em; }
+.brand small { margin-top: 0.1rem; color: var(--muted); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+.document-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; }
 .header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.55rem; }
 .icon-button { display: inline-grid; place-items: center; min-width: 34px; padding: 0.45rem; }
-.save-status { color: var(--muted); font-size: 0.78rem; }
+/* Save-state indicator (frontend_spec §6.3). It is a button, not a label: autosave
+   runs on its own, but anyone who does not trust autosave needs a way to force it. */
+.save-status {
+  display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  padding: 0.3rem 0.55rem; border: 1px solid var(--border); border-radius: 999px;
+  color: var(--muted); background: transparent; font-size: 0.78rem; line-height: 1;
+}
+.save-status:hover { border-color: var(--accent, var(--muted)); color: var(--text); }
+.save-status .save-icon { font-size: 0.7rem; }
+.save-status.dirty { color: #9b6a13; }
 .save-status.saving { color: #9b6a13; }
-.save-status.error { color: var(--danger); }
+.save-status.saved { color: var(--accent); }
+.save-status.error { color: var(--danger); border-color: var(--danger); }
+.save-status.saving .save-icon { animation: save-pulse 900ms ease-in-out infinite; }
+@keyframes save-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .save-status.saving .save-icon { animation: none; } }
 
 .app-shell { min-height: 100%; padding-top: var(--header-height); }
 /* Collapse state is persisted in ltm_sidebar_collapsed (frontend_spec §3.2). */
@@ -171,7 +205,8 @@ button.danger { color: var(--danger); }
   .brand { display: none; }
   .mobile-only { display: inline-grid; }
   .document-title { text-align: left; }
-  .save-status, #exportButton { display: none; }
+  #exportButton { display: none; }
+  .save-status .save-label { display: none; }
   .sidebar { transform: translateX(-101%); transition: transform 180ms ease; box-shadow: var(--shadow); }
   .sidebar:not(.collapsed) { transform: translateX(0); }
   .main-viewport { margin-left: 0; padding: 0.7rem; }

@@ -1,77 +1,76 @@
-# Reader / Frontend Spec (frontend_spec.md)
+# 阅读器 / 前端规范 (frontend_spec.md)
 
-> Must-keep product details distilled from the English Learning previewer and Culture Magazine reader.  
-> This repo is Markdown + protocols first; when migrating or rebuilding the frontend, **accept against this file** — do not drop behaviors.
-
----
-
-## 1. Content sources & isolation (anti-mix)
-
-| Rule | Note |
-| :--- | :--- |
-| Learning content only | Sidebar TOC lists only `content/magazines/*.md` and `content/units/*.md` |
-| Hide internal files | Never put `protocols/` `knowledge/` `state/` `scripts/` `DESIGN.md` `AGENT.md` in the reading TOC |
-| Clear grouping | Suggest two groups: `Magazines` / `Units` (or by number); highlight the open item |
-| Notes isolated per file | Every `notes.json` entry must have `file` (or compatible `issue`) pointing to **that** md |
-| Default: current-file notes only | Notes sidebar default `showAll = false`; render only `file === current path` |
-| Optional “all notes” | Provide a toggle for cross-doc notes; default off to avoid multi-issue mixups |
-| Grading filtered by file | Phase 3 / frontend AI annotations also filter by current `file` |
-
-Once generated, do not casually rename paths; if you must, sync every matching `file` in `notes.json`.
+> 从 English Learning 预览器与 Culture Magazine 阅读器提炼的**必须保留的产品细节**。  
+> 本仓库当前以 Markdown + 协议为主；迁入或重做前端时，**按本文件验收**，不得丢行为。
 
 ---
 
-## 2. TOC sort (oldest first / newest first)
+## 1. 内容来源与隔离（防搞混）
 
-| Rule | Note |
+| 规则 | 说明 |
 | :--- | :--- |
-| Toggleable | Sidebar sort button: `old → new` / `new → old`, with a visible label and arrow icon |
-| Default | **old → new** (`asc`) |
-| Persist | `localStorage` key `ltm_sort_order`, values `asc` \| `desc` |
-| Sort key | Prefer `magazineNN` / `unitNN` in filename; else mtime |
-| Scope | Applies to the Contents tab; hide the control on tabs where it is meaningless (Notes, Concepts) |
+| 只列出学习内容 | 侧边栏「目录」只显示 `content/magazines/*.md` 与 `content/units/*.md` |
+| 禁止露出内部文件 | 不得把 `protocols/` `knowledge/` `state/` `scripts/` `DESIGN.md` `AGENT.md` 放进阅读目录 |
+| 分组清晰 | 建议两组：`Magazines` / `Units`（或按编号）；打开一份时高亮当前项 |
+| 注释按文件隔离 | `notes.json` 每条必须有 `file`（或兼容字段 `issue`）指向**那一篇** md |
+| 默认只看当前篇注释 | Notes 侧栏默认 `showAll = false`，只渲染 `file === 当前打开路径` 的条目 |
+| 可切换「全部注释」 | 提供开关查看跨文档注释，但默认关闭，避免杂志多期搞混 |
+| 批改也按文件过滤 | Phase 3 / 前端展示 AI 批注时，同样按当前 `file` 过滤 |
 
-> **Default is `asc` on purpose.** Both source readers default to oldest-first (`sortOrder = 'asc'`,
-> `currentSortOrder = 'old-to-new'`) because curricula and magazine issues are both read forward, and
-> landing on issue 01 is the correct first-run experience. Do not "fix" this to newest-first.
-
-### 2.1 Preference persistence (applies to every stored preference)
-
-A default is what a **new** user gets. Once the user has chosen, their choice wins — forever, on every
-reload, until they change it again. Being handed back the default on each open is a bug, not a reset.
-
-| Rule | Requirement |
-| :--- | :--- |
-| Write on change | Every toggle writes `localStorage` in the same handler that changes the state — no "save on exit", no batching |
-| Restore before first render | Read all four keys during startup and apply them **before** the first list/body render, so nothing visibly flips after paint |
-| Default only when absent | Apply the documented default only when `getItem` returns `null`. An explicitly stored value that happens to equal the default is still the user's choice |
-| Control reflects state | After restore, the sort button label/icon, theme icon, sidebar collapse state, and Notes-scope button must show the restored value, not the default |
-| Never reset silently | Do not clear these keys on error, on version change, or when a document fails to load |
-
-Applies to `ltm_sort_order`, `ltm_theme`, `ltm_sidebar_collapsed`, and `ltm_notes_show_all` (§7.3).
+路径一经生成不要随便改名；若必须重命名，同步改 `notes.json` 里所有对应 `file`。
 
 ---
 
-## 2.5 Theme contract — light / dark (required)
+## 2. 目录排序（旧到新 / 新到旧）
 
-Both source readers ship a light and a dark theme. This is **not** optional polish; a reader that only
-does dark mode fails acceptance.
-
-### 2.5.1 Locked mechanism
-
-| Rule | Requirement |
+| 规则 | 说明 |
 | :--- | :--- |
-| Carrier | `<html data-theme="dark">` / `data-theme="light"` on the **root element** |
-| Do **not** use | A `body.light-theme` class. The magazine reader does this and it cannot be applied before `<body>` exists — that is what causes the white flash |
-| Colors | Every color goes through CSS custom properties on `:root`; `[data-theme="light"]` overrides the same variable names. No hard-coded hex outside the variable blocks |
-| Default | `dark` when nothing is stored |
-| Persist | `localStorage` key `ltm_theme`, values `light` \| `dark` |
-| Toggle | One control in the top bar; icon reflects the **target** state |
+| 可切换 | 侧栏提供排序按钮：`旧 → 新` / `新 → 旧`，带可见文字标签与箭头图标 |
+| 默认 | **旧 → 新**（`asc`） |
+| 持久化 | `localStorage` 键 `ltm_sort_order`，取值 `asc` \| `desc` |
+| 排序键 | 优先按文件名中的编号 `magazineNN` / `unitNN`；否则按 mtime |
+| 作用范围 | 只作用于 Contents 标签页；在无意义的标签页（Notes、Concepts）隐藏该控件 |
 
-### 2.5.2 FOUC guard (mandatory, exact placement)
+> **默认 `asc` 是刻意的。** 两个源阅读器实际默认都是旧到新（`sortOrder = 'asc'`、
+> `currentSortOrder = 'old-to-new'`），因为课程和杂志期刊都是顺着往下读的，首次打开落在第 01 期
+> 才是正确体验。不要把它「修正」成新到旧。
 
-The theme must be applied **before first paint** — an inline script in `<head>`, above every
-stylesheet, not in `DOMContentLoaded`:
+### 2.1 偏好持久化（适用于全部已存偏好）
+
+默认值是给**新**用户的。用户一旦做出选择，他的选择就永远优先 —— 每次重新打开都算数，直到他自己再改。
+每次打开都被塞回默认值是 bug，不是重置。
+
+| 规则 | 要求 |
+| :--- | :--- |
+| 改动即写入 | 每个开关都在改变状态的同一个 handler 里写 `localStorage` —— 不做「退出时保存」，不做批量延迟写入 |
+| 首次渲染前恢复 | 启动时读取全部四个键并应用，**先于**第一次列表/正文渲染，避免画面绘制后再跳变 |
+| 仅在缺失时用默认 | 只有 `getItem` 返回 `null` 时才套用默认值。已存的值即使恰好等于默认值，也仍然是用户的选择 |
+| 控件反映实际状态 | 恢复之后，排序按钮的文字/图标、主题图标、侧边栏折叠状态、Notes 范围按钮都必须显示恢复后的值，而不是默认值 |
+| 禁止静默重置 | 不得因为报错、版本变化或某个文档加载失败而清空这些键 |
+
+适用于 `ltm_sort_order`、`ltm_theme`、`ltm_sidebar_collapsed`、`ltm_notes_show_all`（§7.3）。
+
+---
+
+## 2.5 主题契约 —— 亮色 / 暗色（必需）
+
+两个源阅读器都带亮色与暗色主题。这**不是**可选的锦上添花；只做暗色的阅读器验收不通过。
+
+### 2.5.1 锁定的实现方式
+
+| 规则 | 要求 |
+| :--- | :--- |
+| 载体 | **根元素**上的 `<html data-theme="dark">` / `data-theme="light"` |
+| **禁止**使用 | `body.light-theme` 类。magazine 阅读器就是这么做的，而它无法在 `<body>` 存在之前应用 —— 这正是白屏闪烁的成因 |
+| 颜色 | 所有颜色一律走 `:root` 上的 CSS 自定义属性；`[data-theme="light"]` 覆盖同名变量。变量块之外不得出现硬编码色值 |
+| 默认 | 无存储值时为 `dark` |
+| 持久化 | `localStorage` 键 `ltm_theme`，取值 `light` \| `dark` |
+| 切换控件 | 顶栏一个控件；图标表示**将要切换到**的状态 |
+
+### 2.5.2 FOUC 守卫（强制，位置固定）
+
+主题必须在**首次绘制之前**应用 —— 放在 `<head>` 内的内联脚本，位于所有样式表之上，不能放进
+`DOMContentLoaded`：
 
 ```html
 <script>
@@ -82,391 +81,439 @@ stylesheet, not in `DOMContentLoaded`:
 </script>
 ```
 
-### 2.5.3 Third-party themes must follow
+### 2.5.3 第三方主题必须跟随
 
-Anything with its own baked-in dark styling has to be swapped on toggle, not left behind:
+任何自带深色样式的第三方资源都要在切换时一并换掉，不能留在原地：
 
-- **highlight.js** — keep the stylesheet in a `<link id="hljs-theme-link">` and rewrite `href`
-  (`github.min.css` ⇄ `github-dark.min.css`) inside the toggle handler.
-- **Mermaid** — one global theme chosen at init (`visual_arsenal` contract). If the diagram theme
-  cannot follow the toggle, pick the neutral theme that is legible on both backgrounds rather than
-  re-rendering diagrams on every switch.
+- **highlight.js** —— 把样式表放在 `<link id="hljs-theme-link">` 中，在切换处理函数里改写 `href`
+  （`github.min.css` ⇄ `github-dark.min.css`）。
+- **Mermaid** —— 初始化时选定唯一全局主题（`visual_arsenal` 契约）。若图表主题无法跟随切换，
+  就选一个在两种背景下都清晰的中性主题，而不是每次切换都重新渲染全部图表。
 
-### 2.5.4 What must be verified in both themes
+### 2.5.4 两种主题下都必须验证的部位
 
-Annotation underline and highlight fills, tooltip/float panel backgrounds, interactive blank and
-textarea backgrounds, table zebra striping, `viz-*` block borders, and diagram text. These are exactly
-the places the source projects needed separate light overrides — a theme that only restyles the page
-background is incomplete.
+注释下划线与高亮填充、tooltip / 浮层背景、填空框与 textarea 背景、表格斑马纹、`viz-*` 块边框、
+图表文字。这些正是源项目当初不得不单独写亮色覆盖的地方 —— 只改了页面背景色的主题是不完整的。
 
 ---
 
-## 3. Sidebar structure
+## 3. 侧边栏结构
 
-| Tab | Content | Behavior |
+| Tab | 内容 | 行为 |
 | :--- | :--- | :--- |
-| **Contents** | Magazines + Units list | Click opens md; current item active |
-| **Concepts** | Term / vocabulary library for the current piece, or `log.md` Concept Ledger | Click jumps to in-doc heading / anchor |
-| **Notes** | Highlights & notes for current file (or all) | Click jumps to annotation in body and opens edit float |
+| **Contents** | Magazines + Units 列表 | 点击打开对应 md；当前项 active |
+| **Concepts** | 当前篇的术语 / 词汇库，或 `log.md` 的 Concept Ledger | 点击跳到文内对应标题 / 锚点 |
+| **Notes** | 当前文件（或全部）的高亮与注释 | 点击跳转到正文中的标注处并打开编辑浮层 |
 
-- New note created → **appears immediately in Notes Tab** (refresh list after saving `notes.json`).  
-- Concepts / Notes jumps must be stable: depend on heading format and annotation spans; generators follow `tech_spec.md`.
+- 做了新注释 → **立即出现在 Notes Tab**（保存 `notes.json` 后刷新列表）。
 
-### 3.1 Sidebar search (required)
+### 3.1 侧边栏搜索（必需）
 
-Both source readers have a search input at the top of the sidebar, and it is used constantly. Filter
-the **active tab's** list as the user types: document titles in Contents, terms in Concepts, and both
-`word` and note text in Notes. Plain case-insensitive substring matching is enough — no fuzzy search.
+两个源阅读器侧栏顶部都有搜索框，而且用得非常频繁。输入时过滤**当前标签页**的列表：Contents 过滤
+文档标题，Concepts 过滤术语，Notes 同时匹配 `word` 和注释文本。普通的大小写不敏感子串匹配即可，
+不需要模糊搜索。
 
-### 3.2 Collapse
+### 3.2 折叠
 
-The sidebar collapses to give the body full width; persist in `localStorage` key `ltm_sidebar_collapsed`.
+侧边栏可折叠以让正文占满宽度；状态持久化到 `localStorage` 键 `ltm_sidebar_collapsed`。  
+- Concepts / Notes 的跳转必须稳定：依赖文内标题格式与标注 span，生成内容时遵守 `tech_spec.md`。
 
 ---
 
-## 4. Annotations: create with context (mandatory)
+## 4. 注释：创建上下文定位（强制）
 
-> Storing `word` alone is not enough: the same word may appear many times; grading also loses context.
+> 仅存 `word` 不够：一词多处出现时无法精确定位，批改也失去语境。
 
-On create, the frontend must silently write:
+创建时前端必须静默写入：
 
-| Field | Meaning |
+| 字段 | 含义 |
 | :--- | :--- |
-| `word` | Contiguous selected text (within one block, no newlines) |
-| `context` | **Full sentence or current block paragraph** (prefer whole sentence; at least the `<p>`/`<li>` text) |
-| `contextOffset` | Start char offset of `word` inside `context` |
-| `file` | Relative path of current doc |
-| `isHighlight` | `true` = pure highlight (no note text) · `false` = underlined annotation carrying a note |
-| `userNoteRaw` / `note` | User note (AI never overwrites raw) |
-| `aiReview` | Written by Phase 3 only; the frontend must never drop it (Smart Merge, §7.2) |
+| `word` | 用户选中的连续文本（单块内，无换行） |
+| `context` | **所在完整句子或当前块级段落**（推荐：整句；至少是所在 `<p>`/`<li>` 文本） |
+| `contextOffset` | `word` 在 `context` 内的起始字符偏移 |
+| `file` | 当前文档相对路径 |
+| `isHighlight` | `true` = 纯高亮（无注释文字）· `false` = 带注释的下划线标注 |
+| `userNoteRaw` / `note` | 用户注释（AI 不覆盖 raw） |
+| `aiReview` | 只由 Phase 3 写入；前端绝不能把它丢掉（Smart Merge，§7.2） |
 
-### 4.1 Two annotation forms (both required)
+### 4.1 两种注释形态（都必须有）
 
-The reader has **two** marking gestures and they are visually distinct:
+阅读器有**两种**标注手势，视觉上必须可区分：
 
-| Form | `isHighlight` | Classes | Meaning |
+| 形态 | `isHighlight` | 类名 | 含义 |
 | :--- | :--- | :--- | :--- |
-| Underlined annotation | `false` | `.annotated-word` | User wrote a note / question; hovering shows it, and Phase 3 grades it |
-| Pure highlight | `true` | `.annotated-word.custom-highlight` | "This matters / I'm unsure" with no text yet; still a gradable signal |
+| 下划线注释 | `false` | `.annotated-word` | 用户写了注释 / 疑问；悬停显示，Phase 3 会批改 |
+| 纯高亮 | `true` | `.annotated-word.custom-highlight` | 「这里重要 / 我不确定」但还没写文字；同样是可批改的信号 |
 
-A pure highlight must be upgradable to an annotation in place (open the float, type, save) without
-losing `id`, `context`, or `contextOffset`.
+纯高亮必须能就地升级为注释（打开浮层、输入、保存），且不丢失 `id`、`context`、`contextOffset`。
 
-### 4.2 Capture on selection — order matters
+### 4.2 划词捕获 —— 顺序至关重要
 
-1. Require a usable selection: non-empty, **no newline**, and **under 150 chars** (the source readers
-   allow whole phrases, not just single words).
-2. **Snap the range to word boundaries first** (`snapRangeToWordBoundaries`), then re-apply it to the
-   selection so the user sees what will actually be saved.
-3. **Only then** derive `word`, `context`, `contextOffset` from the snapped range. Computing the offset
-   before snapping produces an offset that no longer matches the stored `word` — silent mislocation later.
-4. `context` = `textContent` of the nearest enclosing block (`P LI TD TH H1–H6 BLOCKQUOTE DT DD`, plus
-   `.viz-block-body` — see §4.3's note below — stopping at the body container). `contextOffset` = length
-   of a range spanning from the start of that block to the start of the selection.
-5. If no enclosing block is found, store `context = ''` and `contextOffset = 0` rather than guessing.
+1. 先确认选区可用：非空、**不含换行**、且**短于 150 字符**（源阅读器允许选整个短语，不限单词）。
+2. **先把 range 吸附到单词边界**（`snapRangeToWordBoundaries`），再把它写回 selection，让用户看到
+   实际将被保存的范围。
+3. **然后才**从吸附后的 range 取 `word`、`context`、`contextOffset`。先算偏移再吸附，会得到一个
+   与所存 `word` 不再对应的偏移 —— 后续就是静默定位错误。
+4. `context` = 最近的祖先块级元素的 `textContent`（`P LI TD TH H1–H6 BLOCKQUOTE DT DD`，
+   加上 `.viz-block-body`——见 §4.3 下方说明，到正文容器为止）。`contextOffset` = 从该块起点到
+   选区起点的 range 长度。
+5. 找不到祖先块时，存 `context = ''` 和 `contextOffset = 0`，不要猜。
 
-### 4.3 Rendering: mark every occurrence, but exactly one is primary
+### 4.3 渲染：全部出现都标记，但只有一处是 primary
 
-This is the mechanism that makes a common word locatable. Do not simplify it away.
+这就是让常见词可定位的机制。不要为了省事把它简化掉。
 
 ```
-for each block element (P LI TD TH H1–H6 BLOCKQUOTE DT DD, plus dialogue lines and `.viz-block-body`):
-    collect text nodes in document order, skipping excluded subtrees
-    combined = concat(text node values)          # lets a phrase split across <em>/<strong> still match
-    match all annotation words against `combined` with one case-insensitive regex
-        - patterns sorted LONGEST FIRST  (stops "note" from eating "banknotes")
-        - add \b only on the side that starts/ends with a word char
-        - keep non-overlapping matches only
-    for each match:
-        word = matched text, lowercased
-        candidates = every annotation whose word equals `word`
-        sameBlock = candidates whose own context equals `combined` (trimmed)
-        ann = sameBlock.length > 1 ? whichever sameBlock offset is closest to matchIndex
-            : sameBlock[0] || candidates[0]      # see disambiguation rule below
+对每个块级元素（P LI TD TH H1–H6 BLOCKQUOTE DT DD，以及对话行和 `.viz-block-body`）：
+    按文档顺序收集 text node，跳过被排除的子树
+    combined = 拼接全部 text node 的值        # 让被 <em>/<strong> 劈开的短语仍能匹配
+    用一条大小写不敏感的正则，把所有注释词在 combined 上全部匹配出来
+        - 模式按长度降序排列（防止 "note" 吃掉 "banknotes"）
+        - 只在以词字符开头/结尾的那一侧加 \b
+        - 只保留互不重叠的匹配
+    对每个匹配：
+        word = 匹配到的文本，转小写
+        candidates = 所有 word 与之相等的注释
+        sameBlock = candidates 中 context（去空白后）等于 combined 的那些
+        ann = 若 sameBlock.length > 1，取偏移最接近 matchIndex 的那条
+            : 否则取 sameBlock[0] || candidates[0]      # 见下方消歧规则
         isPrimary = ann.context && combined.trim() === ann.context.trim()
                     && abs(matchIndex - ann.contextOffset) < 3
-    map matches back onto their text nodes, rebuild nodes in REVERSE order
-    wrap each matched segment in <span class="annotated-word[ custom-highlight]"
+    把匹配映射回各自的 text node，**逆序**重建这些节点
+    每个命中片段包进 <span class="annotated-word[ custom-highlight]"
           data-id data-word data-note [data-primary="true"]>
 ```
 
-| Rule | Why |
+| 规则 | 原因 |
 | :--- | :--- |
-| **All** occurrences get wrapped | The learner sees every place that word appears — that is the point of marking vocabulary |
-| **Only the matching occurrence** gets `data-primary="true"` | It is the one the note was actually written about, and the only correct jump target |
-| **Disambiguate by context before picking `ann`** | Two separate annotations can share a word — "coffee" highlighted with one note in paragraph 1 and a different note in paragraph 5. Picking "the first annotation with this word" cross-attributes paragraph 5's occurrence to paragraph 1's note: wrong tooltip, wrong click target, and a real risk of overwriting the wrong note on save. Prefer a candidate whose own `context` is this exact block; among same-block candidates (the word annotated twice in one block) prefer the closest offset; only fall back to "any annotation with this word" when nothing belongs to this block at all — the common case of one real note and several unrelated echoes |
-| Tolerance `< 3` chars on the offset | Absorbs whitespace normalization between capture time and render time. Do not tighten to `=== 0`; do not widen |
-| Rebuild text nodes in reverse order | Forward rebuilding invalidates the offsets of later nodes in the same block |
-| Excluded subtrees | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`, anything already `.annotated-word`, and speaker labels. Annotating inside an input would destroy the answer |
-| Headings are allowed | Both source readers annotate inside headings; only code and form controls are off-limits |
-| **`.viz-block-body` counts as a block; other `viz-*` wrapper `div`s do not** | Per `visual_arsenal.md`, `.viz-caption` is a `<p>` (already covered above) but `.viz-block-body` is a `<div>`, and `div` is deliberately *not* generic block-level here — see the next row. Treating only `.viz-block-body` as a block (by class, not by making all `div`s block-level) lets text inside a flowchart/block-diagram box be selected and highlighted, without breaking the row below |
-| `div` is not block-level in general | So the walker recurses *through* `.viz-blocks` / `.viz-blocks-row` / `.viz-block` / `.sticky-note` wrapper `div`s down to whatever they contain (their own `<p>`, or a `.viz-block-body`), instead of swallowing an entire diagram's text into one match. Making `.viz-block-body` block-level is an explicit, narrow exception to this — not a general "treat divs as blocks" rule |
+| **全部**出现都包起来 | 学习者能看到这个词出现的每一处 —— 这正是标记词汇的意义 |
+| **只有命中那一处**拿 `data-primary="true"` | 它才是这条注释真正针对的位置，也是唯一正确的跳转目标 |
+| **选 `ann` 前先按 context 消歧** | 两条独立的注释可能共用同一个词——"coffee" 在第 1 段和第 5 段各自写了不同备注。取「数组里第一个同词注释」会把第 5 段的出现错误关联到第 1 段的注释：悬浮提示错、点击编辑目标错，保存时还可能覆盖那条不相关的注释。优先选自身 `context` 就是当前块的候选；同一块内同一个词被标注多次时，优先选偏移最接近的那条；只有没有任何候选属于当前块时，才退回「任意一条同词注释」——对应最常见的情形：只有一条真实备注，这个词在别处只是重复出现的回声 |
+| 偏移容差 `< 3` 字符 | 吸收捕获与渲染之间的空白归一化差异。不要收紧成 `=== 0`，也不要放宽 |
+| 逆序重建 text node | 正序重建会让同一块内后续节点的偏移全部失效 |
+| 排除的子树 | `PRE CODE TEXTAREA INPUT BUTTON SCRIPT STYLE`、已经是 `.annotated-word` 的元素、以及说话人标签。在输入框内加标注会毁掉作答内容 |
+| 标题内允许标注 | 两个源阅读器都在标题里做过标注；只有代码和表单控件是禁区 |
+| **`.viz-block-body` 算块级元素，其它 `viz-*` 外层 `div` 不算** | 按 `visual_arsenal.md`，`.viz-caption` 是 `<p>`（上面已覆盖），但 `.viz-block-body` 是 `<div>`，而 `div` 在这里刻意**不**被当作通用块级元素——见下一行。只把 `.viz-block-body` 按类名单独识别为块级（而不是把所有 `div` 都算块级），既能让流程图/方框图里的文字可以被划选和高亮，又不破坏下一行说的规则 |
+| `div` 整体上不算块级元素 | 因此遍历会**穿过** `.viz-blocks` / `.viz-blocks-row` / `.viz-block` / `.sticky-note` 这些外层 `div` 容器，往下钻到它们实际包着的内容（自己的 `<p>`，或者 `.viz-block-body`），而不是把整张图的文字混成一整块去匹配。把 `.viz-block-body` 算作块级是对这条规则的一个明确、窄范围的例外，不是"所有 div 都算块级"这种笼统规则 |
 
-> **Do not port `sortedAnnotations.find(a => a.word === word)` from the magazine reference
-> implementation** (`index.html` around the `applyAnnotations` function) — it has exactly the
-> cross-attribution bug described above. It was fixed in `templates/reader_skeleton.html` and this
-> branch's `reader-core.js`; match those versions, not the original reference.
+> **不要照搬 magazine 参考实现（`index.html` 的 `applyAnnotations` 函数附近）里的
+> `sortedAnnotations.find(a => a.word === word)`** —— 它就是上面这个串号 bug 的源头。
+> `templates/reader_skeleton.html` 和本分支的 `reader-core.js` 里都已经修好了，请对照那两个版本，
+> 而不是原始参考实现。
 
-### 4.4 Locate priority (Notes sidebar → body)
+### 4.4 定位优先级（Notes 侧栏 → 正文）
 
-1. `data-id === note.id` **and** `data-primary === "true"` — the correct hit  
-2. `data-id === note.id` (any occurrence) — annotation exists but context drifted after an edit  
-3. First span whose text equals `word`, case-insensitive — legacy notes with no `context`  
-4. Nothing found → tell the user the anchor is gone; never scroll to a random occurrence silently
+1. `data-id === note.id` **且** `data-primary === "true"` —— 正确命中  
+2. `data-id === note.id`（任意一处）—— 注释还在，但内容编辑后语境漂移了  
+3. 第一个文本等于 `word` 的 span（大小写不敏感）—— 无 `context` 的老数据  
+4. 都没找到 → 告知用户锚点已失效；**绝不静默滚到随便某一处**
 
-On hit: `scrollIntoView({ behavior: 'smooth', block: 'center' })`, flash the accent color for ~2s, then
-restore. Notes list order: prefer document physical order; else by time.
+命中后：`scrollIntoView({ behavior: 'smooth', block: 'center' })`，用强调色闪烁约 2 秒后恢复。
+Notes 列表排序：优先按正文物理顺序；否则按时间。
 
-**Legacy tolerance**: `context` was added to the source projects mid-flight, so roughly half of the
-existing notes have none. New notes must always carry it; old ones must still open via rule 3.
+**老数据容忍**：`context` 是源项目中途才加的，因此约有一半旧注释没有它。新注释必须始终写入；
+旧注释仍要能通过第 3 条规则打开。
 
-**Generation avoidances** (same as source projects):
+**生成内容时的规避**（与源项目一致）：
 
-- Do not put critical terms only inside code fences / across sticky-note boundaries (cannot highlight)  
-- `word` must not cross paragraphs  
+- 不要让关键术语只出现在代码块 / 跨 sticky-note 边界（会导致无法高亮）  
+- `word` 禁止跨段落  
 
-Phase 3 grading: **must use `context` for situated explanation** — no dictionary dumps.
+Phase 3 批改：**必须结合 `context` 做语境讲解**，禁止只甩词典。
 
 ---
 
-## 5. Click-to-jump experience
+## 5. 点击跳转体验体验
 
-| Scene | Expectation |
+| 场景 | 期望 |
 | :--- | :--- |
-| Click a Notes item | Scroll to body annotation → brief highlight flash → open edit float (if any) |
-| Click a Concepts item | Scroll to concept heading (Unit `### N. Name` or Mag Key Ideas anchor) |
-| Click a TOC item | Load that md; Notes/Concepts switch to that file’s data; never clear other files’ `notes.json` |
-| Jump targets a doc that is not open | Load that doc first, **await** the render, then locate — do not race the DOM |
+| Notes 列表点一条 | 滚动到正文标注 → 短暂高亮闪烁 → 打开编辑浮层（若有） |
+| Concepts 点一条 | 滚动到概念标题（Unit 的 `### N. 名称` 或 Mag 的 Key Ideas 锚点） |
+| 目录点一篇 | 加载该 md；Notes/Concepts 切换为该文件数据；不清空其它文件的 `notes.json` |
+| 跳转目标不在当前打开的文档 | 先加载该文档并 **await** 渲染完成，再定位 —— 不要和 DOM 抢时序 |
 
 ---
 
-## 6. Interactive elements & autosave
+## 6. 交互组件与自动保存机制 (Interactive Elements & Autosave)
 
-The frontend must parse interactive Markdown elements, render HTML controls, and on user input/check **realtime autosave answers back into the source Markdown**.
+前端必须能够解析 Markdown 正文中的交互元素，在浏览器中渲染为 HTML 交互控件，且在用户操作（输入/勾选）时实时、自动地将答案写回源 Markdown 文件中。
 
-### 6.1 Parse & render rules
+### 6.1 交互元素解析与渲染规则
 
-| Element | Markdown | HTML render | Parse / write-back |
+| 元素类型 | Markdown 语法 | HTML 渲染形式 | 解析与写回逻辑 |
 | :--- | :--- | :--- | :--- |
-| **Empty blank** | `___` (≥3 underscores) | `<input type="text" class="interactive-blank" data-index="N" />` | **Parse**: replace underscore runs with inputs.<br>**Write-back**: on change, replace N-th `___` in memory Markdown with `__user answer__` (double underscores wrap the answer). |
-| **Filled blank** | `__filled content__` | `<input type="text" class="interactive-blank" data-index="N" value="filled content" />` | **Parse**: double-underscore wraps → input with default value.<br>**Write-back**: update to `__new content__`; if cleared, degrade back to `___`. |
-| **Open answer** | `**[Your Answer]**` or `**[Your Answer]**: (answer)` | `<textarea class="interactive-textarea" data-index="N">answer</textarea>` | **Parse**: match `**[Your Answer]**` at line start or list item; text after colon/in parens is initial value.<br>**Write-back**: update after `**[Your Answer]**:` to `(user answer)` or trailing answer, keeping Markdown structure. |
-| **Choice / T-F** | `- [ ]` or `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **Parse**: standard Markdown task list → checkbox.<br>**Write-back**: toggle `[ ]` ↔ `[x]` at the matching position. |
+| **空格填空** | `___` (3个及以上下划线) | `<input type="text" class="interactive-blank" data-index="N" />` | **解析**：将连续下划线替换为输入框。<br>**写回**：当输入框发生变化，前端将内存中 Markdown 的第 N 个 `___` 替换为 `__用户答案__`（注意是双下划线包裹答案）。 |
+| **已填填空** | `__已填内容__` (双下划线包裹) | `<input type="text" class="interactive-blank" data-index="N" value="已填内容" />` | **解析**：解析双下划线包裹的文本，渲染为带默认值的输入框。<br>**写回**：当用户修改输入，更新双下划线内的内容为 `__新内容__`。若用户清空，则退化回三个下划线 `___`。 |
+| **主观问答** | `**[Your Answer]**` 或 `**[Your Answer]**: (答案)` | `<textarea class="interactive-textarea" data-index="N">答案</textarea>` | **解析**：匹配行首或列表项中的 `**[Your Answer]**` 标记。若冒号后或括号内有答案，则作为 textarea 初始值。<br>**写回**：用户输入时，在 Markdown 对应行的 `**[Your Answer]**:` 后面更新为 `(用户答案)` 或紧跟 `用户答案`，保持 Markdown 语法结构。 |
+| **单选/多选/判断** | `- [ ]` 或 `- [x]` | `<input type="checkbox" class="interactive-checkbox" data-index="N" />` | **解析**：标准的 Markdown 任务列表语法，渲染为可勾选的 checkbox。<br>**写回**：用户勾选/取消勾选时，将内存中 Markdown 对应位置的 `[ ]` 切换为 `[x]`，反之亦然。 |
 
-### 6.1.1 Dual-input tolerance (strongly recommended)
+### 6.1.1 双重输入框容错（强烈建议）
 
-Protocol already bans stacking blanks + `[Your Answer]` on the same item (`tech_spec.md` §1.1). When migrating the reader, still add UI tolerance so legacy bad content does not mislead users again:
+协议层已禁止同一题叠用填空 + `[Your Answer]`（见 `tech_spec.md` §1.1）。迁入阅读器时仍建议做 UI 容错，避免历史坏内容再次误导用户：
 
-1. Split DOM by heading (`##` / `###` / `####`) or exercise block.  
-2. If a block **already has** `.interactive-blank` (from `___` / `__filled__`) and a following `[Your Answer]` textarea is **empty** → **do not render** that redundant textarea (or collapse it and mark “redundant — ignored”).  
-3. Do not treat an empty textarea as the sole evidence of “unanswered”; grading still prefers inline blanks (`p3_review.md` §1.1).
+1. 按标题（`##` / `###` / `####`）或题块切分 DOM。  
+2. 若某题块内**已有** `.interactive-blank`（来自 `___` / `__已填__`），且紧随其后的 `[Your Answer]` 渲染出的 textarea **为空** → **不渲染**该冗余 textarea（或折叠并标「redundant — ignored」）。  
+3. 不要把空 textarea 当成「用户未作答」的唯一证据；批改侧仍以行内填空为准（`p3_review.md` §1.1）。
 
-### 6.2 Autosave flow
+### 6.2 自动保存信息流 (Autosave Flow)
 
-1. **In-memory copy**: after loading Markdown, keep a raw Markdown string in memory.  
-2. **Listen + debounce**: listen to `input` / `change` on all interactive controls. Use **debounce (suggested 500–1000ms)** to avoid flooding the backend.  
-3. **Full write-back**: on debounce fire, run replace algorithm on the in-memory string, then `POST /api/save`.  
-4. **API contract**:
-   * **Path**: `/api/save`
-   * **Payload**: `{ path: "content/units/unit01.md", content: "full updated Markdown…" }`
-   * **Backend**: validate `path` safety, then overwrite the source file.
-5. **Grading panel render**:
-   * Results wrap in `details.feedback-panel`.
-   * Errors use `<span class="err">wrong</span>` and `<span class="fix">fix</span>`; frontend must preserve and render these tags.
+1. **内存副本维护**：前端加载 Markdown 后，在内存中保留一份 raw Markdown 字符串副本。
+2. **事件监听与防抖**：监听所有交互控件的 `input` 或 `change` 事件。当用户输入时，利用 **防抖函数 (Debounce，建议 500ms - 1000ms)**，避免频繁向后台发送请求。
+3. **全量写回**：防抖触发后，前端运行替换算法更新内存中的 Markdown 字符串，然后发起 `POST /api/save` 接口。
+4. **接口契约**：
+   * **请求路径**：`/api/save`
+   * **Payload**：`{ path: "content/units/unit01.md", content: "更新后的全量Markdown文本..." }`
+   * **后端行为**：后端接收到请求后，校验 `path` 安全性，直接覆盖写入对应的源文件。
+5. **批改面板渲染**：
+   * 批改结果使用 `details.feedback-panel`（折叠反馈面板）包裹。
+   * 文本错误标注使用 `<span class="err">错误词</span>` (红色中划线/背景) 与 `<span class="fix">修改词</span>` (绿色下划线/背景) 渲染，前端需要对这些特定的 HTML 标签予以保留和渲染。
 
 ---
 
-## 7. Multi-doc rules & Universal Reader fusion
+### 6.3 保存状态指示器（必需）
 
-On new-project init, the frontend must fuse **Magazine mode** and **Unit mode** into one Universal Reader SPA.
+自动保存最大的问题不是丢数据，而是**用户不知道有没有保存**。所以状态必须一直可见，
+并且必须存在一个「我现在就要保存」的出口 —— 不放心自动保存的人一定会去找它。
 
-### 7.1 Layout
+| 要求 | 硬契约 |
+| :--- | :--- |
+| 位置 | 页头右上角（与主题、导出按钮同一组） |
+| 载体 | **`<button class="save-status">`** —— 是按钮不是纯文字标签；必须可点击、可聚焦 |
+| 结构 | 内含 `.save-icon`（一眼扫的图标）与 `.save-label`（文字说明） |
+| 状态 | `idle` / `dirty` / `saving` / `saved` / `error`，同时写入 `data-state` 与 class |
+| 图标 | 空心圆 / 实心圆 / 虚线圆（可动） / 对勾 / 警告，五个状态互相可分辨 |
+| 手动保存 | **点击指示器**立即保存；**`⌘S` / `Ctrl+S`** 同效，且必须 `preventDefault()` 掉浏览器的「保存网页」 |
+| 干净文档 | 手动保存时若无改动，也要给回应（状态置 `saved` + 一句 toast）—— 静默会被读成「没生效」 |
+| 单一写入口 | 手动保存必须走与自动保存**同一个函数**；禁止再写一条 POST 路径 |
+| 窄屏 | 可以只留图标隐藏文字，**不得整个隐藏** —— 它是手动保存的唯一入口 |
+| 可访问性 | `aria-live="polite"` + `aria-label`；`title` 写明快捷键 |
+
+状态语义（文案可按界面语言改，状态机不可改）：
+
+```
+idle    ○  就绪 —— 尚未打开文档或无改动
+dirty   ●  待保存 —— 已改动，防抖计时中
+saving  ◌  保存中 —— POST /api/save 进行中
+saved   ✓  已保存 —— 服务器已确认写盘
+error   ⚠  保存失败 —— 保留 dirty=true，下次输入会重试
+```
+
+---
+
+## 7. 多文档项目的精细规则与通用阅读器融合
+
+新项目初始化时，前端必须将**杂志模式 (Magazines)** 和**课本模式 (Units)** 融合进一个统一的单页阅读器（Universal Reader）中。
+
+### 7.1 通用版面布局 (Layout)
 
 ```
 +-----------------------------------------------------------------------+
-|  LOGO  [Universal Reader]          [current issue/unit title]  [save/export/theme] |
+|  LOGO  [通用阅读器]                [当前期/单元标题]          [保存/导出/主题] |
 +------------------------------------+----------------------------------+
-| Sidebar                            | Main Viewport                    |
+| Sidebar (左侧栏)                   | Main Viewport (主阅读区)         |
 |                                    |                                  |
 | +--------------------------------+ | +------------------------------+ |
-| | Tab 1: Contents                | | |                              | |
-| | - Magazines (newest→oldest)    | | |   Rendered Markdown          | |
-| | - Units (optional week groups) | | |   (blanks, choices, answers) | |
+| | Tab 1: Contents (目录树)        | | |                              | |
+| | - Magazines (杂志列表，新->旧)  | | |   Markdown 渲染内容          | |
+| | - Units (课本单元，按Week分组) | | |   (填空、选择、问答交互控件)    | |
 | +--------------------------------+ | |                              | |
-| | Tab 2: Concepts                | | |   Mermaid / SVG visuals      | |
+| | Tab 2: Concepts (词汇与概念)    | | |   Mermaid 图表 / SVG 可视化  | |
 | +--------------------------------+ | |                              | |
-| | Tab 3: Notes                   | | +------------------------------+ |
+| | Tab 3: Notes (高亮注释与批改)    | | +------------------------------+ |
 | +--------------------------------+ |                                  |
 +------------------------------------+----------------------------------+
 ```
 
-### 7.2 Core fusion contracts
+### 7.2 核心融合交互契约
 
-1. **Multi-mode TOC**:
-   * Fetch via `/api/files` (or `/api/issues`).
-   * Contents tab must group `content/magazines/` and `content/units/` clearly.
-   * Persist sort (`desc` / `asc`) in `localStorage` via a button.
-2. **Note isolation & Smart Merge**:
-   * `notes.json` stores all user highlights and AI reviews.
-   * Opening file A applies only `file === 'content/magazines/A.md'` highlights; Notes Tab defaults to current file only.
-   * **Smart Merge (backend)**: before writing `notes.json`, read existing file and **merge** — never wipe AI `aiReview` already written.
+1. **侧栏多模态目录展示**：
+   * 前端通过 `/api/files` (或 `/api/issues`) 接口获取所有可用文件。
+   * 必须在 **Contents** 侧栏中清晰分组展示：`content/magazines/` 下的杂志列表与 `content/units/` 下的课本列表。
+   * 支持通过按钮在 `localStorage` 中持久化记录排序规则（`desc` / `asc`）。
+2. **注释隔离与 Smart Merge**：
+   * `notes.json` 存储所有的用户高亮及 AI 批复。
+   * 打开 A 文件时，正文仅应用 `file === 'content/magazines/A.md'` 的高亮，Notes Tab 默认也只展示当前文件的注释。
+   * **Smart Merge (后端核心细节)**：当用户在前端添加或修改注释并保存 `notes.json` 时，后端在写入前必须读取已有的 `notes.json`，**合并**新旧数据，绝对不能覆盖或冲掉 AI 已经在 `aiReview` 字段中写入的批改和反馈信息。
 
 ---
 
-## 7.3 Locked names (do not rename — `verify_reader.js` asserts these)
+## 7.3 锁定命名（不得改名 —— `verify_reader.js` 会断言这些）
 
-The two source readers each invented their own names, which is why nothing could be shared between
-them. The template picks one set. Everything below is a hard contract.
+两个源阅读器各自发明了一套命名，这正是它们之间无法共享任何东西的原因。模板统一选定一套。
+以下全部是硬契约。
 
-### localStorage keys
+### localStorage 键
 
-| Key | Values | Default |
+| 键 | 取值 | 默认 |
 | :--- | :--- | :--- |
 | `ltm_theme` | `light` \| `dark` | `dark` |
 | `ltm_sort_order` | `asc` \| `desc` | `asc` |
 | `ltm_sidebar_collapsed` | `true` \| `false` | `false` |
-| `ltm_notes_show_all` | `true` \| `false` | `false` (current doc only) |
+| `ltm_notes_show_all` | `true` \| `false` | `false`（仅当前文档） |
 
-### HTTP routes
+### HTTP 路由
 
-| Route | Method | Purpose |
+| 路由 | 方法 | 用途 |
 | :--- | :--- | :--- |
-| `/api/files` | GET | List readable docs under `content/magazines/` + `content/units/` only |
-| `/api/file?path=…` | GET | One doc's raw Markdown; path must resolve inside `content/` |
-| `/api/save` | POST | `{ path, content }` — full write-back of a doc |
-| `/api/notes` | GET / POST | Read / Smart-Merge write of `notes.json` |
+| `/api/files` | GET | 只列出 `content/magazines/` + `content/units/` 下的可读文档 |
+| `/api/file?path=…` | GET | 某篇文档的原始 Markdown；路径必须解析在 `content/` 之内 |
+| `/api/save` | POST | `{ path, content }` —— 整篇回写 |
+| `/api/notes` | GET / POST | 读取 / Smart Merge 写入 `notes.json` |
 
-### DOM contract
+### DOM 契约
 
-| Name | Role |
+| 名称 | 作用 |
 | :--- | :--- |
-| `html[data-theme]` | Theme carrier (§2.5) |
-| `.annotated-word` | Any marked span |
-| `.custom-highlight` | Added when `isHighlight === true` |
-| `[data-id]` `[data-word]` `[data-note]` | Annotation identity on the span |
-| `[data-primary="true"]` | The single context-matched occurrence (§4.3) |
-| `.interactive-blank` `.interactive-textarea` `.interactive-checkbox` | Autosaved controls (§6.1) |
-| `.viz-*` `.sticky-note` | Visual arsenal (§11.3) |
+| `html[data-theme]` | 主题载体（§2.5） |
+| `.annotated-word` | 任何被标记的 span |
+| `.custom-highlight` | `isHighlight === true` 时追加 |
+| `[data-id]` `[data-word]` `[data-note]` | span 上的注释身份 |
+| `[data-primary="true"]` | 唯一的语境命中处（§4.3） |
+| `.interactive-blank` `.interactive-textarea` `.interactive-checkbox` | 自动保存的控件（§6.1） |
+| `.save-status` `.save-icon` `.save-label` | 保存状态指示器兼手动保存按钮（§6.3） |
+| `.viz-*` `.sticky-note` | 可视化武器库（§11.3） |
 
 ---
 
-## 7.4 Explicitly out of scope (do not build, even though the reference has it)
+## 7.4 明确不做的部分（即便参考实现里有）
 
-The source readers accumulated extras that must **not** be carried into a fresh project reader:
+源阅读器积累了一些附加功能，**不得**带进新项目的阅读器：
 
-| Excluded | Why |
+| 排除项 | 原因 |
 | :--- | :--- |
-| **Git UI and all `/api/git/*` routes** | `Melbourne culture magazine/server.js` implements `/api/git/status`, `/api/git/history`, `/api/git/commit`, `/api/git/show` and a "Git" sidebar tab. **Do not port any of it.** Version control is the user's business outside the reader, many users of this template have no Git installed at all, and a commit button in a study app is a foot-gun |
-| Audio/TTS controls | Only meaningful for a language subject; add later per subject, never in the baseline |
-| Subject-specific tabs (slang library, cardpacks) | Generalized into the Concepts tab (§3) |
-| Any write route outside `content/` and `notes.json` | The reader must not be able to modify `protocols/`, `knowledge/`, or `state/` |
+| **Git UI 与全部 `/api/git/*` 路由** | `Melbourne culture magazine/server.js` 实现了 `/api/git/status`、`/api/git/history`、`/api/git/commit`、`/api/git/show` 和一个「Git」侧栏标签页。**一行都不要移植。** 版本管理是阅读器之外的事，很多使用本模板的人根本没装 Git，而在学习应用里放一个提交按钮是自找麻烦 |
+| 音频 / TTS 控件 | 只对语言类科目有意义；日后按科目单独加，绝不进基线 |
+| 学科专属标签页（俚语库、卡包） | 已泛化进 Concepts 标签页（§3） |
+| `content/` 与 `notes.json` 之外的任何写入路由 | 阅读器不得有能力修改 `protocols/`、`knowledge/`、`state/` |
 
-If the user later asks for one of these, build it then — but it is never part of Step 3.5 acceptance.
-
----
-
-## 8. Migration & build references
-
-**Start from `templates/reader_skeleton.html`.** It is the reference UI shell for this template:
-design tokens for both themes, the FOUC guard, preference persistence, sidebar tabs/search/sort/collapse,
-and working implementations of §4.2 capture, §4.3 `data-primary` rendering, and §4.4 jump. Copy it to
-the root as `index.html` and extend it; it is deliberately free of Git UI and subject-specific features.
-
-Then integrate the remaining modules. **Port behavior, not files** — and apply §7.3 names and §7.4
-exclusions while porting:
-
-1. **Server & routes**: reference `Melbourne culture magazine/server.js` — static hosting, `/api/save` full save, Smart Merge for `notes.json`. **Stop before the `/api/git/*` handlers.**  
-2. **Multi-issue TOC & note jump**: reference `Melbourne culture magazine/index.html` — highlight create, floating edit panel, locate via `context` + `contextOffset` (`applyAnnotations` / `jumpToWord` are the functions worth studying, **except** its word-to-annotation lookup — see the §4.3 warning above). Its theming uses `body.light-theme`; **use `html[data-theme]` instead** (§2.5).  
-3. **Textbook interactive controls**: reference `English learning for Melbourne/scripts/preview.html` — convert `___`, `- [ ]`, `**[Your Answer]**` to interactive DOM with autosave, and copy its `<head>` FOUC guard verbatim in spirit.  
-4. **Visual module**: import `scripts/viz.css` so blocks/SVG/Mermaid styles stay global and survive Markdown rendering.
-
-> Neither reference is available to a user who cloned only this template. Everything required to
-> rebuild from scratch is specified in §1–§7 and checked by `scripts/verify_reader.js`; the references
-> are an accelerator, not a dependency.
+用户日后要其中某项时再做 —— 但它永远不属于 Step 3.5 的验收范围。
 
 ---
 
-## 9. Acceptance checklist (frontend Ready)
+## 8. 迁入与开发参考建议
 
-> Run `node scripts/verify_reader.js` for the machine-checkable half of this list. It must pass before
-> `p0_bootstrap.md` Step 3.5 counts as done and before cleanup (Gate B) may run.
+**从 `templates/reader_skeleton.html` 开始。** 它是本模板的参考 UI 外壳：两套主题的设计变量、
+FOUC 守卫、偏好持久化、侧边栏标签/搜索/排序/折叠，以及 §4.2 捕获、§4.3 `data-primary` 渲染、
+§4.4 跳转的可用实现。把它复制到根目录改名 `index.html` 再扩展；它刻意不含 Git UI 和任何学科专属功能。
 
-- [ ] `node scripts/verify_reader.js` passes with no FAIL  
-- [ ] Light and dark both usable; toggle persists; **no white flash on reload in dark mode**  
-- [ ] Annotation underline, highlight fill, floats, blanks, tables, and `viz-*` all legible in **both** themes  
-- [ ] Highlighting a word that occurs many times marks them all, and the sidebar jumps to the right one  
-- [ ] A pure highlight can be upgraded to a note without losing its anchor  
-- [ ] No Git UI, no `/api/git/*` route exists  
-- [ ] Sidebar search filters the active tab  
-- [ ] TOC toggles **oldest/newest** and persists (default oldest-first)  
-- [ ] Internal md never appears in reading TOC  
-- [ ] Magazines vs Units grouped; notes never cross files  
-- [ ] Notes write `context` + `contextOffset`  
-- [ ] Notes click jumps and opens edit  
-- [ ] New notes appear in sidebar immediately  
-- [ ] Saving notes never loses `aiReview` (Smart Merge)  
-- [ ] Blanks / open / MCQ / T-F answerable and reviewable  
-- [ ] TOC: rebuild after every body re-render; click uses `getElementById` live lookup (no orphan DOM)  
-- [ ] Selection snaps to word boundaries (avoid partial-letter match failures)  
-- [ ] Highlights allowed in headings; not inside code/`pre` (same as source projects)
+其余模块按下列方式整合。**移植的是行为，不是文件** —— 移植时同步套用 §7.3 命名与 §7.4 排除项：
+
+1. **服务器与路由基础**：参考 `Melbourne culture magazine/server.js`，保留其静态文件托管、`/api/save` 全量保存以及 `notes.json` 的 Smart Merge 逻辑。**读到 `/api/git/*` 处理函数就停。**
+2. **多期目录与注释跳转**：参考 `Melbourne culture magazine/index.html` 中的 Notes 高亮创建、Floating Panel 浮层编辑、基于 `context` + `contextOffset` 的精确定位逻辑（值得研读的是 `applyAnnotations` / `jumpToWord` 两个函数，**但词到注释的查找逻辑除外**——见上方 §4.3 的警告）。它的主题用的是 `body.light-theme`，**请改用 `html[data-theme]`**（§2.5）。
+3. **课本交互控件与作答渲染**：参考 `English learning for Melbourne/scripts/preview.html` 中将 `___`、`- [ ]`、`**[Your Answer]**` 动态转换为交互 DOM 并在发生变化时触发自动保存的 Javascript 逻辑，并照搬其 `<head>` 中 FOUC 守卫的做法。
+4. **可视化模块**：引入 `scripts/viz.css` 以保证工程框图、SVG 和 Mermaid 样式全局统一，且不被 Markdown 渲染引擎破坏。
+
+> 只克隆了本模板的用户手上并没有这两个参考项目。从零重建所需的一切都写在 §1–§7 中，并由
+> `scripts/verify_reader.js` 检查；参考实现是加速器，不是依赖。
+
 
 ---
 
-## 10. Render lifecycle (from magazine tech_spec)
+## 9. 验收清单（前端 Ready 的定义）
 
-1. Editing annotations rewrites body `innerHTML` → all old DOM refs die.  
-2. After every `renderActiveFile()`, immediately `generateTOC()`.  
-3. TOC clicks must not cache old heading nodes — look up by id and scroll.
+> 本清单中可机检的部分请运行 `node scripts/verify_reader.js`。它必须通过，`p0_bootstrap.md`
+> Step 3.5 才算完成，闸 B 的清理才允许执行。
+
+- [ ] `node scripts/verify_reader.js` 无 FAIL  
+- [ ] 亮色与暗色都可用；切换可持久化；**暗色下重新加载不得白屏闪烁**  
+- [ ] 注释下划线、高亮填充、浮层、填空框、表格、`viz-*` 在**两种**主题下都清晰可读  
+- [ ] 高亮一个多处出现的词时，全部出现都被标记，且侧栏能跳到正确的那一处  
+- [ ] 纯高亮可就地升级为注释而不丢锚点  
+- [ ] 无 Git UI，无 `/api/git/*` 路由  
+- [ ] 侧边栏搜索可过滤当前标签页  
+- [ ] 目录可 **旧到新 / 新到旧** 切换且持久化（默认旧到新）  
+- [ ] 内部 md 不出现在阅读目录  
+- [ ] Magazines 与 Units 分组、多文件不串注释  
+- [ ] 注释写入 `context` + `contextOffset`  
+- [ ] Notes 点击可跳转并打开编辑  
+- [ ] 新注释立即出现在侧栏  
+- [ ] 保存 notes 不丢 `aiReview`（Smart Merge）  
+- [ ] 填空 / 问答 / MCQ / T-F 可作答并回看  
+- [ ] TOC：每次正文重渲染后重建；点击用 `getElementById` 动态寻址（防 orphan DOM）  
+- [ ] 选词自动对齐到单词边界（避免漏选字母导致匹配失败）  
+- [ ] 标题内可高亮；代码块/`pre` 内不可高亮（与源项目一致）
 
 ---
 
-## 11. Visual Arsenal render contract
+## 10. 渲染生命周期（迁自杂志 tech_spec）
 
-> Authoritative syntax: `protocols/visual_arsenal.md`. Here only **how the browser must behave** so “write once, display consistently, never crash”.
+1. 修改标注会重写正文 `innerHTML` → 旧 DOM 引用全部失效。  
+2. 每次 `renderActiveFile()` 结束后必须立刻 `generateTOC()`。  
+3. TOC 点击不得缓存旧标题节点，必须按 id 现查现滚。
 
-### 11.1 Dependencies
+---
 
-| Capability | Requirement |
+## 11. 可视化武器渲染契约（Visual Arsenal）
+
+> 权威语法见 `protocols/visual_arsenal.md`。此处只定**浏览器必须如何表现**，保证「怎么写就怎么显示、不崩、各期长得一样」。
+
+### 11.1 依赖
+
+| 能力 | 要求 |
 | :--- | :--- |
-| Mermaid | Fixed CDN/local version (suggest ≥10); **one global theme** (e.g. `neutral` or CSS-var map); no in-doc `init` theme overrides |
-| marked | `mermaid` code fences must **not** go through hljs as normal code; hand to Mermaid |
-| Sanitize | Body HTML whitelist includes: `div.viz-*`, sticky-note variants, SVG subset (arsenal §4.7) |
+| Mermaid | 固定 CDN/本地版本（建议 ≥10）；**全局统一 theme**（如 `neutral` 或项目 CSS 变量映射）；禁止文档内 `init` 覆盖主题 |
+| marked | 代码块语言为 `mermaid` 时**不要**当普通 code 用 hljs 高亮；交给 Mermaid |
+| 消毒 | 正文 HTML 白名单含：`div.viz-*`、`sticky-note` 变体、svg 子集（见 arsenal §4.7） |
 
-### 11.2 Render pipeline (each open/refresh)
+### 11.2 渲染流程（每次打开/刷新文档）
 
 ```
 markdown → marked HTML
-  → find .viz-blocks / .viz-svg / .viz-steps / .viz-formula / .sticky-note → already final DOM
-  → find pre code.language-mermaid (or agreed container)
-       → mermaid.render each
-       → try/catch: on fail show “diagram render failed” + expandable source; **never abort the whole page**
-  → then applyAnnotations / TOC
+  → 找到 .viz-blocks / .viz-svg / .viz-steps / .viz-formula / .sticky-note → 已是最终 DOM
+  → 找到 pre code.language-mermaid（或约定容器）
+       → 逐个 mermaid.render
+       → try/catch：失败则显示「图示渲染失败」+ 可展开源码，**绝不中断全文**
+  → 再 applyAnnotations / TOC
 ```
 
-### 11.3 Locked CSS class names (do not rename)
+### 11.3 必须提供的 CSS class（名称锁定，禁止改名）
 
-| class | Role |
+| class | 作用 |
 | :--- | :--- |
-| `.viz-blocks` `.viz-blocks-row` `.viz-block` `.viz-block-accent` `.viz-arrow` `.viz-caption` | Engineering blocks |
-| `.viz-block-title` `.viz-block-body` | Block text |
-| `.viz-svg` `.viz-svg-node` `.viz-svg-edge` `.viz-svg-label` `.viz-svg-muted` | SVG coloring |
-| `.viz-steps` | Step blocks |
-| `.viz-formula` `.viz-formula-main` `.viz-formula-note` | Formula blocks |
-| `.sticky-note.warn-note` `.sticky-note.formula-note` | Sticky variants |
+| `.viz-blocks` `.viz-blocks-row` `.viz-block` `.viz-block-accent` `.viz-arrow` `.viz-caption` | 工程框图 |
+| `.viz-block-title` `.viz-block-body` | 框图内文 |
+| `.viz-svg` `.viz-svg-node` `.viz-svg-edge` `.viz-svg-label` `.viz-svg-muted` | SVG 着色 |
+| `.viz-steps` | 步骤块 |
+| `.viz-formula` `.viz-formula-main` `.viz-formula-note` | 公式块 |
+| `.sticky-note.warn-note` `.sticky-note.formula-note` | 便利贴变体 |
 
-Reference styles may live in `scripts/viz.css` (import on migrate). Small screens: `viz-blocks-row` may wrap; mermaid `max-width:100%`.
+参考样式可放 `scripts/viz.css`（迁入前端时引入）。小屏：`viz-blocks-row` 允许折行；mermaid 图 `max-width:100%`。
 
-### 11.4 Consistency acceptance (anti “looks different every time”)
+### 11.4 一致性验收（防「每次长得不一样」）
 
-- [ ] All flowcharts share one Mermaid theme  
-- [ ] All `viz-block` share border/radius/type size  
-- [ ] caption size matches body secondary text  
-- [ ] Failed diagrams have a unified error UI — not blank / white screen  
-- [ ] Clicks inside diagram containers do not trigger “new blank” etc.  
+- [ ] 所有 flowchart 同一 Mermaid theme  
+- [ ] 所有 `viz-block` 同一边框/圆角/字号  
+- [ ] caption 字号与正文 secondary 文本一致  
+- [ ] 失败图有统一错误 UI，不是空白或整页白屏  
+- [ ] 图示容器内点击不触发「新建填空」等误交互  
 
-### 11.5 With the annotation system
+### 11.5 与注释系统
 
-- Text inside Mermaid-rendered SVG: **not highlightable by default** (same exclusion as code) — avoids locate failure after Mermaid rewrite.  
-- Ordinary text in `viz-caption`, `viz-block-body`: **allowed** (see §4.3 for how — `.viz-block-body`
-  is a `<div>` and needs an explicit class check, not just the generic tag list).  
-- `<text>` inside `viz-svg`: suggest exclude from annotations.
+- Mermaid 渲染后的 SVG 内文字：**默认不可高亮标注**（与 code 块同等排除），避免 DOM 被 Mermaid 重写后定位失败。  
+- `viz-caption`、`viz-block-body` 内普通文本：**允许**标注（实现方式见 §4.3——`.viz-block-body`
+  是 `<div>`，需要按类名单独识别为块级元素，不能只靠通用标签清单）。  
+- `viz-svg` 内 `<text>`：建议排除标注。
+
+---
+
+## 12. UI/UX 视觉与排版设计规范 (UI/UX Design & Layout Standards)
+
+为保证生成内容与前端呈现始终保持如 Magazine / Drill 教案般的高品质视觉体验，前端与 AI 生成正文时必须遵守以下 UI/UX 规范：
+
+### 12.1 色彩与设计 Token
+* **主色调 (Primary Accent)**：湛蓝 / 亮青 (`#38bdf8` 暗色 / `#0284c7` 亮色)，用于交互焦点、目录选中态与操作按钮。
+* **辅助点缀色 (Secondary Accent)**：琥珀金 / 暖黄 (`#fbbf24` 暗色 / `#d97706` 亮色)，用于重点高亮、高质感 Logo 渐变与便利贴卡片边框。
+* **背景与玻璃质感 (Glassmorphic Atmosphere)**：
+  * 使用双色径向渐变（Radial Gradient）铺设渐进式背景层。
+  * 顶栏与侧边栏采用 `backdrop-filter: blur(16px)` 毛玻璃半透明效果。
+  * 内容卡片采用 `rgba(21, 29, 48, 0.75)`（暗色）/ `rgba(255, 255, 255, 0.88)`（亮色），带有 `1px` 细微高亮边框。
+
+### 12.2 字形与版式 (Typography)
+* **标题 / 品牌 / 卡片头**：采用 `Outfit` 与 `Noto Sans TC` 搭配，字体加粗（`font-weight: 700 / 800`），具备现代杂志出版物视效。
+* **正文阅读**：采用 `Inter`，行高锁定为 `1.7`–`1.78`，字符间距舒展，保证长时间阅读舒适度。
+
+### 12.3 容器与部件 (Components & Cards)
+* **便利贴 / 旁注卡片 (`.sticky-note`)**：必须为圆角卡片，左侧带有金/蓝双色渐变指示条，内容结构清晰。
+* **工程图示与步骤 (`.viz-block`, `.viz-steps`)**：卡片居中，微阴影浮起感，图表在亮/暗双色背景下均清晰可辨。
+* **保存状态指示器 (`.save-status`)**：Button 形态，带有圆角胶囊边框、状态图标（`○` 就绪 / `●` 待保存 / `◌` 保存中 / `✓` 已保存 / `⚠` 失败）以及脉冲微动效，支持快捷操作。
+
