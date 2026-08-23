@@ -22,25 +22,32 @@
 </head>
 <body>
   <header class="app-header">
-    <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏">☰</button>
-    <div class="brand">
-      <span class="brand-mark">L</span>
-      <div><strong>Learning Reader</strong><small>Magazine + Unit</small></div>
+    <div class="header-left">
+      <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏" title="切换左侧栏">☰</button>
+      <div id="documentTitle" class="document-title">选择一篇内容</div>
     </div>
-    <div id="documentTitle" class="document-title">选择一篇内容</div>
     <div class="header-actions">
       <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
       <button id="saveStatus" class="save-status" type="button" data-state="idle"
               title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
         <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
       </button>
+      <button id="themeButton" class="icon-button" type="button" aria-label="切换主题" title="切换主题">◐</button>
+      <button id="tocToggle" class="icon-button" type="button" aria-label="切换章节目录" title="切换右侧章节目录">🧭</button>
       <button id="exportButton" type="button" disabled>导出</button>
-      <button id="themeButton" class="icon-button" type="button" aria-label="切换主题">◐</button>
     </div>
   </header>
 
   <div class="app-shell">
     <aside id="sidebar" class="sidebar">
+      <div class="brand-section">
+        <div class="brand-mark">L</div>
+        <div class="brand-info">
+          <strong>Learning Reader</strong>
+          <small>Magazine + Unit</small>
+        </div>
+      </div>
+
       <nav class="tabs" aria-label="阅读器侧栏">
         <button class="tab active" type="button" data-tab="contents">目录</button>
         <button class="tab" type="button" data-tab="concepts">概念</button>
@@ -48,7 +55,7 @@
       </nav>
 
       <div class="sidebar-search">
-        <input id="sidebarSearch" type="search" placeholder="搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
+        <input id="sidebarSearch" type="search" placeholder="🔍 搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
       </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
@@ -79,6 +86,18 @@
         </div>
       </article>
     </main>
+
+    <!-- 右侧章节目录 (Collapsible Right Sidebar TOC) -->
+    <aside id="tocSidebar" class="toc-sidebar collapsed">
+      <div class="toc-header">
+        <span>🧭 章节目录 Navigation</span>
+      </div>
+      <div class="toc-scroll-area">
+        <div id="tocList" class="toc-list">
+          <p class="empty-toc">尚未打开文档</p>
+        </div>
+      </div>
+    </aside>
   </div>
 
   <button id="addNoteButton" class="selection-action" type="button" hidden>＋ Note</button>
