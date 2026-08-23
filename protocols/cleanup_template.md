@@ -1,6 +1,6 @@
 # 模板清理协议 (cleanup_template.md)
 
-> **注意**：本文件是**一次性协议**。当项目第一次初始化（Phase 0）完成、用户画像（profile）写入完毕、阅读器及 Windows 启动脚本验证就绪后，由用户或 AI 触发执行。
+> **注意**：本文件是**一次性协议**。当项目第一次初始化（Phase 0）完成、用户画像（profile）写入完毕、自带阅读器及 macOS 启动脚本验证就绪后，由用户或 AI 触发执行。
 > 只有在全部修改与验证成功后，才允许把删除本文件作为**最后一步**。任何检查失败时立即停止并保留本文件。
 
 ---
@@ -9,8 +9,8 @@
 
 当且仅当满足以下条件时，方可读取本文件并执行清理：
 1. **Phase 0 确认卡已通过**：用户确认画像，且画像数据已写入 `knowledge/profile.md`、`knowledge/desire.md` 等文件。
-2. **浏览器程序可用**：阅读器已在 `p0_bootstrap.md` Step 3.5 中按 `protocols/frontend_spec.md` 准备并可正常加载；**或**用户明确表示不需要阅读器，且 `profile.md` 已记录 `Reader: skipped by user`。
-3. **启动脚本可运行**：`start.bat` 已调整并在 Windows 上测试可用。用户明确拒绝阅读器时同样豁免。
+2. **浏览器程序可用**：本分支自带的阅读器可正常加载，且 `p0_bootstrap.md` Step 3.5 校验通过（`npm test` 与 `node scripts/verify_reader.js` 均无问题）。
+3. **启动脚本可运行**：`start.command` 保留可执行权限并已在 macOS 上测试可用。
 4. **用户或 AI 发出指令**：「读取 `cleanup_template.md` 执行清理」或「清理模板冗余信息」。
 5. **改动可恢复** —— Git 是**可选项**，很多使用本模板的人根本没装过 Git：
    * 用 `git rev-parse HEAD` 探测一次。**不得**要求用户去安装 Git，也不得把「没有 Git」当作失败。
@@ -32,7 +32,7 @@ AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号、
 - `knowledge/`、`state/`、`content/`、`templates/`、`images/` 中的任何文件；
 - `notes.json`、`review.md`、`DESIGN.md`、README、启动脚本和全部阅读器文件；
 - 若 §1.5 生成了 `state/AGENT.md.pre-cleanup.bak`，该备份不得删除（无 Git 时它是唯一的撤销路径）；
-- `AGENT.md` 中的「更新画像」「修改解释语言」「模态切换」路由，以及 Phase 1–3、Tech Debug 和 Progress Check 路由。
+- `AGENT.md` 中的「更新画像」「修改解释语言」「改配图 / 改题型 / 改排版偏好」「模态切换」路由，以及 Phase 1–3、Tech Debug 和 Progress Check 路由。
 
 允许删除的内容只有：
 
@@ -66,7 +66,7 @@ AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号、
    * 同时更新状态栏，使该痕迹不依赖 `log.md` 单点存在。
    * 这一行是初始化的持久证据，也是 §2.3 的幂等标记。改造完成清单无法承担此职责：它位于第 1 步删除的区块之内。
 7. **保留已确认的个人偏好**：
-   * 不修改 `intake_checklist.md`、`p0_bootstrap.md` 或任何画像文件。禁止删除 `knowledge/profile.md` 中已经确认的值，包括主要解释语言、学习内容语言、无障碍需求、时间约束和学习偏好。
+   * 不修改 `intake_checklist.md`、`p0_bootstrap.md` 或任何画像文件。禁止删除 `knowledge/profile.md` 中已经确认的值，包括主要解释语言、学习内容语言、无障碍需求、时间约束、学习偏好，以及 **§内容形态偏好整节**（配图密度 / 图示档位 / 便利贴 / 题型取舍）—— Phase 2 每次生成都要读它。
    * 保留「更新画像」路由，使用户以后可修改这些值而不必重跑完整 Bootstrap。
 
 ### 2.2 验证、审核与最后自删
@@ -105,4 +105,4 @@ AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号、
 3. **持久画像检查**：确认主要解释语言及其它已接受的个人偏好仍保留在 `knowledge/profile.md`。
 4. **保护清单检查**：确认 intake、p0、内容、Notes、状态、模板与阅读器均未被删除或清空。
 5. **初始化痕迹**：引用写入 `state/log.md` 的那一行 `Initialized …`，并说明当前使用的撤销路径（Git 提交哈希、`.bak` 文件，或「两者皆无 —— 用户选择直接继续」）。
-6. **下一步行动指引**：提示用户运行 `start.bat` 启动浏览器，并说「今天学什么」或「排期」正式进入 Phase 1。
+6. **下一步行动指引**：提示用户双击 `start.command` 启动浏览器，并说「今天学什么」或「排期」正式进入 Phase 1。

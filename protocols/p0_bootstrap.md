@@ -18,6 +18,7 @@
 4. **主要解释语言 / 最熟悉的语言**，与学习内容语言分开确认
 5. **学习模态预设 T / M / H / C**（见 `modality_presets.md`）
 6. （建议）阅读器排序 / Notes 范围偏好
+7. **内容形态偏好**：配图密度 / 图示档位 / 便利贴 / 题型取舍（见 `intake_checklist.md` §H）
 
 规则：
 
@@ -40,7 +41,7 @@
 
 | 写入目标 | 内容来源 |
 | :--- | :--- |
-| `knowledge/profile.md` | 科目、目标、水平、已知、约束、**解释语言 + 内容语言**、模态预设、阅读器偏好 |
+| `knowledge/profile.md` | 科目、目标、水平、已知、约束、**解释语言 + 内容语言**、模态预设、阅读器偏好、**内容形态偏好（§H：配图 / 图示 / 便利贴 / 题型）** |
 | `knowledge/desire.md` | 兴趣与想覆盖主题（`[ ]`） |
 | `state/gaps.md` | 弱项初始 Kanban |
 | `knowledge/domain_map.md` | 学科树草稿；已知节点标 Covered |
@@ -64,24 +65,22 @@
 
 ---
 
-## Step 3.5：准备阅读器（浏览器/服务器文件的唯一归属）
+## Step 3.5：校验阅读器（浏览器/服务器文件的唯一归属）
 
-> **本步骤是阅读器创建的唯一归属，没有别的协议负责。** `cleanup_template.md` 要求阅读器可用，
-> 因此本步骤一旦被跳过，就没有任何东西可供验收，清理也永远无法合法执行。
+> **本分支自带可用的阅读器**（`index.html`、`app.js`、`reader-core.js`、`server.js`、`styles.css`），
+> 因此本步骤是**校验**而非构建。`cleanup_template.md` 要求阅读器通过校验，本步骤一旦被跳过，
+> 清理就永远无法合法执行。
 
-1. 先检查是否已有阅读器：仓库根目录的 `server.js` 或 `scripts/preview_server.js`，以及它所服务的页面。
-2. 若**不存在**，**从 `templates/reader_skeleton.html` 开始** —— 复制到项目根目录命名为 `index.html`
-   再做扩展。它已经实现了主题契约、偏好持久化、侧边栏外壳、注释捕获以及 `data-primary` 锚定规则；
-   仅凭文字规格重写这些正是阅读器出错的地方。补齐其中标注的四个 EXTENSION POINT（Markdown 渲染、
-   交互控件与自动保存、Concepts 标签页、注释编辑浮层）并写好配套服务器。
-   若需从外部来源取用文件，先征得用户同意。
-3. 运行 `start.bat` 打开页面验证。Phase 2 之前目录为空是正常的 —— 这一步的验收标准是「能正常加载」，
-   不是「能显示课文」。
-4. **运行 `node scripts/verify_reader.js`，必须无 FAIL。** 它检查那些会静默腐化的契约：主题载体与
+1. 需要时先安装依赖（`npm install`），然后用 `start.command` 启动并打开页面。Phase 2 之前目录为空
+   是正常的 —— 这一步的验收标准是「能正常加载」，不是「能显示课文」。
+2. **运行 `npm test`。** 测试覆盖交互式 Markdown 的往返写回、服务器路径安全、Smart Merge，
+   以及注释锚定规则（`ReaderCore.annotationMatches`）。
+3. **运行 `node scripts/verify_reader.js`，必须无 FAIL。** 它检查那些会静默腐化的契约：主题载体与
    FOUC 守卫、锁定的存储键与路由、`data-primary` 锚定规则、被排除的功能（无 Git UI），以及
    `notes.json` 的一致性。出现 FAIL 时按 `frontend_spec.md` 修实现，而不是改检查项。
-5. 若用户当前不想要阅读器（纯 Markdown 工作流同样成立），在 `knowledge/profile.md` §阅读器偏好
-   记录 `Reader: skipped by user` 后继续。
+4. `templates/reader_skeleton.html` 在本分支作为**参考外壳**保留，不需要复制过来 —— 自带阅读器
+   已经实现了它所演示的内容。扩展 UI 时可以参考它。
+5. 若 `start.command` 在复制后丢失可执行权限，用 `chmod +x start.command` 恢复。
 
 本步骤的结果决定下面 Step 4 的闸 B。
 
@@ -109,7 +108,7 @@
 
 ### 闸 B —— 阅读器验收通过后执行（可推迟，不紧急）
 
-仅当 Step 3.5 产出了可用的阅读器且 `start.bat` 测试通过（或用户明确拒绝阅读器）时执行。
+仅当 Step 3.5 校验通过时执行：`start.command` 能启动阅读器、`npm test` 全绿、且 `verify_reader.js` 无 FAIL。
 此时**读取并执行 `protocols/cleanup_template.md`**：它会清除 `AGENT.md` 中一次性的 Phase 0 访谈
 指引，保留全部已确认画像数据（包括解释语言），并自我删除。
 
@@ -128,7 +127,7 @@
 | 前 5 期待排 | 已按模态标注 Mag/Unit |
 | 初始弱项 | 3–5 条 |
 | AGENT | 已改为科目项目态 ✅（闸 A） |
-| 阅读器 | 已构建 / 已复制 / 用户选择跳过 |
+| 阅读器 | 自带阅读器已校验（start.command · npm test · verify_reader） |
 | 模板清理 | 已完成（闸 B）/ 待阅读器验收后执行 |
 | 待确认 TBD | … |
 

@@ -1,21 +1,27 @@
 @echo off
 chcp 65001 > nul
 echo =============================================================
-echo 🚀 AI Learning Module - Launcher
+echo 🚀 AI Learning Module - Launcher (Windows)
 echo =============================================================
 
+where node >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [ERROR] Node.js 20 or newer is required. Please install it from https://nodejs.org/
+    pause
+    exit /b 1
+)
+
+if not exist "node_modules" (
+    echo [INFO] Installing local reader dependencies...
+    call npm install --no-audit --no-fund
+)
+
 if exist "server.js" (
-    echo [INFO] Found server.js. Starting Node server...
+    echo [INFO] Starting reader server at http://127.0.0.1:4173 ...
+    start http://127.0.0.1:4173
     node server.js
-) else if exist "scripts\preview_server.js" (
-    echo [INFO] Found scripts\preview_server.js. Starting Node server...
-    node scripts\preview_server.js
 ) else (
-    echo [ERROR] No server.js or scripts\preview_server.js found.
-    echo [ERROR] Please complete Phase 0 initialization and build/copy the browser server first.
-    echo.
-    echo Once you have created server.js or scripts\preview_server.js,
-    echo run this start.bat script again to launch the browser companion.
-    echo =============================================================
+    echo [ERROR] server.js not found.
     pause
 )
+

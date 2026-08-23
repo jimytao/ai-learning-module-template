@@ -6,18 +6,20 @@
 
 | 分支 | 语言 | 适用对象 |
 | :--- | :--- | :--- |
-| **`Chinese`**（本分支） | 以中文为主的文档（可夹杂英文术语） | 中文用户 |
-| **`English`** | 全英文文档 | 英文用户 |
+| **`macos-chinese`**（本分支） | 中文为主的模板 + 完整 macOS 阅读器 | 中文为主的 macOS 用户 |
+| **`Chinese`** | 中文为主的 Windows 基线文档 | 中文用户 |
+| **`macos-english`** | 全英文模板 + 完整 macOS 阅读器 | 英文为主的 macOS 用户 |
+| **`English`** | 全英文 Windows 基线文档 | 英文用户 |
 
 ```bash
-# 中文文档（本分支）
-git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+# 中文为主的完整 macOS 阅读器（本分支）
+git clone -b macos-chinese https://github.com/jimytao/ai-learning-module-template.git
 
 # 全英文文档
 git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-克隆后也可：`git checkout Chinese` / `git checkout English`。
+克隆后也可：`git checkout macos-chinese` / `git checkout macos-english`。
 
 ---
 
@@ -33,7 +35,7 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 这是一个基于文件夹的 AI 学习系统。AI 编程代理先读 `AGENT.md`，了解你的目标和偏好，提出学习顺序，把新课程写成 Markdown；之后再批改答案、解释 Notes，并用弱项安排复习。画像、内容、进度和注释都以可读文件保存在项目里。
 
-它**不是**预先写好的课程，也不附送大模型或 API 订阅。你需要选择一个能读取和修改整个项目文件夹的 AI 代理。macOS 分支已带完整本地网页阅读器；本 Windows 基线保留现有启动流程和阅读器实现规范。
+它**不是**预先写好的课程，也不附送大模型或 API 订阅。你需要选择一个能读取和修改整个项目文件夹的 AI 代理。本分支已带完整的 macOS 本地网页阅读器；Windows 基线分支保留各自原有的启动流程。
 
 学习闭环分四个阶段：
 
@@ -56,11 +58,43 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 先读 AGENT.md，执行 Phase 0 / 初始化。在我确认采集卡之前不要生成课程正文。
 ```
 
-4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言和学习模态。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。
-5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并把 `AGENT.md` 改造成你这个科目的项目。**到这一步就已经可以开始学了** —— 直接进入下面的日常循环。
-6. 阅读器是另一条线：AI 从 `templates/reader_skeleton.html` 出发准备符合 `frontend_spec.md` 的阅读器文件，跑通 `start.bat`，并用 `node scripts/verify_reader.js` 验收。只有验收通过（或你明确表示不需要阅读器）后，才执行 `cleanup_template.md` 删除一次性的前期配置 prompt；已经保存的个人偏好不会被删除。这一步刻意推迟，它不会阻塞学习。
+4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言、学习模态预设，以及 **§内容形态偏好（配图密度、图示档位、便利贴旁注类型、单选/多选/填空/问答/判断等题型取舍）**。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。偏好会保存在 `knowledge/profile.md` 中，AI 后续生成正文时会严格遵守。
+5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并把 `AGENT.md` 改造成你这个科目的项目。**到这一步就已经可以开始学了。** 用 `cleanup_template.md` 删除一次性前期配置 prompt 的动作会推迟到阅读器校验通过之后；已经保存的个人偏好与重入护栏不会被删除。
+6. 安装 Node.js 20+，然后双击 **`start.command`**（Windows 用户双击 `start.bat`）。第一次运行会安装本地依赖并打开网页阅读器。随后运行 `npm test` 与 `node scripts/verify_reader.js`，两者都干净之后，上一步的清理才允许执行。
 
-> **Git 是可选的。** 装了 Git，清理会记录一次提交，所有改动都可回退；没装也没关系，它会把 `AGENT.md` 备份到 `state/` 并在修改前请你确认。不会要求你去安装任何东西。
+---
+
+## 🎨 浏览器 JS 渲染与双向自动保存机制
+
+项目采用 **AI Markdown 写作 + 本地 JS 动态渲染 + 交互双向写回** 的无缝学习体验：
+
+```text
+  [AI 生成 Markdown 课件] ──> 保存至 content/magazines/ 或 content/units/
+                                             │
+                                             ▼
+  [运行 start.command / start.bat] ──> 启动 Node 本地 Server (127.0.0.1:4173)
+                                             │
+                                             ▼
+  [浏览器 JS 渲染引擎 (app.js + reader-core.js)]
+   ├── 1. Markdown 语法转 HTML (支持 Marked.js + DOMPurify 安全过滤)
+   ├── 2. 交互式题型转换: 填空 ___ 变输入框 / 开放题变文本域 / 选择题变复选框
+   ├── 3. 视觉武器库渲染: 流程图/树状图/Mermaid 自动渲染成矢量图表
+   └── 4. 实时双向写回 (Auto-Save): 
+          做题回答/勾选/编辑实时触发防抖写回，通过 /api/save 直接更新底层 .md 文件！
+```
+
+### 右上角保存状态图标与手动保存 (`saveStatus`)
+
+阅读器右上角设有专门的保存指示按钮：
+* **图标状态指示**：
+  * `○ 就绪 (Ready)`：无未保存修改。
+  * `● 待保存 (Saving soon)`：正在输入或答题，变更已准备写回。
+  * `◌ 保存中… (Saving…)`：后台正将做题结果同步回 Markdown 文件。
+  * `✓ 已保存 (Saved)`：已成功写回磁盘，文件保持同步。
+  * `⚠ 保存失败 (Error)`：保存出错（会弹出 Toast 说明原因）。
+* **手动点击保存**：如果不放心自动保存，任何时候都可以**点击右上角的保存图标**或按下快捷键 `⌘S` / `Ctrl+S` 进行立即强制保存，系统会提示「已保存」或「没有改动，已经是最新的了」。
+
+---
 
 ## 初始化后的每一次学习
 
@@ -125,7 +159,10 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ```
 AGENT.md                 # AI 唯一入口路由 (初始化清理后会自动移除模板说明)
-start.bat                # Windows 一键启动 Node 服务器脚本
+start.command            # macOS 首次安装、启动服务器并打开浏览器
+server.js                # 本地文件、答案自动保存与 Notes Smart Merge 后端
+index.html / app.js      # Magazine + Unit 通用网页阅读器
+reader-core.js           # 交互题解析与 Markdown 回写
 DESIGN.md                # 设计逻辑
 protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec、cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / 模态预设
@@ -144,8 +181,6 @@ review.md                # 批改复盘存档
 | [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | 一次性初始化后模板清理与精简协议（执行后自毁） |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | 流程/树/框图/SVG 等硬语法 |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | 通用阅读器验收规范（含填空/问答自动写回、Notes 跳转、图示渲染） |
-| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | 参考阅读器 UI：主题、偏好记忆、侧边栏、注释锚定 |
-| [`scripts/verify_reader.js`](scripts/verify_reader.js) | 阅读器验收脚本 —— 构建阅读器后运行 |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | 交互 Markdown 校验 |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave 图片下载（需 `BRAVE_API_KEY`） |
 
@@ -154,28 +189,28 @@ review.md                # 批改复盘存档
 ## 工具脚本
 
 ```bash
-# 启动本地服务器 (创建浏览器服务端文件后可用)
-start.bat
+# macOS 一键启动（也可双击 start.command）
+./start.command
+
+# 只启动服务器，不自动打开浏览器
+npm start
 
 # 校验 content 下交互格式与图示声明头
 node scripts/validate_content.js
 
 # 下载 imageQuery 图片
-set BRAVE_API_KEY=your_key
-python scripts/download_images.py content/magazines/magazine01_xxx.md
+export BRAVE_API_KEY=your_key
+python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 ```
 
 ---
 
-## 尚未包含
+## 内置网页阅读器
 
-本仓库目前不直接包含**完整**的网页端 HTML/JS 实现，但提供了参考 UI 外壳 [`templates/reader_skeleton.html`](templates/reader_skeleton.html)：它已实现亮/暗主题契约、偏好记忆、侧边栏外壳，以及让常见词可精确定位的注释锚定逻辑。在此基础上扩展时请严格参考 [`protocols/frontend_spec.md`](protocols/frontend_spec.md)，该文档制定了 Textbook 模式（填空、选择、文本框输入实时回写保存至源文件）与 Magazine 模式（目录排序、基于 context 定位的高亮标注、Smart Merge 智能合并）相融合的完整规范，以及锁定的存储键、路由与明确排除的功能。
-
-做完之后运行 `node scripts/verify_reader.js`。它是阅读器的验收标准 —— 检查上述契约和 `notes.json` 的内部一致性，必须无 FAIL。
+本分支已经实现 [`protocols/frontend_spec.md`](protocols/frontend_spec.md) 规定的 Universal Reader：Magazine/Unit 分组导航、持久排序、Markdown 与 Mermaid 渲染、填空/问答/选择自动保存、每篇文档独立 Notes、基于 `context + contextOffset` 的跳转，以及保留 AI review 的 Smart Merge。服务器只监听 `127.0.0.1`，浏览器写入范围限制为两个学习内容目录与 `notes.json`。
 
 ---
 
 ## License
 
 [MIT](LICENSE) — 可自由使用、修改、分发。
-
