@@ -17,6 +17,9 @@ const INTERACTIVE_REGEX = /(\[([ xX])\]|_{2}([^\n_]+)_{2}|_{3,})/g;
 const BACKTICKS_BLANK_REGEX = /`[^`]*?__[^`]*?`/;
 const MCQ_ANSWER_RE = /<!--\s*answer:\s*[A-D]\s*\|/i;
 const TF_ANSWER_RE = /<!--\s*answer:\s*(True|False)\s*\|/i;
+// MSQ (multi-select) answers are plural and comma-separated: <!-- answers: A,C | ... -->
+// Singular `answer:` stays reserved for MCQ / True-False (tech_spec §3.5).
+const MSQ_ANSWERS_RE = /<!--\s*answers:\s*([A-F](?:\s*,\s*[A-F])+)\s*\|/i;
 
 function getMarkdownFiles(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -68,6 +71,8 @@ function validateFile(filePath) {
 
   let mcqStems = 0;
   let mcqAnswers = 0;
+  let msqStems = 0;
+  let msqAnswers = 0;
   let tfStems = 0;
   let tfAnswers = 0;
 
@@ -100,20 +105,34 @@ function validateFile(filePath) {
       tfStems += 1;
     }
     if (MCQ_ANSWER_RE.test(line)) mcqAnswers += 1;
+    if (MSQ_ANSWERS_RE.test(line)) msqAnswers += 1;
     if (TF_ANSWER_RE.test(line)) tfAnswers += 1;
   });
 
   // Count stems more reliably
   mcqStems = (content.match(/^#{2,6}\s*MCQ-\d+/gim) || []).length;
+  msqStems = (content.match(/^#{2,6}\s*MSQ-\d+/gim) || []).length;
   tfStems = (content.match(/^#{2,6}\s*TF-\d+/gim) || []).length;
   mcqAnswers = (content.match(/<!--\s*answer:\s*[A-D]\s*\|/gi) || []).length;
+  msqAnswers = (content.match(/<!--\s*answers:\s*[A-F](?:\s*,\s*[A-F])+\s*\|/gi) || []).length;
   tfAnswers = (content.match(/<!--\s*answer:\s*(True|False)\s*\|/gi) || []).length;
 
   if (mcqStems > 0 && mcqAnswers < mcqStems) {
     errors.push(`MCQ: found ${mcqStems} stems but only ${mcqAnswers} answer comments`);
   }
+  if (msqStems > 0 && msqAnswers < msqStems) {
+    errors.push(
+      `MSQ: found ${msqStems} stems but only ${msqAnswers} plural answer comments — ` +
+      'each MSQ needs <!-- answers: A,C | ... --> with at least two letters (tech_spec §3.5)'
+    );
+  }
   if (tfStems > 0 && tfAnswers < tfStems) {
     errors.push(`T/F: found ${tfStems} stems but only ${tfAnswers} answer comments`);
+  }
+  // A single-answer MSQ is a mis-typed MCQ: the learner sees "(select all)" but only one option is right.
+  const lonelyMsq = (content.match(/<!--\s*answers:\s*[A-F]\s*\|/gi) || []).length;
+  if (lonelyMsq) {
+    errors.push(`MSQ: ${lonelyMsq} "answers:" comment(s) list only one letter — use MCQ with "answer:" instead`);
   }
 
   if (/___/.test(content) && /```[\s\S]*?___[\s\S]*?```/.test(content)) {

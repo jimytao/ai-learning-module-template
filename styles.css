@@ -54,9 +54,22 @@ button.danger { color: var(--danger); }
 .document-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-family: Georgia, serif; font-weight: 700; }
 .header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.55rem; }
 .icon-button { display: inline-grid; place-items: center; min-width: 34px; padding: 0.45rem; }
-.save-status { color: var(--muted); font-size: 0.78rem; }
+/* Save-state indicator (frontend_spec §6.3). It is a button, not a label: autosave
+   runs on its own, but anyone who does not trust autosave needs a way to force it. */
+.save-status {
+  display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  padding: 0.3rem 0.55rem; border: 1px solid var(--border); border-radius: 999px;
+  color: var(--muted); background: transparent; font-size: 0.78rem; line-height: 1;
+}
+.save-status:hover { border-color: var(--accent, var(--muted)); color: var(--text); }
+.save-status .save-icon { font-size: 0.7rem; }
+.save-status.dirty { color: #9b6a13; }
 .save-status.saving { color: #9b6a13; }
-.save-status.error { color: var(--danger); }
+.save-status.saved { color: var(--accent); }
+.save-status.error { color: var(--danger); border-color: var(--danger); }
+.save-status.saving .save-icon { animation: save-pulse 900ms ease-in-out infinite; }
+@keyframes save-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .save-status.saving .save-icon { animation: none; } }
 
 .app-shell { min-height: 100%; padding-top: var(--header-height); }
 /* Collapse state is persisted in ltm_sidebar_collapsed (frontend_spec §3.2). */
@@ -171,7 +184,8 @@ button.danger { color: var(--danger); }
   .brand { display: none; }
   .mobile-only { display: inline-grid; }
   .document-title { text-align: left; }
-  .save-status, #exportButton { display: none; }
+  #exportButton { display: none; }
+  .save-status .save-label { display: none; }
   .sidebar { transform: translateX(-101%); transition: transform 180ms ease; box-shadow: var(--shadow); }
   .sidebar:not(.collapsed) { transform: translateX(0); }
   .main-viewport { margin-left: 0; padding: 0.7rem; }

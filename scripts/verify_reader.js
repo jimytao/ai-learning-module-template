@@ -290,6 +290,18 @@ expect(V, html, /setTimeout[\s\S]{0,160}(?:save|Save)|debounce|scheduleSave/i,
   '自动保存做了防抖',
   '§6.2：把连续输入合并后再 POST，否则每次按键都会打到服务器');
 expect(V, html, /method:\s*['"]POST['"]/, '客户端通过 POST 提交保存');
+expect(V, html, /class=["'][^"']*\bsave-status\b/,
+  '存在保存状态指示器（.save-status）',
+  '§6.3：页头右上角需要一个显示 就绪/待保存/保存中/已保存/失败 的控件');
+
+expect(V, html, /<button[^>]*class=["'][^"']*\bsave-status\b|<button[^>]*\bid=["']save-?[sS]tatus["']/,
+  '保存指示器是按钮（可手动保存）',
+  '§6.3：它必须能点 —— 不放心自动保存的人需要一个「现在就存」的出口，纯 <span> 给不了');
+
+expect(V, html, /key\s*\.?\s*toLowerCase\(\)\s*[!=]==?\s*['"]s['"]|key\s*[!=]==?\s*['"]s['"]/,
+  '实现了 ⌘S / Ctrl+S 手动保存',
+  '§6.3：监听 keydown，(metaKey||ctrlKey) && key==="s" 时 preventDefault() 并保存');
+
 
 // ---------------------------------------------------------------------------
 // notes.json — data-level invariants (the checks that catch real rot)

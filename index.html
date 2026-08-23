@@ -25,7 +25,11 @@
     </div>
     <div id="documentTitle" class="document-title">选择一篇内容</div>
     <div class="header-actions">
-      <span id="saveStatus" class="save-status" aria-live="polite">就绪</span>
+      <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
+      <button id="saveStatus" class="save-status" type="button" data-state="idle"
+              title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
+        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
+      </button>
       <button id="exportButton" type="button" disabled>导出</button>
       <button id="themeButton" class="icon-button" type="button" aria-label="切换主题">◐</button>
     </div>

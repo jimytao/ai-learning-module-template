@@ -24,6 +24,7 @@
 | "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 —— **仅限本项目尚未初始化时；见黄金规则 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
 | "修改解释语言" / "用我的母语解释" | **Phase 0 · 补丁** | `intake_checklist.md`（只问语言槽）+ `profile.md` | — |
+| "改配图" / "改题型" / "多点图" / "不要开放题" / "改排版偏好" | **Phase 0 · 补丁** | `intake_checklist.md`（只问 §H 槽）+ `knowledge/profile.md` §内容形态偏好 | `visual_arsenal` / `tech_spec` |
 | "改成 textbook / magazine / 混合" / "改模态" | **模态切换** | `knowledge/modality_presets.md` + `knowledge/profile.md` + 本文件状态区 | — |
 | "开新科目" / "复制模板" / "新增轨道" / "怎么归档" | **Lifecycle** | `protocols/project_lifecycle.md` + 必要时 `domain_map.md` | `intake_checklist`（只补新轨道槽） |
 | "查知识地图" / "这个概念" / "我弱项有哪些" | **Knowledge Query** | 对应 `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
@@ -87,6 +88,7 @@
 - [ ] Phase 0 路由已收窄为「补全 TBD / 更新画像」，并已加入重入护栏（黄金规则 18）  
 - [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
 - [ ] `profile.md` 已分别确认主要解释语言与学习内容语言
+- [ ] `profile.md` §内容形态偏好已写入（配图密度 / 图示档位 / 便利贴 / 题型取舍）  
 - [ ] 下一步指向 Phase 1  
 
 **闸 B（推迟项 —— 不阻塞任何事）：**
@@ -187,6 +189,7 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
     * **已初始化** → Phase 0 降级为**仅补丁**。只补 `TBD` 槽位和用户指名要改的内容。**禁止**覆盖已确认值、清空 `desire` / `gaps` / `calendar` / `domain_map`，也禁止在未明说「本项目已经是**[科目]**了，你是想改几个字段，还是开一个全新科目？」并得到答复前重跑完整访谈。同一文件夹换新科目走 `project_lifecycle.md` 的归档流程，不是重跑 Phase 0。  
     * **未初始化** → 正常执行 Phase 0。  
     * 已初始化的项目里用户说「我要学 X」，绝大多数是 Phase 1 请求而非重新初始化。先问，别猜。
+19. **内容形态偏好驱动 Phase 2**：配图密度、图示档位、便利贴、题型取舍一律以 `knowledge/profile.md` §内容形态偏好为准（执行细则见 `p2_generate.md` §0.5）。用户没选过就用模板默认值并在收尾时说明可改；**任何偏好都不得把题型压到只剩一类**（否则违反黄金规则 6）。
 
 ---
 

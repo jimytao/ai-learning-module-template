@@ -32,7 +32,7 @@ AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号、
 - `knowledge/`、`state/`、`content/`、`templates/`、`images/` 中的任何文件；
 - `notes.json`、`review.md`、`DESIGN.md`、README、启动脚本和全部阅读器文件；
 - 若 §1.5 生成了 `state/AGENT.md.pre-cleanup.bak`，该备份不得删除（无 Git 时它是唯一的撤销路径）；
-- `AGENT.md` 中的「更新画像」「修改解释语言」「模态切换」路由，以及 Phase 1–3、Tech Debug 和 Progress Check 路由。
+- `AGENT.md` 中的「更新画像」「修改解释语言」「改配图 / 改题型 / 改排版偏好」「模态切换」路由，以及 Phase 1–3、Tech Debug 和 Progress Check 路由。
 
 允许删除的内容只有：
 
@@ -66,7 +66,7 @@ AI 必须严格执行以下修改和删除操作，**严禁使用绝对行号、
    * 同时更新状态栏，使该痕迹不依赖 `log.md` 单点存在。
    * 这一行是初始化的持久证据，也是 §2.3 的幂等标记。改造完成清单无法承担此职责：它位于第 1 步删除的区块之内。
 7. **保留已确认的个人偏好**：
-   * 不修改 `intake_checklist.md`、`p0_bootstrap.md` 或任何画像文件。禁止删除 `knowledge/profile.md` 中已经确认的值，包括主要解释语言、学习内容语言、无障碍需求、时间约束和学习偏好。
+   * 不修改 `intake_checklist.md`、`p0_bootstrap.md` 或任何画像文件。禁止删除 `knowledge/profile.md` 中已经确认的值，包括主要解释语言、学习内容语言、无障碍需求、时间约束、学习偏好，以及 **§内容形态偏好整节**（配图密度 / 图示档位 / 便利贴 / 题型取舍）—— Phase 2 每次生成都要读它。
    * 保留「更新画像」路由，使用户以后可修改这些值而不必重跑完整 Bootstrap。
 
 ### 2.2 验证、审核与最后自删

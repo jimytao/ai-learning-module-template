@@ -43,8 +43,17 @@
     toast.timer = setTimeout(() => { elements.toast.hidden = true; }, 2600);
   }
 
+  // §6.3 — one control carries both jobs: it reports the save state and, when clicked,
+  // forces a save. The icon is what people glance at; the label explains it.
+  const SAVE_ICONS = { '': '\u25cb', dirty: '\u25cf', saving: '\u25cc', saved: '\u2713', error: '\u26a0' };
+
   function setSaveStatus(text, mode = '') {
-    elements.saveStatus.textContent = text;
+    const icon = elements.saveStatus.querySelector('.save-icon');
+    const label = elements.saveStatus.querySelector('.save-label');
+    if (icon) icon.textContent = SAVE_ICONS[mode] || SAVE_ICONS[''];
+    if (label) label.textContent = text;
+    else elements.saveStatus.textContent = text;
+    elements.saveStatus.dataset.state = mode || 'idle';
     elements.saveStatus.className = `save-status ${mode}`.trim();
   }
 
@@ -112,17 +121,24 @@
     renderNotes();
   }
 
-  async function saveCurrentNow() {
+  async function saveCurrentNow({ manual = false } = {}) {
     clearTimeout(state.saveTimer);
     state.saveTimer = null;
-    if (!state.dirty || !state.activePath) return;
+    if (!state.dirty || !state.activePath) {
+      // A manual click on a clean document must still answer: silence reads as "did it work?".
+      if (manual && state.activePath) {
+        setSaveStatus('已保存', 'saved');
+        toast('没有改动，已经是最新的了');
+      }
+      return;
+    }
     const path = state.activePath;
     const content = state.rawMarkdown;
     state.dirty = false;
     setSaveStatus('保存中…', 'saving');
     try {
       await api('/api/save', { method: 'POST', body: JSON.stringify({ path, content }) });
-      setSaveStatus('已保存');
+      setSaveStatus('已保存', 'saved');
     } catch (error) {
       state.dirty = true;
       setSaveStatus('保存失败', 'error');
@@ -132,7 +148,7 @@
 
   function scheduleSave() {
     state.dirty = true;
-    setSaveStatus('待保存', 'saving');
+    setSaveStatus('待保存', 'dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(saveCurrentNow, 700);
   }
@@ -150,7 +166,7 @@
       await renderActiveFile();
       renderContents();
       renderNotes();
-      setSaveStatus('已加载');
+      setSaveStatus('已加载', 'saved');
       elements.sidebar.classList.remove('open');
       window.scrollTo({ top: 0 });
     } catch (error) {
@@ -529,6 +545,16 @@
     link.download = state.activePath.split('/').pop();
     link.click();
     URL.revokeObjectURL(link.href);
+  });
+  // §6.3 — manual save: the indicator itself, plus the shortcut every editor has trained
+  // people to press. Both go through the same path as autosave, so there is one writer.
+  elements.saveStatus.addEventListener('click', () => {
+    saveCurrentNow({ manual: true }).catch((error) => toast(error.message));
+  });
+  window.addEventListener('keydown', (event) => {
+    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') return;
+    event.preventDefault();
+    saveCurrentNow({ manual: true }).catch((error) => toast(error.message));
   });
   window.addEventListener('beforeunload', (event) => {
     if (!state.dirty) return;
