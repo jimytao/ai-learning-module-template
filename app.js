@@ -20,7 +20,7 @@
     title: $('#documentTitle'), saveStatus: $('#saveStatus'), sortButton: $('#sortButton'), exportButton: $('#exportButton'),
     addNote: $('#addNoteButton'), noteDialog: $('#noteDialog'), noteForm: $('#noteForm'), noteWord: $('#noteWord'),
     noteText: $('#noteText'), deleteNote: $('#deleteNoteButton'), showAllNotes: $('#showAllNotes'), sidebar: $('#sidebar'),
-    toast: $('#toast'), search: $('#sidebarSearch'),
+    toast: $('#toast'), search: $('#sidebarSearch'), tocSidebar: $('#tocSidebar'), tocList: $('#tocList'), tocToggle: $('#tocToggle'),
   };
 
   window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
@@ -43,8 +43,17 @@
     toast.timer = setTimeout(() => { elements.toast.hidden = true; }, 2600);
   }
 
+  // §6.3 — one control carries both jobs: it reports the save state and, when clicked,
+  // forces a save. The icon is what people glance at; the label explains it.
+  const SAVE_ICONS = { '': '\u25cb', dirty: '\u25cf', saving: '\u25cc', saved: '\u2713', error: '\u26a0' };
+
   function setSaveStatus(text, mode = '') {
-    elements.saveStatus.textContent = text;
+    const icon = elements.saveStatus.querySelector('.save-icon');
+    const label = elements.saveStatus.querySelector('.save-label');
+    if (icon) icon.textContent = SAVE_ICONS[mode] || SAVE_ICONS[''];
+    if (label) label.textContent = text;
+    else elements.saveStatus.textContent = text;
+    elements.saveStatus.dataset.state = mode || 'idle';
     elements.saveStatus.className = `save-status ${mode}`.trim();
   }
 
@@ -61,7 +70,7 @@
 
   function renderContents() {
     elements.contentsList.replaceChildren();
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
     const labels = { magazines: 'Magazines', units: 'Units' };
     let count = 0;
     for (const groupName of ['magazines', 'units']) {
@@ -75,7 +84,7 @@
       if (!files.length) {
         const empty = document.createElement('p');
         empty.className = 'empty-list';
-        empty.textContent = 'No content yet';
+        empty.textContent = '暂无内容';
         section.append(empty);
       }
       for (const file of files) {
@@ -93,7 +102,7 @@
       }
       elements.contentsList.append(section);
     }
-    if (!count) elements.contentsList.setAttribute('aria-label', 'No learning content in this project yet');
+    if (!count) elements.contentsList.setAttribute('aria-label', '项目尚无学习内容');
   }
 
   async function refreshFiles({ selectFirst = false } = {}) {
@@ -112,27 +121,34 @@
     renderNotes();
   }
 
-  async function saveCurrentNow() {
+  async function saveCurrentNow({ manual = false } = {}) {
     clearTimeout(state.saveTimer);
     state.saveTimer = null;
-    if (!state.dirty || !state.activePath) return;
+    if (!state.dirty || !state.activePath) {
+      // A manual click on a clean document must still answer: silence reads as "did it work?".
+      if (manual && state.activePath) {
+        setSaveStatus('已保存', 'saved');
+        toast('没有改动，已经是最新的了');
+      }
+      return;
+    }
     const path = state.activePath;
     const content = state.rawMarkdown;
     state.dirty = false;
-    setSaveStatus('Saving…', 'saving');
+    setSaveStatus('保存中…', 'saving');
     try {
       await api('/api/save', { method: 'POST', body: JSON.stringify({ path, content }) });
-      setSaveStatus('Saved');
+      setSaveStatus('已保存', 'saved');
     } catch (error) {
       state.dirty = true;
-      setSaveStatus('Save failed', 'error');
+      setSaveStatus('保存失败', 'error');
       toast(error.message);
     }
   }
 
   function scheduleSave() {
     state.dirty = true;
-    setSaveStatus('Unsaved', 'saving');
+    setSaveStatus('待保存', 'dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(saveCurrentNow, 700);
   }
@@ -140,7 +156,7 @@
   async function loadFile(path) {
     if (path === state.activePath) return;
     await saveCurrentNow();
-    setSaveStatus('Loading…', 'saving');
+    setSaveStatus('加载中…', 'saving');
     try {
       const payload = await api(`/api/file?path=${encodeURIComponent(path)}`);
       state.activePath = payload.path;
@@ -150,11 +166,11 @@
       await renderActiveFile();
       renderContents();
       renderNotes();
-      setSaveStatus('Loaded');
+      setSaveStatus('已加载', 'saved');
       elements.sidebar.classList.remove('open');
       window.scrollTo({ top: 0 });
     } catch (error) {
-      setSaveStatus('Load failed', 'error');
+      setSaveStatus('加载失败', 'error');
       toast(error.message);
     }
   }
@@ -176,7 +192,7 @@
       .filter((heading) => matchesQuery(heading.textContent));
     if (!headings.length) {
       elements.conceptsList.className = 'concepts-list empty-list';
-      elements.conceptsList.textContent = state.activePath ? 'The current document has no section headings' : 'No document open';
+      elements.conceptsList.textContent = state.activePath ? '当前文档没有小节标题' : '尚未打开文档';
       return;
     }
     elements.conceptsList.className = 'concepts-list';
@@ -281,7 +297,7 @@
         mark.dataset.word = hit.annotation.word;
         mark.dataset.note = hit.annotation.userNoteRaw || hit.annotation.note || '';
         if (hit.isPrimary) mark.dataset.primary = 'true';
-        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || 'Highlight';
+        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || '高亮';
         mark.textContent = text.slice(hit.localStart, hit.localEnd);
         mark.addEventListener('click', () => openExistingNote(hit.annotation.id));
         fragment.append(mark);
@@ -298,6 +314,27 @@
     for (const block of noteCandidates()) markBlock(block, annotations);
   }
 
+  function generateTOC() {
+    if (!elements.tocList) return;
+    elements.tocList.replaceChildren();
+    const headings = [...elements.reader.querySelectorAll('h1, h2, h3, h4')];
+    if (!headings.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-toc';
+      empty.textContent = state.activePath ? '当前文档没有标题' : '尚未打开文档';
+      elements.tocList.append(empty);
+      return;
+    }
+    for (const heading of headings) {
+      const item = document.createElement('div');
+      item.className = `toc-item depth-${heading.tagName.toLowerCase()}`;
+      item.textContent = heading.textContent;
+      const id = heading.id;
+      item.addEventListener('click', () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      elements.tocList.append(item);
+    }
+  }
+
   async function renderActiveFile() {
     const safeSource = state.rawMarkdown.replace(/<\/?(?:script|style|textarea)\b[^>]*>/gi, '');
     const interactiveMarkdown = ReaderCore.markdownWithInteractiveHtml(safeSource);
@@ -312,6 +349,7 @@
     await renderMermaid();
     applyAnnotations();
     generateConcepts();
+    generateTOC();
   }
 
   function renderNotes() {
@@ -322,7 +360,7 @@
       .filter((note) => matchesQuery(note.word, note.userNoteRaw, note.note));
     if (!notes.length) {
       elements.notesList.className = 'notes-list empty-list';
-      elements.notesList.textContent = 'No notes yet';
+      elements.notesList.textContent = '暂无注释';
       return;
     }
     elements.notesList.className = 'notes-list';
@@ -333,9 +371,9 @@
     for (const note of notes) {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'note-item';
-      const strong = document.createElement('strong'); strong.textContent = note.word || 'Content summary';
+      const strong = document.createElement('strong'); strong.textContent = note.word || '内容总结';
       const small = document.createElement('small');
-      small.textContent = `${note.userNoteRaw || note.note || 'Highlight only'}${showAll ? ` · ${note.file}` : ''}`;
+      small.textContent = `${note.userNoteRaw || note.note || '仅高亮'}${showAll ? ` · ${note.file}` : ''}`;
       button.append(strong, small);
       button.addEventListener('click', async () => {
         if (note.file && note.file !== state.activePath) await loadFile(note.file);
@@ -358,7 +396,7 @@
       || (note && marks.find((mark) => mark.textContent.trim().toLowerCase() === String(note.word).toLowerCase()));
 
     if (!target) {
-      toast('This note no longer matches the text — its anchor was lost.');
+      toast('这条注释已与正文对不上 —— 锚点失效。');
       return;
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -423,7 +461,7 @@
     if (!note) return;
     state.editingNoteId = id;
     state.pendingSelection = null;
-    elements.noteWord.textContent = note.word || 'Content summary';
+    elements.noteWord.textContent = note.word || '内容总结';
     elements.noteText.value = note.userNoteRaw ?? note.note ?? '';
     elements.deleteNote.hidden = false;
     elements.noteDialog.showModal();
@@ -459,7 +497,7 @@
     await renderActiveFile();
     renderNotes();
     switchTab('notes');
-    toast('Note saved');
+    toast('Note 已保存');
   }
 
   async function deleteCurrentNote() {
@@ -469,7 +507,7 @@
     elements.noteDialog.close();
     await renderActiveFile();
     renderNotes();
-    toast('Note deleted');
+    toast('Note 已删除');
   }
 
   elements.reader.addEventListener('input', (event) => {
@@ -522,6 +560,10 @@
     document.documentElement.dataset.theme = next;
     localStorage.setItem('ltm_theme', next);
   });
+  elements.tocToggle?.addEventListener('click', () => {
+    const collapsed = elements.tocSidebar?.classList.toggle('collapsed');
+    localStorage.setItem('ltm_toc_collapsed', String(collapsed));
+  });
   elements.exportButton.addEventListener('click', () => {
     const blob = new Blob([state.rawMarkdown], { type: 'text/markdown;charset=utf-8' });
     const link = document.createElement('a');
@@ -529,6 +571,16 @@
     link.download = state.activePath.split('/').pop();
     link.click();
     URL.revokeObjectURL(link.href);
+  });
+  // §6.3 — manual save: the indicator itself, plus the shortcut every editor has trained
+  // people to press. Both go through the same path as autosave, so there is one writer.
+  elements.saveStatus.addEventListener('click', () => {
+    saveCurrentNow({ manual: true }).catch((error) => toast(error.message));
+  });
+  window.addEventListener('keydown', (event) => {
+    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') return;
+    event.preventDefault();
+    saveCurrentNow({ manual: true }).catch((error) => toast(error.message));
   });
   window.addEventListener('beforeunload', (event) => {
     if (!state.dirty) return;
@@ -542,7 +594,10 @@
     document.documentElement.dataset.theme = localStorage.getItem('ltm_theme') || 'dark';
     elements.showAllNotes.checked = localStorage.getItem('ltm_notes_show_all') === 'true';
     elements.sidebar.classList.toggle('collapsed', localStorage.getItem('ltm_sidebar_collapsed') === 'true');
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
+    if (localStorage.getItem('ltm_toc_collapsed') === 'false') {
+      elements.tocSidebar?.classList.remove('collapsed');
+    }
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
   }
   restorePreferences();
 
@@ -550,7 +605,7 @@
     await refreshNotes();
     await refreshFiles({ selectFirst: true });
   })().catch((error) => {
-    setSaveStatus('Initialization failed', 'error');
+    setSaveStatus('初始化失败', 'error');
     toast(error.message);
   });
 })();
