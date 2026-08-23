@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>AI Learning Module Reader</title>
+  <title>AI 学习模块阅读器</title>
   <!-- FOUC guard: applies the saved theme before first paint. Must stay above every
        stylesheet — running this on DOMContentLoaded is what causes the white flash. -->
   <script>
@@ -13,52 +13,60 @@
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
+  <!-- Google Fonts: Outfit & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/scripts/viz.css">
 </head>
 <body>
   <header class="app-header">
-    <button id="sidebarToggle" class="icon-button" type="button" aria-label="Toggle sidebar">☰</button>
+    <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏">☰</button>
     <div class="brand">
       <span class="brand-mark">L</span>
       <div><strong>Learning Reader</strong><small>Magazine + Unit</small></div>
     </div>
-    <div id="documentTitle" class="document-title">Select a document</div>
+    <div id="documentTitle" class="document-title">选择一篇内容</div>
     <div class="header-actions">
-      <span id="saveStatus" class="save-status" aria-live="polite">Ready</span>
-      <button id="exportButton" type="button" disabled>Export</button>
-      <button id="themeButton" class="icon-button" type="button" aria-label="Toggle theme">◐</button>
+      <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
+      <button id="saveStatus" class="save-status" type="button" data-state="idle"
+              title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
+        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
+      </button>
+      <button id="exportButton" type="button" disabled>导出</button>
+      <button id="themeButton" class="icon-button" type="button" aria-label="切换主题">◐</button>
     </div>
   </header>
 
   <div class="app-shell">
     <aside id="sidebar" class="sidebar">
-      <nav class="tabs" aria-label="Reader sidebar">
-        <button class="tab active" type="button" data-tab="contents">Contents</button>
-        <button class="tab" type="button" data-tab="concepts">Concepts</button>
-        <button class="tab" type="button" data-tab="notes">Notes</button>
+      <nav class="tabs" aria-label="阅读器侧栏">
+        <button class="tab active" type="button" data-tab="contents">目录</button>
+        <button class="tab" type="button" data-tab="concepts">概念</button>
+        <button class="tab" type="button" data-tab="notes">注释</button>
       </nav>
 
       <div class="sidebar-search">
-        <input id="sidebarSearch" type="search" placeholder="Search documents, concepts, notes…" autocomplete="off" aria-label="Search sidebar">
+        <input id="sidebarSearch" type="search" placeholder="搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
       </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
-          <button id="sortButton" type="button">↑ Old → New</button>
-          <button id="refreshButton" type="button">Refresh</button>
+          <button id="sortButton" type="button">↑ 旧 → 新</button>
+          <button id="refreshButton" type="button">刷新</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
       </section>
 
       <section id="conceptsPanel" class="tab-panel" data-panel="concepts">
-        <p class="panel-hint">Built from the current document headings; click to jump.</p>
-        <div id="conceptsList" class="concepts-list empty-list">No document open</div>
+        <p class="panel-hint">来自当前文档标题；点击可跳转。</p>
+        <div id="conceptsList" class="concepts-list empty-list">尚未打开文档</div>
       </section>
 
       <section id="notesPanel" class="tab-panel" data-panel="notes">
-        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> Show notes from all documents</label>
-        <div id="notesList" class="notes-list empty-list">No notes yet</div>
+        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> 显示全部文档注释</label>
+        <div id="notesList" class="notes-list empty-list">暂无注释</div>
       </section>
     </aside>
 
@@ -66,8 +74,8 @@
       <article id="reader" class="reader" aria-live="polite">
         <div class="welcome-card">
           <p class="eyebrow">UNIVERSAL READER</p>
-          <h1>Your learning content will appear here</h1>
-          <p>Complete Phase 0, then place generated Markdown in <code>content/magazines</code> or <code>content/units</code>.</p>
+          <h1>学习内容会出现在这里</h1>
+          <p>先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
         </div>
       </article>
     </main>
@@ -78,16 +86,16 @@
   <dialog id="noteDialog" class="note-dialog">
     <form id="noteForm" method="dialog">
       <div class="dialog-heading">
-        <div><small>Selected text</small><strong id="noteWord"></strong></div>
-        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="Close">×</button>
+        <div><small>选中文本</small><strong id="noteWord"></strong></div>
+        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="关闭">×</button>
       </div>
-      <label for="noteText">Your note</label>
-      <textarea id="noteText" rows="6" placeholder="Write a question, explanation, or +explicit lookup…"></textarea>
+      <label for="noteText">你的注释</label>
+      <textarea id="noteText" rows="6" placeholder="写下疑问、解释或 +显式查询…"></textarea>
       <div class="dialog-actions">
-        <button id="deleteNoteButton" class="danger" type="button" hidden>Delete</button>
+        <button id="deleteNoteButton" class="danger" type="button" hidden>删除</button>
         <span class="dialog-spacer"></span>
-        <button id="cancelNoteButton" type="button">Cancel</button>
-        <button class="primary" type="submit">Save</button>
+        <button id="cancelNoteButton" type="button">取消</button>
+        <button class="primary" type="submit">保存</button>
       </div>
     </form>
   </dialog>
