@@ -20,7 +20,7 @@
     title: $('#documentTitle'), saveStatus: $('#saveStatus'), sortButton: $('#sortButton'), exportButton: $('#exportButton'),
     addNote: $('#addNoteButton'), noteDialog: $('#noteDialog'), noteForm: $('#noteForm'), noteWord: $('#noteWord'),
     noteText: $('#noteText'), deleteNote: $('#deleteNoteButton'), showAllNotes: $('#showAllNotes'), sidebar: $('#sidebar'),
-    toast: $('#toast'), search: $('#sidebarSearch'),
+    toast: $('#toast'), search: $('#sidebarSearch'), tocSidebar: $('#tocSidebar'), tocList: $('#tocList'), tocToggle: $('#tocToggle'),
   };
 
   window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
@@ -314,6 +314,27 @@
     for (const block of noteCandidates()) markBlock(block, annotations);
   }
 
+  function generateTOC() {
+    if (!elements.tocList) return;
+    elements.tocList.replaceChildren();
+    const headings = [...elements.reader.querySelectorAll('h1, h2, h3, h4')];
+    if (!headings.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-toc';
+      empty.textContent = state.activePath ? '当前文档没有标题' : '尚未打开文档';
+      elements.tocList.append(empty);
+      return;
+    }
+    for (const heading of headings) {
+      const item = document.createElement('div');
+      item.className = `toc-item depth-${heading.tagName.toLowerCase()}`;
+      item.textContent = heading.textContent;
+      const id = heading.id;
+      item.addEventListener('click', () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      elements.tocList.append(item);
+    }
+  }
+
   async function renderActiveFile() {
     const safeSource = state.rawMarkdown.replace(/<\/?(?:script|style|textarea)\b[^>]*>/gi, '');
     const interactiveMarkdown = ReaderCore.markdownWithInteractiveHtml(safeSource);
@@ -328,6 +349,7 @@
     await renderMermaid();
     applyAnnotations();
     generateConcepts();
+    generateTOC();
   }
 
   function renderNotes() {
@@ -538,6 +560,10 @@
     document.documentElement.dataset.theme = next;
     localStorage.setItem('ltm_theme', next);
   });
+  elements.tocToggle?.addEventListener('click', () => {
+    const collapsed = elements.tocSidebar?.classList.toggle('collapsed');
+    localStorage.setItem('ltm_toc_collapsed', String(collapsed));
+  });
   elements.exportButton.addEventListener('click', () => {
     const blob = new Blob([state.rawMarkdown], { type: 'text/markdown;charset=utf-8' });
     const link = document.createElement('a');
@@ -568,6 +594,9 @@
     document.documentElement.dataset.theme = localStorage.getItem('ltm_theme') || 'dark';
     elements.showAllNotes.checked = localStorage.getItem('ltm_notes_show_all') === 'true';
     elements.sidebar.classList.toggle('collapsed', localStorage.getItem('ltm_sidebar_collapsed') === 'true');
+    if (localStorage.getItem('ltm_toc_collapsed') === 'false') {
+      elements.tocSidebar?.classList.remove('collapsed');
+    }
     elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
   }
   restorePreferences();
