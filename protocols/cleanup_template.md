@@ -1,6 +1,6 @@
 # Template Cleanup Protocol (cleanup_template.md)
 
-> **Note**: This file is a **one-shot protocol**. After first initialization (Phase 0) completes, the user profile is written, and the reader plus Windows start script are verified, the user or AI triggers execution.
+> **Note**: This file is a **one-shot protocol**. After first initialization (Phase 0) completes, the user profile is written, and the built-in reader plus macOS start script are verified, the user or AI triggers execution.
 > Only after every edit and validation succeeds may deletion of this file run as the **final step**. On any failed check, stop and retain this file.
 
 ---
@@ -9,8 +9,8 @@
 
 Read and run this file only when **all** of the following are true:
 1. **Phase 0 confirmation card passed**: user confirmed the profile, and data is written to `knowledge/profile.md`, `knowledge/desire.md`, etc.
-2. **Browser app works**: the reader prepared in `p0_bootstrap.md` Step 3.5 under `protocols/frontend_spec.md` loads successfully — **or** the user explicitly declined a reader and `profile.md` records `Reader: skipped by user`.
-3. **Start script works**: `start.bat` has been adjusted and tested on Windows. Waived under the same explicit-decline case as (2).
+2. **Browser app works**: the reader shipped on this branch loads successfully, and `p0_bootstrap.md` Step 3.5 verification passed (`npm test` and `node scripts/verify_reader.js` both clean).
+3. **Start script works**: `start.command` retains executable permission and has been tested on macOS.
 4. **User or AI issues the command**: “run cleanup via `cleanup_template.md`” or “clean up template boilerplate”.
 5. **Changes are recoverable** — Git is **optional**, many users of this template never installed it:
    * Probe once with `git rev-parse HEAD`. **Do not** ask the user to install Git, and do not treat its absence as a failure.
@@ -105,4 +105,4 @@ After cleanup, AI must give a short “project cleanliness report” including:
 3. **Persistent profile check**: confirm that explanation language and the other accepted personal preferences remain in `knowledge/profile.md`.
 4. **Protection-list check**: confirm intake, p0, content, Notes, state, templates, and reader files were not deleted or emptied.
 5. **Initialization trace**: quote the `Initialized …` line written to `state/log.md`, and state the undo path in use (Git commit hash, or the `.bak` file, or “none — user proceeded without either”).
-6. **Next actions**: run `start.bat` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.
+6. **Next actions**: double-click `start.command` to launch the browser, then say “what should I study today” or “schedule” to enter Phase 1.

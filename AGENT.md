@@ -24,6 +24,7 @@
 | “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
 | “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
+| “change images” / “change question types” / “more diagrams” / “no open Q&A” / “change layout preferences” | **Phase 0 · patch** | `intake_checklist.md` (section H only) + `knowledge/profile.md` §Content format preferences | `visual_arsenal` / `tech_spec` |
 | “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
 | “new subject” / “copy template” / “add track” / “how to archive” | **Lifecycle** | `protocols/project_lifecycle.md` + `domain_map.md` if needed | `intake_checklist` (new-track slots only) |
 | “check knowledge map” / “this concept” / “what are my gaps” | **Knowledge Query** | matching `domain_map.md` / `gaps.md` / `coach_reference.md` | `log.md` |
@@ -55,7 +56,7 @@
 | Golden rule #8 | Replace template-mode “do not prefill personal info” with: “Profile is authoritative; do not invent unprovided info” |
 
 > [!IMPORTANT]
-> **Gate B — cleanup**: the browser/server files are created in `p0_bootstrap.md` **Step 3.5** (that step owns them; no other protocol does). Once the reader is verified — or the user explicitly declines a reader — the AI loads `protocols/cleanup_template.md`, runs its template cleanup, and lets it **self-delete**. If the reader is not ready, say so in one line and continue to Phase 1; do not run cleanup with unmet preconditions.
+> **Gate B — cleanup**: this branch **ships a working reader**, so `p0_bootstrap.md` **Step 3.5** verifies it rather than building it. Once `start.command` runs, `npm test` passes, and `node scripts/verify_reader.js` reports no FAIL, the AI loads `protocols/cleanup_template.md`, runs its template cleanup, and lets it **self-delete**. If verification has not been done, say so in one line and continue to Phase 1; do not run cleanup with unmet preconditions.
 
 > [!NOTE]
 > **Initialization trace**: this checklist lives inside the block that cleanup deletes, so it cannot record its own completion. Before deleting anything, cleanup appends one `Initialized …` line to `state/log.md` and stamps the status bar. That line — not this checklist — is the durable proof the project was bootstrapped, and the idempotence marker that stops a later session from re-running Phase 0.
@@ -91,7 +92,7 @@
 
 **Gate B (deferred — blocks nothing):**
 
-- [ ] Reader built/copied per `frontend_spec.md` and `start.bat` tested — or user declined a reader  
+- [ ] Shipped reader verified: `start.command` runs, `npm test` passes, `verify_reader.js` reports no FAIL  
 - [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (`Initialized …` line written to `state/log.md`; cleanup file auto-deleted)  
 <!-- TEMPLATE_BOOTSTRAP_END -->
 
@@ -101,7 +102,7 @@
 
 ```
 AGENT.md                          ← entry router (this file; rewritten after Bootstrap)
-start.bat                         ← one-click browser + local server start
+start.command                     ← one-click macOS browser + local server start
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0: intake confirmation checklist (mandatory)
@@ -187,6 +188,7 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
     * **Already initialized** → Phase 0 is **patch-only**. Fill `TBD` slots and change what the user asked about. **Never** overwrite a confirmed value, wipe `desire` / `gaps` / `calendar` / `domain_map`, or re-run the full interview without saying plainly “this project is already set up for *[subject]* — do you want to update a few fields, or start a completely new subject?” and getting an answer. Starting a new subject in the same folder is the archive route in `project_lifecycle.md`, not a Phase 0 rerun.  
     * **Not initialized** → run Phase 0 normally.  
     * A user saying “I want to learn X” in an initialized project is far more often a Phase 1 request than a re-bootstrap. Ask; do not assume.
+19. **Content format preferences drive Phase 2**: Image density, visual diagram tier, sticky note callouts, and exercise selection are governed by `knowledge/profile.md` section §Content format preferences (see execution details in `p2_generate.md` §0.5). If unchosen, use defaults and inform the user they can be changed; **no preference set may reduce exercise types to a single category** (violating rule 6).
 
 ---
 

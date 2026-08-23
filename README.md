@@ -4,18 +4,20 @@
 
 | Branch | Language | Who it’s for |
 | :--- | :--- | :--- |
-| **`English`** (this branch) | Fully English documentation | English-primary users |
+| **`macos-english`** (this branch) | Fully English template + complete macOS reader | English-primary macOS users |
+| **`English`** | Fully English documentation baseline | English-primary users |
 | **`Chinese`** | Chinese-primary docs (may mix some English terms) | Chinese-primary users |
+| **`macos-chinese`** | Chinese-primary template + complete macOS reader | Chinese-primary macOS users |
 
 ```bash
-# English docs (this branch)
-git clone -b English https://github.com/jimytao/ai-learning-module-template.git
+# Complete English macOS reader (this branch)
+git clone -b macos-english https://github.com/jimytao/ai-learning-module-template.git
 
 # Chinese docs
 git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-Or after cloning: `git checkout English` / `git checkout Chinese`.
+Or after cloning: `git checkout macos-english` / `git checkout macos-chinese`.
 
 ---
 
@@ -32,7 +34,7 @@ Distilled from battle-tested textbook and magazine learning systems: routing, sc
 
 This is a folder-based learning system for an AI coding agent. The AI reads `AGENT.md`, learns your goals and preferences, proposes a sequence, writes lessons as Markdown, and later grades your answers and uses your notes to plan review. Your profile, progress, content, and annotations remain as readable files in this project.
 
-It is **not** a prewritten course or a model/API subscription. You bring an AI agent with permission to read and edit this folder. The macOS branches include a complete local web reader; this baseline keeps the Windows launcher and the documented reader contract for a reader generated or migrated during setup.
+It is **not** a prewritten course or a model/API subscription. You bring an AI agent with permission to read and edit this folder. The macOS branches also include a local web reader; the Windows baseline branches keep their existing Windows workflow.
 
 The learning loop has four phases:
 
@@ -55,47 +57,86 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I confirm the intake card.
 ```
 
-4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, and Textbook/Magazine/Hybrid modality. The explanation language is used for difficult explanations and feedback even if you are studying English. Review the confirmation card and reply `confirm` only when it is accurate.
-5. After confirmation the AI writes the accepted information to `knowledge/profile.md` and the other knowledge/state files, and rewrites `AGENT.md` into your subject's project. **At this point you can already start learning** — go to the cycle below.
-6. Separately, the AI prepares the reader files required by `protocols/frontend_spec.md` and tests **`start.bat`**. Only once that works (or you tell it you don't want a reader) does it run `protocols/cleanup_template.md`, which removes the one-time bootstrap prompt while retaining your saved preferences. This step is deliberately deferred — it never blocks studying.
+4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, Textbook/Magazine/Hybrid modality, and **§Content Format Preferences (image density, visual diagram tier, sticky note types, exercise types: MCQ, MSQ, blanks, open Q&A, T/F)**. Review the confirmation card and reply `confirm` when accurate. These preferences are saved in `knowledge/profile.md` for Phase 2 generation.
+5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and other knowledge/state files, and rewrites `AGENT.md` into your subject's project. **You can already start learning at this point.** Removing the one-time bootstrap prompt through `protocols/cleanup_template.md` happens later, once the reader is verified; your saved preferences and re-entry guards are strictly retained.
+6. Install Node.js 20+, then double-click **`start.command`** (or `start.bat` on Windows). On first run it installs local dependencies and opens the web reader. Then run `npm test` and `node scripts/verify_reader.js` — both must pass before the cleanup step above may run.
 
-> **Git is optional.** If you have it, cleanup records a commit so every edit is reversible. If you don't, it saves a backup of `AGENT.md` under `state/` and asks you to confirm before editing. You will not be asked to install anything.
+---
+
+## 🎨 Browser JS Rendering & Bi-directional Auto-Save Architecture
+
+This project pairs **AI Markdown content creation + local browser JS rendering + bi-directional interaction write-back**:
+
+```text
+  [AI Generates Markdown Lessons] ──> Saved to content/magazines/ or content/units/
+                                                    │
+                                                    ▼
+  [Run start.command / start.bat] ──> Starts local Node Server (127.0.0.1:4173)
+                                                    │
+                                                    ▼
+  [Browser JS Engine (app.js + reader-core.js)]
+   ├── 1. Converts Markdown to HTML (via Marked.js + DOMPurify security filtering)
+   ├── 2. Transforms interactive tokens: ___ to inputs / open Q&A to textareas / [ ] to checkboxes
+   ├── 3. Renders Visual Arsenal diagrams & Mermaid charts
+   └── 4. Real-time Auto-Save:
+          Editing inputs/answers/checkboxes triggers debounced POST /api/save directly back to .md files!
+```
+
+### Top-Right Save Status Indicator & Manual Save (`saveStatus`)
+
+The top-right header features a live status button:
+* **Visual Statuses**:
+  * `○ Ready`: No unsaved changes.
+  * `● Saving soon`: Input/answer changed; queued for debounced save.
+  * `◌ Saving…`: Writing answers back to the Markdown file on disk.
+  * `✓ Saved`: File successfully written and in sync with disk.
+  * `⚠ Save failed`: Error saving (displays toast notification).
+* **Manual Save**: Click the top-right save icon or press `⌘S` / `Ctrl+S` at any time to force an immediate save to disk.
+
+---
 
 ## Every learning cycle after setup
 
-1. **Plan:** `What should I study today?` or `Propose the next unit.` The AI reads your calendar, interests, and gaps and presents a proposal; it does not write the lesson yet.
-2. **Approve and generate:** revise the proposal if needed, then say `Confirm the proposal and generate it.` The AI creates a Magazine/Unit Markdown file, validates it, and updates the calendar.
-3. **Study:** open the reader, read, answer questions, and add Notes/highlights.
+Use short commands; `AGENT.md` routes them to the correct protocol:
+
+1. **Plan:** `What should I study today?` or `Propose the next unit.` The AI reads your calendar, interests, and gaps, then presents a proposal. It does not write the lesson yet.
+2. **Approve and generate:** revise the proposal if needed, then say `Confirm the proposal and generate it.` The AI creates a new Magazine/Unit Markdown file, validates it, and updates the calendar.
+3. **Study:** open the local reader, read, answer questions, and add Notes/highlights. Inputs autosave into the source Markdown.
 4. **Review:** say `Grade my answers and explain my highlights.` The AI grades in context and updates gaps/progress. It must ask before creating extra drills.
-5. **Repeat:** ask what to study next. The proposal should combine new material with recurrence of weak points.
+5. **Repeat:** say `What should I study today?` again. The next proposal should mix new material with spaced recurrence of your weak points.
 
 Useful maintenance commands include `update profile`, `change explanation language`, `change modality`, `show progress`, and `debug the reader`.
 
 ## Choose an AI coding agent
 
-Plans and limits change. Follow the official link before subscribing; most people only need **one** tool.
+Plans and limits change. Follow the official link before subscribing; most people only need **one** of these tools.
 
 | Tool | What it is | How to get it / account requirements |
 | :--- | :--- | :--- |
-| [Cursor](https://cursor.com/download) | AI-first code editor and a friendly visual starting point | Its [Hobby plan](https://cursor.com/pricing) has limited free Agent usage. Built-in models do not require your own API key; paid plans increase limits. |
-| [Devin](https://app.devin.ai/) | Cloud autonomous software engineer with shell, editor, and browser | Connect the repository after signup. Devin offers a limited [Free plan](https://docs.devin.ai/admin/billing/self-serve), not a separately named free Agent model. Paid plans increase usage; MCP availability can depend on plan. |
-| [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) | Open-source personal agent with memory, skills, and terminal/desktop surfaces | The software is MIT-licensed, but inference needs a Nous Portal subscription, provider API key/OAuth, or compatible local endpoint. |
-| [OpenAI Codex](https://learn.chatgpt.com/docs/quickstart) | OpenAI coding agent in ChatGPT desktop, CLI, IDE, and cloud | Sign in with an eligible ChatGPT plan; [current Codex plans](https://learn.chatgpt.com/docs/pricing) include limited Free usage. CLI/IDE can alternatively use a billed OpenAI API key, with some feature differences. |
-| [Claude Code](https://code.claude.com/docs/en/setup) | Anthropic coding agent for terminal, IDE, desktop, and web | Use a paid Claude plan that includes Claude Code, or an Anthropic Console account with active API billing. See [pricing](https://claude.com/pricing). |
-| [Google Antigravity](https://antigravity.google/download) | Google's agent-first IDE/platform | Sign in with Google. The [Individual plan](https://antigravity.google/pricing) currently starts at $0 with basic weekly limits; paid Google AI/Cloud options raise limits. |
+| [Cursor](https://cursor.com/download) | AI-first code editor; easiest visual starting point for users familiar with VS Code | Its [Hobby plan](https://cursor.com/pricing) has limited free Agent usage and needs no credit card. Built-in model usage does not require your own model API key; paid plans increase limits. |
+| [Devin](https://app.devin.ai/) | Cloud autonomous software engineer with its own shell, editor, and browser | Sign up in the web app and connect the repository. Devin currently offers a limited [Free plan](https://docs.devin.ai/admin/billing/self-serve) — this is free plan usage, not a separately named “free Agent model.” Paid plans increase usage; MCP availability can depend on plan. |
+| [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) | Open-source, self-improving personal agent with memory, skills, and terminal/desktop surfaces | Install Hermes Desktop or its CLI. The software is MIT-licensed, but inference still needs a provider: a Nous Portal subscription, a supported provider API key/OAuth, or a compatible local endpoint. |
+| [OpenAI Codex](https://learn.chatgpt.com/docs/quickstart) | OpenAI coding agent in the ChatGPT desktop app, CLI, IDE extension, and cloud | Sign in with an eligible ChatGPT plan; [current Codex plans and limits](https://learn.chatgpt.com/docs/pricing) include a limited Free tier. CLI/IDE can alternatively use a billed OpenAI API key, but some cloud features may differ. |
+| [Claude Code](https://code.claude.com/docs/en/setup) | Anthropic coding agent for terminal, IDE, desktop, and web workflows | Sign in with a paid Claude plan that includes Claude Code, or use an Anthropic Console account with active API billing. See [current pricing](https://claude.com/pricing). Free Claude chat alone should not be assumed to include Claude Code. |
+| [Google Antigravity](https://antigravity.google/download) | Google's agent-first IDE/platform with editor, terminal, browser, CLI, and multi-agent workflows | Sign in with a Google account. The [Individual plan](https://antigravity.google/pricing) currently starts at $0 with basic weekly limits; Google AI Pro/Ultra or Google Cloud options raise limits. A personal Gemini API key is not required for ordinary Individual use. |
 
-Give the chosen agent access only to this project folder, review its plan before large edits, and use Git so changes remain inspectable.
+Whichever you choose, give it access only to this project folder, review its plan before large edits, and keep the project under Git so changes can be inspected or reverted.
 
 ## Optional online search and image setup
 
-Some agents include web search. Otherwise add a trusted MCP using its official client-specific instructions:
+An agent needs current web access to verify sources and recommend real articles, videos, or data. Some agents already include web search. If yours does not, add a trusted search MCP:
 
-- [Tavily MCP](https://docs.tavily.com/documentation/mcp): obtain a key from [app.tavily.com](https://app.tavily.com/); the current free Researcher tier has limited monthly credits without a card.
-- [Brave Search API](https://brave.com/search/api/): obtain a token from the [dashboard](https://api-dashboard.search.brave.com/). Current plans include monthly free credit but require a card for anti-fraud verification. Brave provides an [official MCP server](https://github.com/brave/brave-search-mcp-server).
+- [Tavily](https://docs.tavily.com/documentation/mcp): create a key at [app.tavily.com](https://app.tavily.com/). Its current free Researcher tier provides limited monthly credits without a card. Use Tavily's client-specific instructions for Cursor or Claude Code; for other agents, ask: `Using the official Tavily MCP documentation, configure it in this app without committing my API key.`
+- [Brave Search API](https://brave.com/search/api/): create a subscription token in the [Brave dashboard](https://api-dashboard.search.brave.com/). It currently includes monthly free credit but requires a card for anti-fraud verification. Brave publishes an [official MCP server](https://github.com/brave/brave-search-mcp-server). Ask your agent to install it using the official instructions for that client.
 
-If your client is not named in those docs, ask it: `Using the official Tavily/Brave MCP documentation, configure this trusted server without committing my API key.` Keep keys in secret/environment settings or a local `.env` ignored by Git — never in Markdown or committed MCP configuration.
+Store keys in the agent's secret/environment settings or a local `.env` ignored by Git. **Never paste a real key into Markdown, `AGENT.md`, an MCP config that will be committed, or a screenshot.**
 
-A search MCP returns current results and usually image URLs; it does not automatically save an image. This repository's `scripts/download_images.py` performs the actual image search/download and specifically requires `BRAVE_API_KEY`; Tavily is not a drop-in replacement. Search access also does not grant copyright or reuse rights, so verify the source and licence.
+Search and image download are separate capabilities:
+
+- A Tavily/Brave MCP usually gives the AI current results and image URLs; it does not automatically save an image into this repository.
+- This template's `scripts/download_images.py` actually searches and downloads a candidate into `images/`, and currently requires `BRAVE_API_KEY`; Tavily is not a drop-in replacement for that script.
+- On macOS: `export BRAVE_API_KEY=...` and run the command in the Scripts section. On Windows PowerShell use `$env:BRAVE_API_KEY='...'` for the current terminal session.
+- Search access does not grant copyright or reuse rights. Check the source and licence before keeping a downloaded image.
 
 ### Learning modality presets
 
@@ -124,15 +165,18 @@ See [`protocols/project_lifecycle.md`](protocols/project_lifecycle.md).
 
 ```
 AGENT.md                 # Sole AI router / entrypoint (Bootstrap post-cleanup removes setup guides)
-start.bat                # One-click Windows batch file to start the web server (node)
+start.command            # macOS first-run install, server launch, and browser open
+server.js                # Local files, autosave, and Notes Smart Merge backend
+index.html / app.js      # Universal Magazine + Unit web reader
+reader-core.js           # Interactive exercise parsing and Markdown write-back
 DESIGN.md                # Design rationale
 protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec, cleanup_template…
 knowledge/               # profile / desire / calendar / domain_map / modalities
 state/                   # log / gaps / warehouse
 content/magazines/       # Long-form rich input
 content/units/           # Short lessons + exercises
-templates/               # Generation skeletons + reader_skeleton.html (reference UI shell)
-scripts/                 # Image download, content + reader validation, viz.css
+templates/               # Generation skeletons
+scripts/                 # Image download, validation, viz.css
 notes.json               # Annotations (full-sentence context)
 review.md                # Grading retrospectives archive
 ```
@@ -141,11 +185,11 @@ review.md                # Grading retrospectives archive
 | :--- | :--- |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 intake confirmation checklist |
 | [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | One-time post-initialization cleanup instructions (deletes itself) |
+| [`scripts/verify_reader.js`](scripts/verify_reader.js) | Reader acceptance harness — checks the `frontend_spec.md` contract |
+| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | Reference reader shell, kept for porting the UI to other branches |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | Hard syntax for flow / tree / blocks / SVG-lite… |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | Universal Reader specs (blanks/textarea autosaves, Notes jump, viz render) |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | Interactive Markdown validation |
-| [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | Reference reader UI: themes, persistence, sidebar, annotation anchoring |
-| [`scripts/verify_reader.js`](scripts/verify_reader.js) | Reader acceptance harness — run after building the reader |
 | [`scripts/download_images.py`](scripts/download_images.py) | Brave image download (`BRAVE_API_KEY`) |
 
 ---
@@ -153,27 +197,29 @@ review.md                # Grading retrospectives archive
 ## Scripts
 
 ```bash
-# Start the server (once browser server files are created)
-start.bat
+# One-click macOS launch (or double-click start.command)
+./start.command
+
+# Reader acceptance: unit tests, then the frontend_spec contract check
+npm test
+node scripts/verify_reader.js
+
+# Start only the server without opening a browser
+npm start
 
 # Validate interactive markdown + visual headers under content/
 node scripts/validate_content.js
 
-# Check the reader against protocols/frontend_spec.md (must pass with no FAIL)
-node scripts/verify_reader.js
-
 # Download imageQuery assets
-set BRAVE_API_KEY=your_key
-python scripts/download_images.py content/magazines/magazine01_xxx.md
+export BRAVE_API_KEY=your_key
+python3 scripts/download_images.py content/magazines/magazine01_xxx.md
 ```
 
 ---
 
-## Not included yet
+## Built-in web reader
 
-The browser HTML/JS implementation files are not shipped in this repository. When building or copying your own browser viewer and server, refer to [`protocols/frontend_spec.md`](protocols/frontend_spec.md). It documents the complete merged specifications for both Textbook mode (inputs, textareas, checkboxes autosaved back to markdown) and Magazine mode (concept jumps, context-aware annotations with smart merge, and a visual layout), plus the light/dark theme contract, the locked storage keys and routes, and the annotation anchoring rule that makes a repeated word locatable.
-
-After building it, run `node scripts/verify_reader.js`. It is the acceptance bar for the reader — it checks those contracts and the internal consistency of `notes.json`, and must report no FAIL.
+This branch ships the Universal Reader specified by [`protocols/frontend_spec.md`](protocols/frontend_spec.md): grouped Magazine/Unit navigation, persistent sorting, Markdown and Mermaid, autosaved blanks/answers/choices, per-document Notes, `context + contextOffset` jumps, and Smart Merge that preserves AI reviews. The server listens only on `127.0.0.1` and limits browser writes to the two learning-content directories plus `notes.json`.
 
 ---
 

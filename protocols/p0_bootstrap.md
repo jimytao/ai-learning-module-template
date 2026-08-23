@@ -64,27 +64,24 @@ Use the “Confirmation card template” in `intake_checklist.md`.
 
 ---
 
-## Step 3.5: Prepare the reader (owner of the browser/server files)
+## Step 3.5: Verify the reader (owner of the browser/server files)
 
-> **This step owns reader creation.** No other protocol does. `cleanup_template.md` requires a working
-> reader, so if this step is skipped there is nothing to verify and cleanup can never legitimately run.
+> **This branch ships a working reader** (`index.html`, `app.js`, `reader-core.js`, `server.js`,
+> `styles.css`). So this step **verifies** it rather than building it. `cleanup_template.md` requires a
+> verified reader, so if this step is skipped, cleanup can never legitimately run.
 
-1. Check whether a reader already exists: a `server.js` or `scripts/preview_server.js` at repo root,
-   plus the viewer page it serves.
-2. If **missing**, **start from `templates/reader_skeleton.html`** — copy it to the project root as
-   `index.html` and extend it. It already implements the theme contract, preference persistence,
-   sidebar chrome, annotation capture, and the `data-primary` anchoring rule; rebuilding those from
-   prose is where readers go wrong. Fill its four marked EXTENSION POINTs (Markdown rendering,
-   interactive controls + autosave, Concepts tab, annotation edit UI) and write the matching server.
-   Ask the user before pulling files from any outside source.
-3. Verify by running `start.bat` and opening the page. An empty TOC is expected before Phase 2 —
-   "loads without error" is the acceptance bar here, not "shows lessons".
-4. **Run `node scripts/verify_reader.js`. It must report no FAIL.** It checks the contracts that
+1. Install once if needed (`npm install`), then launch with `start.command` and open the page.
+   An empty TOC is expected before Phase 2 — "loads without error" is the acceptance bar here,
+   not "shows lessons".
+2. **Run `npm test`.** The suite covers interactive-markdown round-tripping, server path safety,
+   Smart Merge, and the annotation anchoring rule (`ReaderCore.annotationMatches`).
+3. **Run `node scripts/verify_reader.js`. It must report no FAIL.** It checks the contracts that
    silently rot: theme carrier and FOUC guard, locked storage keys and routes, the `data-primary`
    anchoring rule, excluded features (no Git UI), and `notes.json` consistency. Fix every FAIL against
    `frontend_spec.md` rather than editing the checks.
-5. If the user does not want a reader right now (Markdown-only workflow is legitimate), record
-   `Reader: skipped by user` in `knowledge/profile.md` §Reader preferences and continue.
+4. `templates/reader_skeleton.html` is kept as the **reference shell**, not as a thing to copy here —
+   the shipped reader already implements what it demonstrates. Consult it when extending the UI.
+5. If `start.command` lost its executable bit after a copy, restore it with `chmod +x start.command`.
 
 Outcome of this step decides Gate B in Step 4 below.
 
@@ -114,8 +111,8 @@ so if Gate A skips item 4 nothing else will do it.
 
 ### Gate B — after the reader is verified (deferred, not urgent)
 
-Run only when Step 3.5 produced a working reader and `start.bat` was tested (or the user explicitly
-declined a reader). Then **load and execute `protocols/cleanup_template.md`**: it strips the one-shot
+Run only when Step 3.5 verification passed: `start.command` launches the reader, `npm test` is green,
+and `verify_reader.js` reports no FAIL. Then **load and execute `protocols/cleanup_template.md`**: it strips the one-shot
 Phase 0 interview guidance from `AGENT.md`, retains all confirmed profile data (including explanation
 language), and self-deletes.
 
@@ -134,7 +131,7 @@ not run cleanup with unmet preconditions.
 | Next 5 queued | Mag/Unit labeled by modality |
 | Initial gaps | 3–5 items |
 | AGENT | Converted to subject-project mode ✅ (Gate A) |
-| Reader | built / copied / skipped by user |
+| Reader | shipped reader verified (start.command · npm test · verify_reader) |
 | Template cleanup | done (Gate B) / deferred until the reader is verified |
 | Pending TBD | … |
 
