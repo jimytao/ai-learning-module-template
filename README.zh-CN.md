@@ -6,20 +6,17 @@
 
 | 分支 | 语言 | 适用对象 |
 | :--- | :--- | :--- |
-| **`macos-chinese`**（本分支） | 中文为主的模板 + 完整 macOS 阅读器 | 中文为主的 macOS 用户 |
-| **`Chinese`** | 中文为主的 Windows 基线文档 | 中文用户 |
-| **`macos-english`** | 全英文模板 + 完整 macOS 阅读器 | 英文为主的 macOS 用户 |
-| **`English`** | 全英文 Windows 基线文档 | 英文用户 |
+| **`Chinese`** | 中文为主的模板 + Windows 阅读器 | 中文为主的 Windows 用户 |
+| **`English`** | 全英文模板 + Windows 阅读器 | 英文为主的 Windows 用户 |
+| **`macos-chinese`**（本分支） | 中文为主的模板 + macOS 阅读器 | 中文为主的 macOS 用户 |
+| **`macos-english`** | 全英文模板 + macOS 阅读器 | 英文为主的 macOS 用户 |
 
 ```bash
-# 中文为主的完整 macOS 阅读器（本分支）
+# 本分支
 git clone -b macos-chinese https://github.com/jimytao/ai-learning-module-template.git
-
-# 全英文文档
-git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-克隆后也可：`git checkout macos-chinese` / `git checkout macos-english`。
+克隆后也可：`git checkout <分支名>`。
 
 ---
 
@@ -35,7 +32,7 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 这是一个基于文件夹的 AI 学习系统。AI 编程代理先读 `AGENT.md`，了解你的目标和偏好，提出学习顺序，把新课程写成 Markdown；之后再批改答案、解释 Notes，并用弱项安排复习。画像、内容、进度和注释都以可读文件保存在项目里。
 
-它**不是**预先写好的课程，也不附送大模型或 API 订阅。你需要选择一个能读取和修改整个项目文件夹的 AI 代理。本分支已带完整的 macOS 本地网页阅读器；Windows 基线分支保留各自原有的启动流程。
+它**不是**预先写好的课程，也不附送大模型或 API 订阅。你需要选择一个能读取和修改整个项目文件夹的 AI 代理。四个分支都带同一个本地网页阅读器，区别只在文档语言和随包的一键启动脚本。
 
 学习闭环分四个阶段：
 
@@ -50,17 +47,57 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 
 ## 第一次使用
 
-1. Clone 或把本仓库复制为新文件夹（推荐保留一份干净母模板）。  
-2. 用 Cursor、Codex、Claude Code、Devin、Hermes Agent、Antigravity 或其它能编辑文件的代理打开**整个文件夹**。不要只把一个 Markdown 文件贴给普通聊天机器人。
-3. 对 AI 说：
+### 1. 准备一个 AI 编程代理
 
-```text
-先读 AGENT.md，执行 Phase 0 / 初始化。在我确认采集卡之前不要生成课程正文。
+先有一个能读写本地文件的 AI 代理 —— Cursor、Claude Code、Codex、Devin、Hermes Agent、
+Antigravity 都可以（见下方[「选择 AI 编程代理」](#选择-ai-编程代理)）。
+**不要**只把某个 Markdown 文件贴进普通聊天机器人，那样它改不了文件。
+
+### 2. 把仓库拉到本地
+
+```bash
+git clone -b macos-chinese https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-4. AI 会询问科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言、学习模态预设，以及 **§内容形态偏好（配图密度、图示档位、便利贴旁注类型、单选/多选/填空/问答/判断等题型取舍）**。即使你学的是英语，主要解释语言仍是 AI 讲解难点、纠错和反馈时用的语言。核对确认卡，准确后再回复「确认」。偏好会保存在 `knowledge/profile.md` 中，AI 后续生成正文时会严格遵守。
-5. 确认后，AI 把资料写入 `knowledge/profile.md` 等文件，并把 `AGENT.md` 改造成你这个科目的项目。**到这一步就已经可以开始学了。** 用 `cleanup_template.md` 删除一次性前期配置 prompt 的动作会推迟到阅读器校验通过之后；已经保存的个人偏好与重入护栏不会被删除。
-6. 安装 Node.js 20+，然后双击 **`start.command`**（Windows 用户双击 `start.bat`）。第一次运行会安装本地依赖并打开网页阅读器。随后运行 `npm test` 与 `node scripts/verify_reader.js`，两者都干净之后，上一步的清理才允许执行。
+或者直接把仓库链接给代理，让它自己 clone 下来。然后用代理打开**整个文件夹**。
+
+### 3. 第一句话：让它读 SETUP.md
+
+```text
+先读 SETUP.md，从 Step 0 开始执行。在我确认采集卡之前不要生成课程正文。
+```
+
+[`SETUP.md`](SETUP.md) 是首次运行的唯一入口，AI 会顺着它做完三件事：
+
+| Step | AI 会做什么 |
+| :--- | :--- |
+| **Step 0** | **装环境**：检查并安装 Node.js 20+、跑 `npm install`、确认本平台的启动脚本（本分支是 `start.command`）、冒烟测试阅读器能打开 |
+| **Step 1–4** | **采集**：问你科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言、学习模态预设（T/M/H/C），以及 **§内容形态偏好**（配图密度、图示档位、便利贴旁注类型，以及单选/多选/填空/问答/判断等题型取舍）。输出确认卡等你回复「确认」，然后写入 `knowledge/` 与 `state/`，并跑 `npm test` + `verify_reader.js` |
+| **Step 5–6** | **改造**：把 `AGENT.md` 从通用模板改成你这个科目的项目，向 `state/log.md` 写入 `Initialized …` 标记 |
+
+> 即使你学的是英语，**主要解释语言**仍是 AI 讲解难点、纠错和反馈时用的语言，和学习内容
+> 语言分开确认。这些偏好保存在 `knowledge/profile.md`，Phase 2 每次生成都会读。
+
+`SETUP.md` **用完留在原地**，不会自我删除。以后要补槽位、改语言、改偏好都还能翻回去看。
+防止重复初始化靠的是 `state/log.md` 里的 `Initialized …` 行，不是靠删文件。
+
+### 4. 之后每次开新会话
+
+Step 6 跑完，入口就从 `SETUP.md` 换成 `AGENT.md`。以后每次开新会话，第一句话都是：
+
+```text
+先读 AGENT.md，然后 <你想做的事>
+```
+
+比如「先读 AGENT.md，然后告诉我今天学什么」「先读 AGENT.md，我想把下个月的复习排一下」
+「先读 AGENT.md，我想学 XXX，帮我插进计划里」。AI 会自己判断该进哪个 Phase、加载哪些文件，
+先给你大纲，你点头之后再生成。
+
+启动阅读器：双击 `start.command`（首次运行会自动装依赖并打开浏览器），或 `npm start` 后自行打开
+<http://127.0.0.1:4173>。
+
+> 本分支面向 **macOS**。如果你在 Windows 上，请改用带 `start.bat` 的对应分支。
+
 
 ---
 
@@ -158,13 +195,14 @@ git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ## 仓库结构
 
 ```
-AGENT.md                 # AI 唯一入口路由 (初始化清理后会自动移除模板说明)
+AGENT.md                 # AI 唯一入口路由（Step 5 会改写成你的科目项目）
+SETUP.md                 # 首次运行：环境准备 + Phase 0 采集 + AGENT 改造
 start.command            # macOS 首次安装、启动服务器并打开浏览器
 server.js                # 本地文件、答案自动保存与 Notes Smart Merge 后端
 index.html / app.js      # Magazine + Unit 通用网页阅读器
 reader-core.js           # 交互题解析与 Markdown 回写
 DESIGN.md                # 设计逻辑
-protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec、cleanup_template…
+protocols/               # Phase0–3、tech_spec、visual_arsenal、frontend_spec…
 knowledge/               # profile / desire / calendar / domain_map / 模态预设
 state/                   # log / gaps / warehouse
 content/magazines/       # 长文富输入
@@ -177,8 +215,8 @@ review.md                # 批改复盘存档
 
 | 路径 | 作用 |
 | :--- | :--- |
+| [`SETUP.md`](SETUP.md) | 首次运行入口：环境准备 + Phase 0 采集 + AGENT 改造（长期保留） |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 采集确认清单 |
-| [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | 一次性初始化后模板清理与精简协议（执行后自毁） |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | 流程/树/框图/SVG 等硬语法 |
 | [`protocols/frontend_spec.md`](protocols/frontend_spec.md) | 通用阅读器验收规范（含填空/问答自动写回、Notes 跳转、图示渲染） |
 | [`scripts/validate_content.js`](scripts/validate_content.js) | 交互 Markdown 校验 |

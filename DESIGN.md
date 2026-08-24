@@ -165,9 +165,9 @@
         ↓
 Phase 0  intake 清单 → 确认卡 → 写入画像/模态
         ↓
-   闸 A     改造 AGENT 为科目项目  →  学习在此解锁
-   Step 3.5 校验自带阅读器：start.command → npm test → verify_reader.js
-   闸 B     模板清理（可推迟；绝不阻塞学习）
+   Step 0   环境准备（Node 20+ / npm install / 启动脚本适配）—— 见 SETUP.md
+   Step 4   阅读器验收：npm test + verify_reader.js
+   Step 5   改造 AGENT 为科目项目  →  学习在此解锁
         ↓
 Phase 1  按 T/M/H/C 预设 + gaps/notes 提案
         ↓ 确认

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * verify_reader.js —— p0_bootstrap Step 3.5 所构建阅读器的验收脚本。
+ * verify_reader.js —— 自带阅读器的验收脚本（SETUP.md Step 4 / p0_bootstrap Step 3.5）。
  *
  * 检查 protocols/frontend_spec.md 中无需浏览器即可验证的硬契约：锁定命名、主题实现方式、
  * 注释锚定、被排除的功能，以及 notes.json 的内部一致性。零依赖 —— 裸 Node 即可运行。
@@ -88,9 +88,8 @@ const htmlPath = HTML_CANDIDATES.find((p) => read(p) !== null);
 if (!serverPath && !htmlPath) {
   console.log('SKIP —— 未找到阅读器（已查找 %s）。', [...SERVER_CANDIDATES, ...HTML_CANDIDATES].join(', '));
   console.log('');
-  console.log('这是全新模板的正常状态。请按 p0_bootstrap.md Step 3.5 构建阅读器后重新运行。');
-  console.log('在本检查通过之前，清理（闸 B）保持阻塞 —— 除非用户明确表示不需要阅读器，');
-  console.log('且该决定已记录在 profile.md 中。');
+  console.log('这是全新模板的正常状态。请按 SETUP.md Step 0 装好环境后重新运行。');
+  console.log('除非用户明确表示不需要阅读器，且该决定已记录在 profile.md 中。');
   process.exit(0);
 }
 
@@ -399,8 +398,7 @@ for (const r of results) {
 
 console.log(`\n通过 ${counts.PASS} · 警告 ${counts.WARN} · 失败 ${counts.FAIL}`);
 if (counts.FAIL) {
-  console.log('\n阅读器未通过验收。请修正上方 FAIL 项（见 protocols/frontend_spec.md）。');
-  console.log('p0_bootstrap Step 3.5 尚未完成，清理（闸 B）不得执行。');
+  console.log('\n阅读器未通过验收（SETUP.md Step 4）。请修正上方 FAIL 项（见 protocols/frontend_spec.md）。');
   process.exit(1);
 }
-console.log('\n阅读器验收通过。Step 3.5 完成 —— 闸 B 清理可以执行。');
+console.log('\n阅读器验收通过（SETUP.md Step 4 完成）。');
