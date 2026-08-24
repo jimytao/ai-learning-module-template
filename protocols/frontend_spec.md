@@ -501,7 +501,7 @@ markdown → marked HTML
 为保证生成内容与前端呈现始终保持如 Magazine / Drill 教案般的高品质视觉体验，前端与 AI 生成正文时必须遵守以下 UI/UX 规范：
 
 ### 12.1 色彩与设计 Token
-* **主色调 (Primary Accent)**：湛蓝 / 亮青 (`#38bdf8` 暗色 / `#0284c7` 亮色)，用于交互焦点、目录选中态与操作按钮。
+* **主色调 (Primary Accent)**：青绿 (`#2dd4a7` 暗色 / `#0d9b78` 亮色)，用于交互焦点、目录选中态与操作按钮。
 * **辅助点缀色 (Secondary Accent)**：琥珀金 / 暖黄 (`#fbbf24` 暗色 / `#d97706` 亮色)，用于重点高亮、高质感 Logo 渐变与便利贴卡片边框。
 * **背景与玻璃质感 (Glassmorphic Atmosphere)**：
   * 使用双色径向渐变（Radial Gradient）铺设渐进式背景层。
