@@ -128,7 +128,7 @@ const all = server + '\n' + html;
 
 if (assets.length) pass('基础', `已扫描外链资源：${assets.map((a) => a.rel).join('、')}`);
 
-if (!serverPath) fail('基础', '存在服务器（server.js 或 scripts/preview_server.js）', 'start.bat 只会查找这两个路径');
+if (!serverPath) fail('基础', '存在服务器（server.js 或 scripts/preview_server.js）', 'start.command 只会查找这两个路径');
 else pass('基础', `已找到服务器：${serverPath}`);
 if (!htmlPath) fail('基础', '存在阅读器页面（index.html 或 scripts/preview.html）');
 else pass('基础', `已找到阅读器页面：${htmlPath}`);
