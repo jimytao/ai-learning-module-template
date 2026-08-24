@@ -378,6 +378,58 @@ if (rawNotes === null) {
 }
 
 // ---------------------------------------------------------------------------
+const E = '界面语言包';
+// ---------------------------------------------------------------------------
+
+// 语言包是给 AI 翻译的，所以最可能的坏法是「漏了一个键」—— 界面上会直接露出
+// 键名。这里把 index.html / app.js 实际引用的键与 ui-strings.js 定义的键对齐。
+const packSrc = read('ui-strings.js');
+if (packSrc === null) {
+  fail(E, 'ui-strings.js 存在', '界面文案的唯一来源（frontend_spec §13）');
+} else {
+  const defined = new Set(
+    [...stripComments(packSrc).matchAll(/^\s{2}([A-Za-z][A-Za-z0-9]*)\s*:/gm)].map((m) => m[1]),
+  );
+  const used = new Set();
+  for (const m of rawHtml.matchAll(/data-i18n(?:-html|-title|-aria|-placeholder)?="([^"]+)"/g)) {
+    used.add(m[1]);
+  }
+  const appSrc = read('app.js');
+  if (appSrc) for (const m of appSrc.matchAll(/\bT\('([^']+)'\)/g)) used.add(m[1]);
+  // lang / pageTitle 是 applyStaticStrings 直接读的，不经过 data-i18n 或 T()。
+  used.add('lang');
+  used.add('pageTitle');
+
+  if (!defined.size) {
+    fail(E, 'ui-strings.js 定义了键', '没解析到任何键 —— 检查 window.UI_STRINGS 的写法');
+  } else {
+    const missing = [...used].filter((k) => !defined.has(k)).sort();
+    if (missing.length) {
+      fail(E, '每个被引用的键都在语言包里', `缺失：${missing.join(', ')}`);
+    } else {
+      pass(E, `语言包覆盖全部 ${used.size} 个被引用的键`);
+    }
+    const unused = [...defined].filter((k) => !used.has(k)).sort();
+    if (unused.length) {
+      warn(E, `语言包里有 ${unused.length} 个没被引用的键`,
+        `${unused.join(', ')} —— 翻译时是白做功，可能是改名后的残留`);
+    }
+  }
+
+  // 界面文案不得再回到 index.html / app.js 里硬编码。
+  const strayHtml = [...rawHtml.matchAll(/<(button|h1|label)\b[^>]*>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
+    .filter((m) => !/data-i18n/.test(m[0]))
+    .filter((m) => !/^[\s\p{P}\p{S}]*$/u.test(m[2]))
+    .map((m) => m[2].trim());
+  if (strayHtml.length) {
+    warn(E, 'index.html 里没有漏掉的硬编码文案',
+      `疑似未接语言包：${strayHtml.slice(0, 5).join(' | ')}`);
+  } else {
+    pass(E, 'index.html 的面向用户文案都走 data-i18n');
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
 

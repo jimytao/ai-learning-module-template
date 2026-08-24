@@ -76,6 +76,7 @@ three stages:
 | :--- | :--- |
 | **Step 0** | **Set up the environment**: check for and install Node.js 20+, run `npm install`, confirm this platform's launcher (`start.command` on this branch), and smoke-test that the reader opens |
 | **Steps 1–4** | **Intake**: asks about your subject, testable goal, current level, known material, gaps, interests, time budget, **primary explanation language**, learning-content language, learning modality (T/M/H/C), and **§Content Format Preferences** (image density, visual diagram tier, sticky-note types, and exercise mix across MCQ, MSQ, blanks, open Q&A, T/F). It prints a confirmation card, waits for you to reply `confirm`, writes to `knowledge/` and `state/`, then runs `npm test` + `verify_reader.js` |
+| **Step 5.5** | **Localize the interface**: translates the reader UI strings (`ui-strings.js`) into your primary explanation language, so the browser is in your own language from then on |
 | **Steps 5–6** | **Convert the project**: rewrites `AGENT.md` from a generic template into your subject's project and appends an `Initialized …` marker to `state/log.md` |
 
 > Even if the subject you are studying is English, the **primary explanation language** is the

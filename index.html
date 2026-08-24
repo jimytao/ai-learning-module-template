@@ -23,23 +23,23 @@
 <body>
   <header class="app-header">
     <div class="header-left">
-      <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏" title="切换左侧栏">☰</button>
-      <div id="documentTitle" class="document-title">选择一篇内容</div>
+      <button id="sidebarToggle" class="icon-button" type="button" data-i18n-aria="sidebarToggleAria" data-i18n-title="sidebarToggleTitle" aria-label="折叠/展开侧栏" title="切换左侧栏">☰</button>
+      <div id="documentTitle" class="document-title" data-i18n="documentTitleEmpty">选择一篇内容</div>
     </div>
     <div class="header-actions">
-      <button id="themeButton" class="pill-button" type="button" aria-label="切换主题" title="切换主题">
-        <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label">Light Mode</span>
+      <button id="themeButton" class="pill-button" type="button" data-i18n-aria="themeAria" data-i18n-title="themeTitle" aria-label="切换主题" title="切换主题">
+        <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label" data-i18n="themeLabel">Light Mode</span>
       </button>
       <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
       <button id="saveStatus" class="save-status" type="button" data-state="idle"
-              title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
-        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
+              data-i18n-title="saveStatusTitle" data-i18n-aria="saveStatusAria" title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
+        <span class="save-icon" aria-hidden="true">○</span><span class="save-label" data-i18n="statusIdle">就绪</span>
       </button>
-      <button id="tocToggle" class="pill-button" type="button" aria-label="切换章节目录" title="切换右侧章节目录">
-        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label">章节目录</span>
+      <button id="tocToggle" class="pill-button" type="button" data-i18n-aria="tocToggleAria" data-i18n-title="tocToggleTitle" aria-label="切换章节目录" title="切换右侧章节目录">
+        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label" data-i18n="tocToggleLabel">章节目录</span>
       </button>
       <button id="exportButton" class="pill-button primary" type="button" disabled>
-        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label">导出</span>
+        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label" data-i18n="exportLabel">导出</span>
       </button>
     </div>
   </header>
@@ -54,33 +54,33 @@
         </div>
       </div>
 
-      <nav class="tabs" aria-label="阅读器侧栏">
-        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span>目录</button>
-        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span>概念</button>
-        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span>注释</button>
+      <nav class="tabs" data-i18n-aria="sidebarAria" aria-label="阅读器侧栏">
+        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span><span data-i18n="tabContents">目录</span></button>
+        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span><span data-i18n="tabConcepts">概念</span></button>
+        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span><span data-i18n="tabNotes">注释</span></button>
       </nav>
 
       <div class="sidebar-search">
-        <input id="sidebarSearch" type="search" placeholder="🔍 搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
+        <input id="sidebarSearch" type="search" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchAria" placeholder="🔍 搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
       </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
-          <span class="panel-label">Curriculum</span>
-          <button id="sortButton" type="button">↑ 旧 → 新</button>
-          <button id="refreshButton" type="button" aria-label="刷新" title="刷新列表">⟳</button>
+          <span class="panel-label" data-i18n="panelLabel">Curriculum</span>
+          <button id="sortButton" type="button" data-i18n="sortAsc">↑ 旧 → 新</button>
+          <button id="refreshButton" type="button" data-i18n-aria="refreshAria" data-i18n-title="refreshTitle" aria-label="刷新" title="刷新列表">⟳</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
       </section>
 
       <section id="conceptsPanel" class="tab-panel" data-panel="concepts">
-        <p class="panel-hint">来自当前文档标题；点击可跳转。</p>
-        <div id="conceptsList" class="concepts-list empty-list">尚未打开文档</div>
+        <p class="panel-hint" data-i18n="conceptsHint">来自当前文档标题；点击可跳转。</p>
+        <div id="conceptsList" class="concepts-list empty-list" data-i18n="noDocumentOpen">尚未打开文档</div>
       </section>
 
       <section id="notesPanel" class="tab-panel" data-panel="notes">
-        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> 显示全部文档注释</label>
-        <div id="notesList" class="notes-list empty-list">暂无注释</div>
+        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> <span data-i18n="showAllNotesLabel">显示全部文档注释</span></label>
+        <div id="notesList" class="notes-list empty-list" data-i18n="notesEmpty">暂无注释</div>
       </section>
     </aside>
 
@@ -88,9 +88,9 @@
       <article id="reader" class="reader" aria-live="polite">
         <div class="welcome-card">
           <div class="welcome-icon" aria-hidden="true">📄</div>
-          <p class="eyebrow">UNIVERSAL READER</p>
-          <h1>学习内容会出现在这里</h1>
-          <p>先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
+          <p class="eyebrow" data-i18n="welcomeEyebrow">UNIVERSAL READER</p>
+          <h1 data-i18n="welcomeTitle">学习内容会出现在这里</h1>
+          <p data-i18n-html="welcomeBody">先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
         </div>
       </article>
     </main>
@@ -98,31 +98,31 @@
     <!-- 右侧章节目录 (Collapsible Right Sidebar TOC) -->
     <aside id="tocSidebar" class="toc-sidebar collapsed">
       <div class="toc-header">
-        <span>🧭 章节目录 Navigation</span>
+        <span data-i18n="tocHeader">🧭 章节目录</span>
       </div>
       <div class="toc-scroll-area">
         <div id="tocList" class="toc-list">
-          <p class="empty-toc">尚未打开文档</p>
+          <p class="empty-toc" data-i18n="noDocumentOpen">尚未打开文档</p>
         </div>
       </div>
     </aside>
   </div>
 
-  <button id="addNoteButton" class="selection-action" type="button" hidden>＋ Note</button>
+  <button id="addNoteButton" class="selection-action" type="button" data-i18n="addNoteLabel" hidden>＋ Note</button>
 
   <dialog id="noteDialog" class="note-dialog">
     <form id="noteForm" method="dialog">
       <div class="dialog-heading">
-        <div><small>选中文本</small><strong id="noteWord"></strong></div>
-        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="关闭">×</button>
+        <div><small data-i18n="noteDialogSelected">选中文本</small><strong id="noteWord"></strong></div>
+        <button id="closeNoteDialog" class="icon-button" type="button" data-i18n-aria="noteDialogCloseAria" aria-label="关闭">×</button>
       </div>
-      <label for="noteText">你的注释</label>
-      <textarea id="noteText" rows="6" placeholder="写下疑问、解释或 +显式查询…"></textarea>
+      <label for="noteText" data-i18n="noteDialogLabel">你的注释</label>
+      <textarea id="noteText" rows="6" data-i18n-placeholder="noteDialogPlaceholder" placeholder="写下疑问、解释或 +显式查询…"></textarea>
       <div class="dialog-actions">
-        <button id="deleteNoteButton" class="danger" type="button" hidden>删除</button>
+        <button id="deleteNoteButton" class="danger" type="button" data-i18n="noteDialogDelete" hidden>删除</button>
         <span class="dialog-spacer"></span>
-        <button id="cancelNoteButton" type="button">取消</button>
-        <button class="primary" type="submit">保存</button>
+        <button id="cancelNoteButton" type="button" data-i18n="noteDialogCancel">取消</button>
+        <button class="primary" type="submit" data-i18n="noteDialogSave">保存</button>
       </div>
     </form>
   </dialog>
@@ -132,6 +132,7 @@
   <script src="/vendor/marked.js"></script>
   <script src="/vendor/purify.js"></script>
   <script src="/vendor/mermaid.js"></script>
+  <script src="/ui-strings.js"></script>
   <script src="/reader-core.js"></script>
   <script src="/app.js"></script>
 </body>

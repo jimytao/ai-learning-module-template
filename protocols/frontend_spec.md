@@ -517,3 +517,45 @@ markdown → marked HTML
 * **工程图示与步骤 (`.viz-block`, `.viz-steps`)**：卡片居中，微阴影浮起感，图表在亮/暗双色背景下均清晰可辨。
 * **保存状态指示器 (`.save-status`)**：Button 形态，带有圆角胶囊边框、状态图标（`○` 就绪 / `●` 待保存 / `◌` 保存中 / `✓` 已保存 / `⚠` 失败）以及脉冲微动效，支持快捷操作。
 
+
+---
+
+## 13. 界面语言包（`ui-strings.js`）
+
+阅读器界面必须能跟着用户的**主要解释语言**走。做法是把全部文案集中到一个文件里，
+让 Phase 0 之后可以整体替换（流程见 `SETUP.md` Step 5.5）。
+
+| 规则 | 硬契约 |
+| :--- | :--- |
+| 唯一来源 | 根目录 `ui-strings.js`，定义 `window.UI_STRINGS = { … }` |
+| 加载顺序 | 在 `app.js` **之前**用普通 `<script>` 同步加载；不能是模块、不能异步 |
+| 服务器路由 | `/ui-strings.js`（`server.js` 静态表里的显式条目） |
+| 禁止硬编码 | `index.html` 与 `app.js` 里不得出现面向用户的字面文案 |
+| 键名锁定 | 翻译只改值。键名是代码契约，`verify_reader.js` 会逐个核对 |
+| 应用时机 | `applyStaticStrings()` 必须在首次渲染**之前**跑（`restorePreferences()` 之前） |
+| 缺键行为 | `T(key)` 回退为键名本身 —— 故意做得显眼，好让漏翻当场暴露 |
+
+### 标记方式
+
+| 标记 | 作用 |
+| :--- | :--- |
+| `data-i18n="key"` | 设置 `textContent` |
+| `data-i18n-html="key"` | 设置 `innerHTML`，**必须经 DOMPurify 消毒**；只用于需要行内 `<code>` 的键 |
+| `data-i18n-title="key"` | 设置 `title` |
+| `data-i18n-aria="key"` | 设置 `aria-label` |
+| `data-i18n-placeholder="key"` | 设置 `placeholder` |
+| `T('key')`（app.js 内） | 运行时生成的文案 |
+
+`lang` 与 `pageTitle` 两个键由 `applyStaticStrings()` 直接读，分别写入
+`<html lang>` 和 `document.title`。
+
+### 不可翻译的部分
+
+状态图标（`○ ● ◌ ✓ ⚠`）是 §6.3 状态机的一部分；导航图标（`☰ ☀ 🧭 ⬇ 🔍 📖 🗂 📝 ⟳`）
+与排序箭头（`↑ ↓ →`）同理。它们保留在值里，但翻译时原样不动。
+
+### 验收
+
+`verify_reader.js` 的「界面语言包」小节会检查：`ui-strings.js` 存在、
+`index.html` / `app.js` 引用的每个键都有定义（缺失 = FAIL）、有没有已定义但没被
+引用的僵尸键（WARN），以及 `index.html` 里还有没有漏接语言包的硬编码文案（WARN）。

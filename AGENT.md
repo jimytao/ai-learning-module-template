@@ -42,6 +42,7 @@
 ```
 AGENT.md                          ← 入口路由（本文件；Phase 0 后会改写）
 SETUP.md                          ← 首次运行：环境准备 + Phase 0 采集 + 本文件改造（长期保留）
+ui-strings.js                     ← 阅读器界面语言包（唯一文案来源；Step 5.5 翻译它）
 start.command                     ← macOS 浏览器与本地服务器一键启动脚本
 │
 ├── protocols/
