@@ -27,14 +27,20 @@
       <div id="documentTitle" class="document-title">选择一篇内容</div>
     </div>
     <div class="header-actions">
+      <button id="themeButton" class="pill-button" type="button" aria-label="切换主题" title="切换主题">
+        <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label">Light Mode</span>
+      </button>
       <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
       <button id="saveStatus" class="save-status" type="button" data-state="idle"
               title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
         <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
       </button>
-      <button id="themeButton" class="icon-button" type="button" aria-label="切换主题" title="切换主题">◐</button>
-      <button id="tocToggle" class="icon-button" type="button" aria-label="切换章节目录" title="切换右侧章节目录">🧭</button>
-      <button id="exportButton" type="button" disabled>导出</button>
+      <button id="tocToggle" class="pill-button" type="button" aria-label="切换章节目录" title="切换右侧章节目录">
+        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label">章节目录</span>
+      </button>
+      <button id="exportButton" class="pill-button primary" type="button" disabled>
+        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label">导出</span>
+      </button>
     </div>
   </header>
 
@@ -49,9 +55,9 @@
       </div>
 
       <nav class="tabs" aria-label="阅读器侧栏">
-        <button class="tab active" type="button" data-tab="contents">目录</button>
-        <button class="tab" type="button" data-tab="concepts">概念</button>
-        <button class="tab" type="button" data-tab="notes">注释</button>
+        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span>目录</button>
+        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span>概念</button>
+        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span>注释</button>
       </nav>
 
       <div class="sidebar-search">
@@ -60,8 +66,9 @@
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
+          <span class="panel-label">Curriculum</span>
           <button id="sortButton" type="button">↑ 旧 → 新</button>
-          <button id="refreshButton" type="button">刷新</button>
+          <button id="refreshButton" type="button" aria-label="刷新" title="刷新列表">⟳</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
       </section>
@@ -80,6 +87,7 @@
     <main id="mainViewport" class="main-viewport">
       <article id="reader" class="reader" aria-live="polite">
         <div class="welcome-card">
+          <div class="welcome-icon" aria-hidden="true">📄</div>
           <p class="eyebrow">UNIVERSAL READER</p>
           <h1>学习内容会出现在这里</h1>
           <p>先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
