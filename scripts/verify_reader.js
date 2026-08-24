@@ -372,6 +372,59 @@ if (rawNotes === null) {
 }
 
 // ---------------------------------------------------------------------------
+const E = 'UI language pack';
+// ---------------------------------------------------------------------------
+
+// The pack exists to be translated by an AI, so the likeliest failure is a dropped
+// key — which surfaces the raw key name in the interface. Reconcile the keys that
+// index.html / app.js actually reference against the ones ui-strings.js defines.
+const packSrc = read('ui-strings.js');
+if (packSrc === null) {
+  fail(E, 'ui-strings.js exists', 'the single source of interface copy (frontend_spec §13)');
+} else {
+  const defined = new Set(
+    [...stripComments(packSrc).matchAll(/^\s{2}([A-Za-z][A-Za-z0-9]*)\s*:/gm)].map((m) => m[1]),
+  );
+  const used = new Set();
+  for (const m of rawHtml.matchAll(/data-i18n(?:-html|-title|-aria|-placeholder)?="([^"]+)"/g)) {
+    used.add(m[1]);
+  }
+  const appSrc = read('app.js');
+  if (appSrc) for (const m of appSrc.matchAll(/\bT\('([^']+)'\)/g)) used.add(m[1]);
+  // lang / pageTitle are read directly by applyStaticStrings, not via data-i18n or T().
+  used.add('lang');
+  used.add('pageTitle');
+
+  if (!defined.size) {
+    fail(E, 'ui-strings.js defines keys', 'no keys parsed — check the window.UI_STRINGS shape');
+  } else {
+    const missing = [...used].filter((k) => !defined.has(k)).sort();
+    if (missing.length) {
+      fail(E, 'every referenced key exists in the pack', `missing: ${missing.join(', ')}`);
+    } else {
+      pass(E, `pack covers all ${used.size} referenced keys`);
+    }
+    const unused = [...defined].filter((k) => !used.has(k)).sort();
+    if (unused.length) {
+      warn(E, `${unused.length} key(s) in the pack are never referenced`,
+        `${unused.join(', ')} — wasted translation effort, probably left over from a rename`);
+    }
+  }
+
+  // Interface copy must not creep back into index.html / app.js.
+  const strayHtml = [...rawHtml.matchAll(/<(button|h1|label)\b[^>]*>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
+    .filter((m) => !/data-i18n/.test(m[0]))
+    .filter((m) => !/^[\s\p{P}\p{S}]*$/u.test(m[2]))
+    .map((m) => m[2].trim());
+  if (strayHtml.length) {
+    warn(E, 'no hard-coded copy left in index.html',
+      `possibly not wired to the pack: ${strayHtml.slice(0, 5).join(' | ')}`);
+  } else {
+    pass(E, 'all user-facing copy in index.html goes through data-i18n');
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
 

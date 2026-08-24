@@ -584,3 +584,48 @@ the frontend and the AI generating body text must follow these UI/UX standards:
 * **Save-state indicator (`.save-status`)**: button form, with a rounded pill border, a state icon
   (`○` ready / `●` unsaved / `◌` saving / `✓` saved / `⚠` failed) and a subtle pulse animation,
   supporting quick manual saves.
+
+---
+
+## 13. UI language pack (`ui-strings.js`)
+
+The reader interface must be able to follow the user's **primary explanation language**.
+That works by keeping all copy in one file so it can be replaced wholesale after Phase 0
+(the procedure is `SETUP.md` Step 5.5).
+
+| Rule | Hard contract |
+| :--- | :--- |
+| Single source | `ui-strings.js` at the repository root, defining `window.UI_STRINGS = { … }` |
+| Load order | A plain synchronous `<script>` **before** `app.js`; not a module, not async |
+| Server route | `/ui-strings.js` (an explicit entry in the `server.js` static table) |
+| No hard-coding | No user-facing literal copy in `index.html` or `app.js` |
+| Keys locked | Translation changes values only. Keys are a code contract, checked one by one by `verify_reader.js` |
+| Apply timing | `applyStaticStrings()` must run **before** the first render (ahead of `restorePreferences()`) |
+| Missing-key behaviour | `T(key)` falls back to the key name itself — deliberately conspicuous, so a dropped translation is obvious immediately |
+
+### Markup
+
+| Marker | Effect |
+| :--- | :--- |
+| `data-i18n="key"` | Sets `textContent` |
+| `data-i18n-html="key"` | Sets `innerHTML`, **must be DOMPurify-sanitized**; only for keys that need inline `<code>` |
+| `data-i18n-title="key"` | Sets `title` |
+| `data-i18n-aria="key"` | Sets `aria-label` |
+| `data-i18n-placeholder="key"` | Sets `placeholder` |
+| `T('key')` (inside app.js) | Copy produced at runtime |
+
+The `lang` and `pageTitle` keys are read directly by `applyStaticStrings()` and written to
+`<html lang>` and `document.title` respectively.
+
+### Not translatable
+
+The state icons (`○ ● ◌ ✓ ⚠`) are part of the §6.3 state machine; the navigation icons
+(`☰ ☀ 🧭 ⬇ 🔍 📖 🗂 📝 ⟳`) and the sort arrows (`↑ ↓ →`) likewise. They stay inside the
+values but are left untouched when translating.
+
+### Acceptance
+
+The "UI language pack" section of `verify_reader.js` checks that `ui-strings.js` exists,
+that every key referenced by `index.html` / `app.js` is defined (missing = FAIL), whether
+any defined key is never referenced (WARN), and whether any hard-coded copy remains
+unwired in `index.html` (WARN).

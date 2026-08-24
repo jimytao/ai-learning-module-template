@@ -143,6 +143,7 @@ function staticTarget(root, pathname) {
     ['/', path.join(root, 'index.html')],
     ['/index.html', path.join(root, 'index.html')],
     ['/app.js', path.join(root, 'app.js')],
+    ['/ui-strings.js', path.join(root, 'ui-strings.js')],
     ['/reader-core.js', path.join(root, 'reader-core.js')],
     ['/styles.css', path.join(root, 'styles.css')],
     ['/scripts/viz.css', path.join(root, 'scripts', 'viz.css')],

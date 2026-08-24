@@ -183,6 +183,36 @@ Magazines by default; **H** → alternate Mag/Unit.
 
 ---
 
+## Step 5.5: Translate the reader interface into the user's own language
+
+> Intake already captured the **primary explanation language** — do not leave the user
+> studying against a foreign-language interface.
+
+Every string in the interface lives in **`ui-strings.js`** at the repository root
+(`index.html` and `app.js` contain no hard-coded copy). To localize:
+
+1. Open `ui-strings.js` and translate every value into the user's **primary explanation
+   language** (not the learning-content language — a Chinese speaker studying English
+   should get a Chinese interface).
+2. Set `lang` to the matching BCP-47 code (`zh-CN` / `en` / `ja` / `ko` / `es` …); it is
+   written to `<html lang>`.
+3. **Change only the values on the right of the colon, never the keys.** The keys are a
+   code contract.
+4. Leave the icon characters (`○ ● ◌ ✓ ⚠ ☰ ☀ 🧭 ⬇ 🔍 📖 🗂 📝 ⟳`) as they are — they carry state
+   semantics (`frontend_spec.md` §6.3), they are not translatable text.
+5. Run `node scripts/verify_reader.js`: it reconciles every key referenced by
+   `index.html` / `app.js` against the pack. A dropped key shows the raw key name in the
+   interface.
+6. Reload the browser and look at it.
+
+When the primary explanation language already matches this branch's documentation
+language, just confirm this step — no edit needed.
+
+If the user later says "switch the interface to language X", redo this step. No other
+file needs to change.
+
+---
+
 ## Step 6: Write the initialization marker and send one summary
 
 **First**, append a line to `state/log.md`:
@@ -212,6 +242,7 @@ Finally, send the bootstrap summary once:
 | Next 5 scheduled | already marked Mag/Unit by modality |
 | Initial gaps | 3–5 items |
 | Environment | Node version · `npm install` · `start.bat` verified |
+| Interface language | `ui-strings.js` translated into [primary explanation language] |
 | Reader | `npm test` passing · `verify_reader.js` no FAIL |
 | AGENT | rewritten into subject-project mode ✅ |
 | Open TBDs | … |
