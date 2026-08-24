@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>AI 学习模块阅读器</title>
+  <title>AI Learning Module Reader</title>
   <!-- FOUC guard: applies the saved theme before first paint. Must stay above every
        stylesheet — running this on DOMContentLoaded is what causes the white flash. -->
   <script>
@@ -23,23 +23,23 @@
 <body>
   <header class="app-header">
     <div class="header-left">
-      <button id="sidebarToggle" class="icon-button" type="button" aria-label="折叠/展开侧栏" title="切换左侧栏">☰</button>
-      <div id="documentTitle" class="document-title">选择一篇内容</div>
+      <button id="sidebarToggle" class="icon-button" type="button" aria-label="Collapse or expand the sidebar" title="Toggle left sidebar">☰</button>
+      <div id="documentTitle" class="document-title">Select a document</div>
     </div>
     <div class="header-actions">
-      <button id="themeButton" class="pill-button" type="button" aria-label="切换主题" title="切换主题">
+      <button id="themeButton" class="pill-button" type="button" aria-label="Toggle theme" title="Toggle theme">
         <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label">Light Mode</span>
       </button>
-      <!-- 保存状态指示器：既是状态显示，也是手动保存按钮（frontend_spec §6.3） -->
+      <!-- Save-state indicator: both a status read-out and the manual save button (frontend_spec §6.3) -->
       <button id="saveStatus" class="save-status" type="button" data-state="idle"
-              title="保存状态 —— 点击立即保存（⌘S / Ctrl+S）" aria-label="保存状态：点击立即保存" aria-live="polite">
-        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">就绪</span>
+              title="Save state — click to save now (⌘S / Ctrl+S)" aria-label="Save state: click to save now" aria-live="polite">
+        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">Ready</span>
       </button>
-      <button id="tocToggle" class="pill-button" type="button" aria-label="切换章节目录" title="切换右侧章节目录">
-        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label">章节目录</span>
+      <button id="tocToggle" class="pill-button" type="button" aria-label="Toggle chapter navigation" title="Toggle the right-hand chapter navigation">
+        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label">Contents</span>
       </button>
       <button id="exportButton" class="pill-button primary" type="button" disabled>
-        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label">导出</span>
+        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label">Export</span>
       </button>
     </div>
   </header>
@@ -54,33 +54,33 @@
         </div>
       </div>
 
-      <nav class="tabs" aria-label="阅读器侧栏">
-        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span>目录</button>
-        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span>概念</button>
-        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span>注释</button>
+      <nav class="tabs" aria-label="Reader sidebar">
+        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span>Contents</button>
+        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span>Concepts</button>
+        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span>Notes</button>
       </nav>
 
       <div class="sidebar-search">
-        <input id="sidebarSearch" type="search" placeholder="🔍 搜索文档、概念、注释…" autocomplete="off" aria-label="搜索侧栏">
+        <input id="sidebarSearch" type="search" placeholder="🔍 Search documents, concepts, notes…" autocomplete="off" aria-label="Search the sidebar">
       </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
           <span class="panel-label">Curriculum</span>
-          <button id="sortButton" type="button">↑ 旧 → 新</button>
-          <button id="refreshButton" type="button" aria-label="刷新" title="刷新列表">⟳</button>
+          <button id="sortButton" type="button">↑ Old → New</button>
+          <button id="refreshButton" type="button" aria-label="Refresh" title="Refresh the list">⟳</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
       </section>
 
       <section id="conceptsPanel" class="tab-panel" data-panel="concepts">
-        <p class="panel-hint">来自当前文档标题；点击可跳转。</p>
-        <div id="conceptsList" class="concepts-list empty-list">尚未打开文档</div>
+        <p class="panel-hint">Pulled from the current document’s headings; click one to jump.</p>
+        <div id="conceptsList" class="concepts-list empty-list">No document open yet</div>
       </section>
 
       <section id="notesPanel" class="tab-panel" data-panel="notes">
-        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> 显示全部文档注释</label>
-        <div id="notesList" class="notes-list empty-list">暂无注释</div>
+        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> Show notes from every document</label>
+        <div id="notesList" class="notes-list empty-list">No notes yet</div>
       </section>
     </aside>
 
@@ -89,20 +89,20 @@
         <div class="welcome-card">
           <div class="welcome-icon" aria-hidden="true">📄</div>
           <p class="eyebrow">UNIVERSAL READER</p>
-          <h1>学习内容会出现在这里</h1>
-          <p>先完成 Phase 0，再把生成的 Markdown 放入 <code>content/magazines</code> 或 <code>content/units</code>。</p>
+          <h1>Your learning content appears here</h1>
+          <p>Finish Phase 0 first, then drop the generated Markdown into <code>content/magazines</code> or <code>content/units</code>.</p>
         </div>
       </article>
     </main>
 
-    <!-- 右侧章节目录 (Collapsible Right Sidebar TOC) -->
+    <!-- Collapsible right-hand table of contents -->
     <aside id="tocSidebar" class="toc-sidebar collapsed">
       <div class="toc-header">
-        <span>🧭 章节目录 Navigation</span>
+        <span>🧭 Navigation</span>
       </div>
       <div class="toc-scroll-area">
         <div id="tocList" class="toc-list">
-          <p class="empty-toc">尚未打开文档</p>
+          <p class="empty-toc">No document open yet</p>
         </div>
       </div>
     </aside>
@@ -113,16 +113,16 @@
   <dialog id="noteDialog" class="note-dialog">
     <form id="noteForm" method="dialog">
       <div class="dialog-heading">
-        <div><small>选中文本</small><strong id="noteWord"></strong></div>
-        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="关闭">×</button>
+        <div><small>Selected text</small><strong id="noteWord"></strong></div>
+        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="Close">×</button>
       </div>
-      <label for="noteText">你的注释</label>
-      <textarea id="noteText" rows="6" placeholder="写下疑问、解释或 +显式查询…"></textarea>
+      <label for="noteText">Your note</label>
+      <textarea id="noteText" rows="6" placeholder="Jot down a question, an explanation, or a +explicit query…"></textarea>
       <div class="dialog-actions">
-        <button id="deleteNoteButton" class="danger" type="button" hidden>删除</button>
+        <button id="deleteNoteButton" class="danger" type="button" hidden>Delete</button>
         <span class="dialog-spacer"></span>
-        <button id="cancelNoteButton" type="button">取消</button>
-        <button class="primary" type="submit">保存</button>
+        <button id="cancelNoteButton" type="button">Cancel</button>
+        <button class="primary" type="submit">Save</button>
       </div>
     </form>
   </dialog>

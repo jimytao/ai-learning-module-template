@@ -70,7 +70,7 @@
 
   function renderContents() {
     elements.contentsList.replaceChildren();
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
     const labels = { magazines: 'Magazines', units: 'Units' };
     let count = 0;
     for (const groupName of ['magazines', 'units']) {
@@ -84,7 +84,7 @@
       if (!files.length) {
         const empty = document.createElement('p');
         empty.className = 'empty-list';
-        empty.textContent = '暂无内容';
+        empty.textContent = 'Nothing here yet';
         section.append(empty);
       }
       for (const file of files) {
@@ -102,7 +102,7 @@
       }
       elements.contentsList.append(section);
     }
-    if (!count) elements.contentsList.setAttribute('aria-label', '项目尚无学习内容');
+    if (!count) elements.contentsList.setAttribute('aria-label', 'This project has no learning content yet');
   }
 
   async function refreshFiles({ selectFirst = false } = {}) {
@@ -127,28 +127,28 @@
     if (!state.dirty || !state.activePath) {
       // A manual click on a clean document must still answer: silence reads as "did it work?".
       if (manual && state.activePath) {
-        setSaveStatus('已保存', 'saved');
-        toast('没有改动，已经是最新的了');
+        setSaveStatus('Saved', 'saved');
+        toast('No changes — already up to date');
       }
       return;
     }
     const path = state.activePath;
     const content = state.rawMarkdown;
     state.dirty = false;
-    setSaveStatus('保存中…', 'saving');
+    setSaveStatus('Saving…', 'saving');
     try {
       await api('/api/save', { method: 'POST', body: JSON.stringify({ path, content }) });
-      setSaveStatus('已保存', 'saved');
+      setSaveStatus('Saved', 'saved');
     } catch (error) {
       state.dirty = true;
-      setSaveStatus('保存失败', 'error');
+      setSaveStatus('Save failed', 'error');
       toast(error.message);
     }
   }
 
   function scheduleSave() {
     state.dirty = true;
-    setSaveStatus('待保存', 'dirty');
+    setSaveStatus('Unsaved', 'dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(saveCurrentNow, 700);
   }
@@ -156,7 +156,7 @@
   async function loadFile(path) {
     if (path === state.activePath) return;
     await saveCurrentNow();
-    setSaveStatus('加载中…', 'saving');
+    setSaveStatus('Loading…', 'saving');
     try {
       const payload = await api(`/api/file?path=${encodeURIComponent(path)}`);
       state.activePath = payload.path;
@@ -166,11 +166,11 @@
       await renderActiveFile();
       renderContents();
       renderNotes();
-      setSaveStatus('已加载', 'saved');
+      setSaveStatus('Loaded', 'saved');
       elements.sidebar.classList.remove('open');
       window.scrollTo({ top: 0 });
     } catch (error) {
-      setSaveStatus('加载失败', 'error');
+      setSaveStatus('Load failed', 'error');
       toast(error.message);
     }
   }
@@ -192,7 +192,7 @@
       .filter((heading) => matchesQuery(heading.textContent));
     if (!headings.length) {
       elements.conceptsList.className = 'concepts-list empty-list';
-      elements.conceptsList.textContent = state.activePath ? '当前文档没有小节标题' : '尚未打开文档';
+      elements.conceptsList.textContent = state.activePath ? 'This document has no section headings' : 'No document open yet';
       return;
     }
     elements.conceptsList.className = 'concepts-list';
@@ -297,7 +297,7 @@
         mark.dataset.word = hit.annotation.word;
         mark.dataset.note = hit.annotation.userNoteRaw || hit.annotation.note || '';
         if (hit.isPrimary) mark.dataset.primary = 'true';
-        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || '高亮';
+        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || 'Highlight';
         mark.textContent = text.slice(hit.localStart, hit.localEnd);
         mark.addEventListener('click', () => openExistingNote(hit.annotation.id));
         fragment.append(mark);
@@ -321,7 +321,7 @@
     if (!headings.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-toc';
-      empty.textContent = state.activePath ? '当前文档没有标题' : '尚未打开文档';
+      empty.textContent = state.activePath ? 'This document has no headings' : 'No document open yet';
       elements.tocList.append(empty);
       return;
     }
@@ -360,7 +360,7 @@
       .filter((note) => matchesQuery(note.word, note.userNoteRaw, note.note));
     if (!notes.length) {
       elements.notesList.className = 'notes-list empty-list';
-      elements.notesList.textContent = '暂无注释';
+      elements.notesList.textContent = 'No notes yet';
       return;
     }
     elements.notesList.className = 'notes-list';
@@ -371,9 +371,9 @@
     for (const note of notes) {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'note-item';
-      const strong = document.createElement('strong'); strong.textContent = note.word || '内容总结';
+      const strong = document.createElement('strong'); strong.textContent = note.word || 'Summary';
       const small = document.createElement('small');
-      small.textContent = `${note.userNoteRaw || note.note || '仅高亮'}${showAll ? ` · ${note.file}` : ''}`;
+      small.textContent = `${note.userNoteRaw || note.note || 'Highlight only'}${showAll ? ` · ${note.file}` : ''}`;
       button.append(strong, small);
       button.addEventListener('click', async () => {
         if (note.file && note.file !== state.activePath) await loadFile(note.file);
@@ -396,7 +396,7 @@
       || (note && marks.find((mark) => mark.textContent.trim().toLowerCase() === String(note.word).toLowerCase()));
 
     if (!target) {
-      toast('这条注释已与正文对不上 —— 锚点失效。');
+      toast('This note no longer lines up with the text — its anchor is stale.');
       return;
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -461,7 +461,7 @@
     if (!note) return;
     state.editingNoteId = id;
     state.pendingSelection = null;
-    elements.noteWord.textContent = note.word || '内容总结';
+    elements.noteWord.textContent = note.word || 'Summary';
     elements.noteText.value = note.userNoteRaw ?? note.note ?? '';
     elements.deleteNote.hidden = false;
     elements.noteDialog.showModal();
@@ -497,7 +497,7 @@
     await renderActiveFile();
     renderNotes();
     switchTab('notes');
-    toast('Note 已保存');
+    toast('Note saved');
   }
 
   async function deleteCurrentNote() {
@@ -507,7 +507,7 @@
     elements.noteDialog.close();
     await renderActiveFile();
     renderNotes();
-    toast('Note 已删除');
+    toast('Note deleted');
   }
 
   elements.reader.addEventListener('input', (event) => {
@@ -597,7 +597,7 @@
     if (localStorage.getItem('ltm_toc_collapsed') === 'false') {
       elements.tocSidebar?.classList.remove('collapsed');
     }
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
   }
   restorePreferences();
 
@@ -605,7 +605,7 @@
     await refreshNotes();
     await refreshFiles({ selectFirst: true });
   })().catch((error) => {
-    setSaveStatus('初始化失败', 'error');
+    setSaveStatus('Init failed', 'error');
     toast(error.message);
   });
 })();
