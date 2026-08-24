@@ -1,8 +1,11 @@
 # Phase 0: Subject Intake & Blank Fill (p0_bootstrap.md)
 
 > **Trigger**: User says “I want to learn…”, “bootstrap”, “set subject”, or profile/calendar is still blank.  
-> **Must load first**: `protocols/intake_checklist.md` + `knowledge/modality_presets.md`  
-> **Goal**: Collect → **user confirms** → write → **rewrite AGENT.md into a subject project** → only then allow Phase 1.
+> **The entrypoint is `SETUP.md` in the repository root** — start there on a first run; its
+> Step 0 (environment prep) has no equivalent in this file.
+> This file is the Phase 0 **detail layer**: write-in fields, domain_map / calendar init rules.
+> **Must load first**: `protocols/intake_checklist.md` + `knowledge/modality_presets.md`
+> **Goal**: Collect → **user confirms** → write → **rewrite AGENT.md per `SETUP.md` Step 5** → only then allow Phase 1.
 
 ---
 
@@ -64,64 +67,50 @@ Use the “Confirmation card template” in `intake_checklist.md`.
 
 ---
 
-## Step 3.5: Verify the reader (owner of the browser/server files)
+## Step 3.5: Verify the reader (sole owner of the browser/server files)
 
-> **This branch ships a working reader** (`index.html`, `app.js`, `reader-core.js`, `server.js`,
-> `styles.css`). So this step **verifies** it rather than building it. `cleanup_template.md` requires a
-> verified reader, so if this step is skipped, cleanup can never legitimately run.
+> **This branch ships a working reader** (`index.html`, `app.js`, `reader-core.js`,
+> `server.js`, `styles.css`), so this step **verifies** rather than builds.
 
-1. Install once if needed (`npm install`), then launch with `start.command` and open the page.
-   An empty TOC is expected before Phase 2 — "loads without error" is the acceptance bar here,
-   not "shows lessons".
-2. **Run `npm test`.** The suite covers interactive-markdown round-tripping, server path safety,
-   Smart Merge, and the annotation anchoring rule (`ReaderCore.annotationMatches`).
-3. **Run `node scripts/verify_reader.js`. It must report no FAIL.** It checks the contracts that
-   silently rot: theme carrier and FOUC guard, locked storage keys and routes, the `data-primary`
-   anchoring rule, excluded features (no Git UI), and `notes.json` consistency. Fix every FAIL against
-   `frontend_spec.md` rather than editing the checks.
-4. `templates/reader_skeleton.html` is kept as the **reference shell**, not as a thing to copy here —
-   the shipped reader already implements what it demonstrates. Consult it when extending the UI.
-5. If `start.command` lost its executable bit after a copy, restore it with `chmod +x start.command`.
-
-Outcome of this step decides Gate B in Step 4 below.
+1. Install dependencies if needed (`npm install`), then launch with `start.command` and open the page.
+   An empty listing before Phase 2 is normal — this step accepts "it loads", not "it shows a lesson".
+2. **Run `npm test`.** It covers interactive-Markdown round-trip write-back, server path
+   safety, Smart Merge, and the annotation anchoring rule (`ReaderCore.annotationMatches`).
+3. **Run `node scripts/verify_reader.js`; it must report no FAIL.** It checks the contracts
+   that rot silently: theme carrier and FOUC guard, locked storage keys and routes, the
+   `data-primary` anchoring rule, excluded features (no Git UI), and `notes.json`
+   consistency. On a FAIL, fix the implementation per `frontend_spec.md`, not the check.
+4. `templates/reader_skeleton.html` stays in this branch as a **reference shell**; nothing
+   needs copying from it, because the bundled reader already implements what it shows.
+5. If `start.command` lost its executable bit when the folder was copied, restore it
+   with `chmod +x start.command`.
 
 ---
 
-## Step 4: Rewrite AGENT.md (critical) — two gates
+## Step 4: Rewrite AGENT.md (critical)
 
-The rewrite happens in **two independent gates**. Gate A converts the project and unblocks learning;
-Gate B only removes one-shot template text. **Never make Gate B a precondition for learning** — the
-Bootstrap block is inert prompt text, and leaving it in place costs the user nothing.
+Mandatory once the confirmation card passes. The full checklist lives in **`SETUP.md`
+Step 5**. In short:
 
-### Gate A — immediately after the confirmation card passes (mandatory)
+1. Title now contains the subject name
+2. Status block gets Subject + modality + `Phase 1 ready`
+3. Blank-template boilerplate removed; one-line subject goal written
+4. **Narrow the Phase 0 route** to "fill in / update profile", keeping the re-entry guard
+   (golden rule 18 in `AGENT.md`)
+5. Record the default proposal leaning for the chosen modality
 
-Follow `AGENT.md` section **“Post-Bootstrap rewrite”** strictly:
+Item 4 is the one that gets skipped — and nothing else will put it back.
 
-1. Title includes subject name  
-2. Status area: Subject + modality + `Phase 1 ready`  
-3. Remove blank-template boilerplate; write one-line subject goal  
-4. **Narrow the Phase 0 routing row** to “fill TBD / update profile” only, and add the re-entry guard
-   (see `AGENT.md` golden rule on Phase 0 re-entry)  
-5. Note default proposal bias by modality  
+**Once the rewrite is done, this repository is that subject's learning project, and
+Phase 1 / Phase 2 are unlocked.**
 
-Gate A owns every edit above. `cleanup_template.md` deliberately does **not** touch the routing table,
-so if Gate A skips item 4 nothing else will do it.
-
-**After Gate A the project is a subject learning project, and Phase 1 / Phase 2 are unblocked.**
-
-### Gate B — after the reader is verified (deferred, not urgent)
-
-Run only when Step 3.5 verification passed: `start.command` launches the reader, `npm test` is green,
-and `verify_reader.js` reports no FAIL. Then **load and execute `protocols/cleanup_template.md`**: it strips the one-shot
-Phase 0 interview guidance from `AGENT.md`, retains all confirmed profile data (including explanation
-language), and self-deletes.
-
-If Gate B cannot run yet, say so in one line and move on to Phase 1 — do not stall the user, and do
-not run cleanup with unmet preconditions.
+Then follow `SETUP.md` Step 6 and append the `Initialized …` line to `state/log.md`. That
+line is the durable proof this project was initialized and the idempotency marker that
+stops a later session from re-running Phase 0.
 
 ---
 
-## Step 5: Bootstrap summary (send once after Gate A)
+## Step 5: Bootstrap summary (send once after the rewrite)
 
 | Field | Content |
 | :--- | :--- |
@@ -130,9 +119,8 @@ not run cleanup with unmet preconditions.
 | Domain map | Top-level themes |
 | Next 5 queued | Mag/Unit labeled by modality |
 | Initial gaps | 3–5 items |
-| AGENT | Converted to subject-project mode ✅ (Gate A) |
+| AGENT | Converted to subject-project mode ✅ |
 | Reader | shipped reader verified (start.command · npm test · verify_reader) |
-| Template cleanup | done (Gate B) / deferred until the reader is verified |
 | Pending TBD | … |
 
 Next prompt: say “what should I study today” or “schedule” → Phase 1.

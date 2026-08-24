@@ -1,0 +1,227 @@
+# First run — environment prep and Phase 0 intake (SETUP.md)
+
+> **For the AI**: this is the only file you need to read the first time a user opens this
+> repository. Work through Step 0 → Step 6 in order. **Step 0 must be finished first**, or
+> there is no way to verify the reader later.
+>
+> **This file stays in place when you are done.** Do not delete it, and do not let a later
+> session delete it. It doubles as the reference for "fill in my profile / change the
+> language / change preferences". What prevents a repeated initialization is the
+> `Initialized …` line in `state/log.md` (see Step 6 and golden rule 18 in `AGENT.md`) —
+> not the absence of a file.
+
+---
+
+## Step 0: Environment prep and launcher matching (required on a fresh machine)
+
+The user has most likely just downloaded this repository onto a machine with no runtime
+installed at all. **Get the environment working before you ask any questions.**
+
+### 0.1 Check for and install Node.js
+
+```bash
+node -v
+npm -v
+```
+
+**Node.js 20 or newer** is required. If the command reports "not found" or the version is
+below 20, walk the user through installing it:
+
+| Platform | How |
+| :--- | :--- |
+| Windows | Download the LTS installer from <https://nodejs.org/>, or `winget install OpenJS.NodeJS.LTS` |
+| macOS | Download the LTS installer from <https://nodejs.org/>, or `brew install node` |
+
+After installing, have the user **open a new terminal** before checking `node -v` again —
+an existing terminal will not pick up the new PATH.
+
+> Node.js is the only requirement. This project does not need Python unless the user later
+> wants `scripts/download_images.py` to fetch illustrations.
+
+### 0.2 Install project dependencies
+
+From the repository root:
+
+```bash
+npm install
+```
+
+### 0.3 Match the launcher to this platform
+
+The repository has two one-click launchers, and **a branch should carry only the one that
+matches its platform**:
+
+| Platform | Launcher | Notes |
+| :--- | :--- | :--- |
+| Windows | `start.bat` | Double-click to run |
+| macOS | `start.command` | Double-click to run; restore the executable bit with `chmod +x start.command` if it is lost |
+
+**This branch targets macOS, so the launcher is `start.command`.** Check that:
+
+1. `start.command` exists at the repository root and is executable (`ls -l start.command`
+   should show `x`; restore it with `chmod +x start.command` — copying the folder often
+   drops the bit);
+2. the port it references matches `DEFAULT_PORT` in `server.js`;
+3. if the user is actually on Windows, they cloned the wrong branch — point them at the
+   `English` branch, or write an equivalent `start.bat` for them.
+
+Do not leave both scripts in place while testing only one of them.
+
+### 0.4 Smoke test
+
+```bash
+npm test
+node scripts/validate_content.js
+```
+
+Then launch the reader (double-click `start.command`, or run `npm start` and open
+<http://127.0.0.1:4173> yourself). **An empty sidebar before Phase 2 is expected** — what
+this step accepts is "the page loads", not "the page shows a lesson".
+
+Only move on to Step 1 once all of Step 0 passes.
+
+---
+
+## Step 1: Run the intake checklist
+
+Load **`protocols/intake_checklist.md`** (all slots, A–H) and
+`knowledge/modality_presets.md`, and work through the questions with the user.
+
+At minimum you must come away with:
+
+1. Subject + a testable goal
+2. Level + known material + gaps
+3. Interests (a few is fine) + time constraints
+4. **Primary explanation language / most fluent language**, confirmed **separately** from
+   the learning-content language
+5. **Learning modality preset T / M / H / C** (see `modality_presets.md`)
+6. (Recommended) reader sort order / Notes scope preferences
+7. **Content format preferences**: image density / diagram tier / sticky notes / exercise
+   mix (`intake_checklist.md` §H)
+
+Rules:
+
+- Ask about whatever is missing; **do not invent anything**.
+- `TBD` may stand for now, but every `TBD` must be listed on the confirmation card.
+- **Before you print a confirmation card and the user confirms it: do not write the real
+  profile, do not edit `AGENT.md`, and do not generate any lesson content.**
+
+---
+
+## Step 2: Print the confirmation card and wait
+
+Use the confirmation-card template in `intake_checklist.md`.
+
+- User wants changes → update the card and wait again.
+- User says `confirm` → go to Step 3.
+
+---
+
+## Step 3: Write the knowledge base and state
+
+Field-level detail and the `domain_map` / `calendar` initialization rules live in
+**`protocols/p0_bootstrap.md` Step 3**. Write targets:
+
+| Target | Source |
+| :--- | :--- |
+| `knowledge/profile.md` | subject, goal, level, known material, constraints, **explanation language + content language**, modality preset, reader preferences, **§content format preferences** |
+| `knowledge/desire.md` | interests and topics to cover (`[ ]`) |
+| `state/gaps.md` | initial weak-point Kanban |
+| `knowledge/domain_map.md` | draft subject tree; known nodes marked Covered |
+| `knowledge/calendar.md` | pointer + Wave lookahead (T leans Unit / M leans Mag / H mixed) |
+| `state/warehouse.md` | small-module pool renamed for the subject |
+| `state/log.md` | empty dashboard + a note that nothing has started |
+| `notes.json` | left as `[]` |
+
+---
+
+## Step 4: Reader acceptance
+
+Step 0.4 already ran `npm test`. This adds the last contract check:
+
+```bash
+node scripts/verify_reader.js
+```
+
+**It must report no FAIL.** It checks the contracts that rot silently: the theme carrier and
+FOUC guard, the locked storage keys and routes, the `data-primary` anchoring rule, excluded
+features (no Git UI), and `notes.json` consistency. On a FAIL, fix the implementation per
+`protocols/frontend_spec.md` — **do not edit the check**.
+
+`templates/reader_skeleton.html` is a reference shell; you do not need to copy anything from
+it, because the bundled reader already implements what it demonstrates.
+
+---
+
+## Step 5: Rewrite AGENT.md into this subject's project
+
+> **Mandatory** once the confirmation card passes. This is what turns the repository from a
+> generic template into this subject's learning project, and it is what unlocks Phase 1 / 2.
+
+### Must rewrite
+
+| Location | Change it to |
+| :--- | :--- |
+| H1 title | `AI Learning Coach — [subject]` |
+| Top "Current status" | Subject, modality preset (T/M/H/C), `Phase 1 ready`, date |
+| Opening blurb | Drop the "blank template" boilerplate; write a one-line goal for this subject (from profile) |
+| The content note in the file map | May state the subject's main modality (e.g. "mostly Magazine") |
+| Phase 0 row of the routing table | **Narrow it** to "only when profile has `TBD` or the user says *update profile*", keeping the re-entry guard (golden rule 18) |
+| Golden rule 8 | Change template-mode "do not prefill personal info" to "profile is authoritative; do not invent what was not provided" |
+
+Record the Phase 1 default by modality: **T** → propose Units by default; **M** → propose
+Magazines by default; **H** → alternate Mag/Unit.
+
+### Rewrite done checklist
+
+- [ ] Title contains the subject name
+- [ ] Status block has no "unset"
+- [ ] Modality preset written
+- [ ] Phase 0 routing narrowed to "fill TBD / update profile", with the re-entry guard in place
+- [ ] Confirmation-card evidence archived (profile / desire / gaps / calendar / domain_map are no longer all TBD)
+- [ ] `profile.md` confirms the primary explanation language and the learning-content language **separately**
+- [ ] `profile.md` §content format preferences written (image density / diagram tier / sticky notes / exercise mix)
+- [ ] Next step points at Phase 1
+
+---
+
+## Step 6: Write the initialization marker and send one summary
+
+**First**, append a line to `state/log.md`:
+
+```
+Initialized [subject] — modality [T/M/H/C] — YYYY-MM-DD
+```
+
+That line is the durable evidence that this project has been initialized, and the
+idempotency marker that stops a later session from re-running Phase 0 (golden rule 18 in
+`AGENT.md`).
+
+Then set the status block to:
+
+```
+**Current status**: `Phase 0 complete — Phase 1 ready` | Subject: [subject] | Modality: H-Hybrid | YYYY-MM-DD
+> Next: “schedule” → Phase 1
+```
+
+Finally, send the bootstrap summary once:
+
+| Field | Content |
+| :--- | :--- |
+| Subject and goal | … |
+| Modality preset | T/M/H/C + one line on what it means |
+| Knowledge map | top-level topics |
+| Next 5 scheduled | already marked Mag/Unit by modality |
+| Initial gaps | 3–5 items |
+| Environment | Node version · `npm install` · `start.command` verified |
+| Reader | `npm test` passing · `verify_reader.js` no FAIL |
+| AGENT | rewritten into subject-project mode ✅ |
+| Open TBDs | … |
+
+**Your closing line must tell the user how to open every future session:**
+
+```text
+Read AGENT.md first, then <what you want>
+```
+
+**Saying "what should I study today" or "schedule" enters Phase 1.**
