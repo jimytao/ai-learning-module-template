@@ -23,6 +23,36 @@
     toast: $('#toast'), search: $('#sidebarSearch'), tocSidebar: $('#tocSidebar'), tocList: $('#tocList'), tocToggle: $('#tocToggle'),
   };
 
+  // --- 界面语言包（frontend_spec §13）------------------------------------
+  // 全部面向用户的文案都来自 ui-strings.js，好让 Phase 0 之后可以整体换成
+  // 用户的母语。这里的回退值只在语言包缺键时才会露出来。
+  const UI = window.UI_STRINGS || {};
+  const T = (key) => (typeof UI[key] === 'string' ? UI[key] : key);
+
+  function applyStaticStrings() {
+    if (UI.lang) document.documentElement.lang = UI.lang;
+    if (UI.pageTitle) document.title = UI.pageTitle;
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      const value = UI[el.dataset.i18n];
+      if (typeof value === 'string') el.textContent = value;
+    }
+    // 只有 welcomeBody 这类需要行内 <code> 的键走 HTML 通道，且必须消毒 ——
+    // 语言包是本地可信文件，但消毒让「翻译时不小心粘进一段标记」也无法造成伤害。
+    for (const el of document.querySelectorAll('[data-i18n-html]')) {
+      const value = UI[el.dataset.i18nHtml];
+      if (typeof value === 'string') el.innerHTML = window.DOMPurify.sanitize(value);
+    }
+    const attrs = [['data-i18n-title', 'i18nTitle', 'title'],
+                   ['data-i18n-aria', 'i18nAria', 'aria-label'],
+                   ['data-i18n-placeholder', 'i18nPlaceholder', 'placeholder']];
+    for (const [selector, dataKey, attribute] of attrs) {
+      for (const el of document.querySelectorAll(`[${selector}]`)) {
+        const value = UI[el.dataset[dataKey]];
+        if (typeof value === 'string') el.setAttribute(attribute, value);
+      }
+    }
+  }
+
   window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
   window.marked.setOptions({ gfm: true, breaks: false });
 
@@ -70,8 +100,8 @@
 
   function renderContents() {
     elements.contentsList.replaceChildren();
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
-    const labels = { magazines: 'Magazines', units: 'Units' };
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? T('sortDesc') : T('sortAsc');
+    const labels = { magazines: T('groupMagazines'), units: T('groupUnits') };
     let count = 0;
     for (const groupName of ['magazines', 'units']) {
       const section = document.createElement('section');
@@ -84,7 +114,7 @@
       if (!files.length) {
         const empty = document.createElement('p');
         empty.className = 'empty-list';
-        empty.textContent = '暂无内容';
+        empty.textContent = T('emptyGroup');
         section.append(empty);
       }
       for (const file of files) {
@@ -102,7 +132,7 @@
       }
       elements.contentsList.append(section);
     }
-    if (!count) elements.contentsList.setAttribute('aria-label', '项目尚无学习内容');
+    if (!count) elements.contentsList.setAttribute('aria-label', T('contentsEmptyAria'));
   }
 
   async function refreshFiles({ selectFirst = false } = {}) {
@@ -127,28 +157,28 @@
     if (!state.dirty || !state.activePath) {
       // A manual click on a clean document must still answer: silence reads as "did it work?".
       if (manual && state.activePath) {
-        setSaveStatus('已保存', 'saved');
-        toast('没有改动，已经是最新的了');
+        setSaveStatus(T('statusSaved'), 'saved');
+        toast(T('toastNoChanges'));
       }
       return;
     }
     const path = state.activePath;
     const content = state.rawMarkdown;
     state.dirty = false;
-    setSaveStatus('保存中…', 'saving');
+    setSaveStatus(T('statusSaving'), 'saving');
     try {
       await api('/api/save', { method: 'POST', body: JSON.stringify({ path, content }) });
-      setSaveStatus('已保存', 'saved');
+      setSaveStatus(T('statusSaved'), 'saved');
     } catch (error) {
       state.dirty = true;
-      setSaveStatus('保存失败', 'error');
+      setSaveStatus(T('statusSaveFailed'), 'error');
       toast(error.message);
     }
   }
 
   function scheduleSave() {
     state.dirty = true;
-    setSaveStatus('待保存', 'dirty');
+    setSaveStatus(T('statusDirty'), 'dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(saveCurrentNow, 700);
   }
@@ -156,7 +186,7 @@
   async function loadFile(path) {
     if (path === state.activePath) return;
     await saveCurrentNow();
-    setSaveStatus('加载中…', 'saving');
+    setSaveStatus(T('statusLoading'), 'saving');
     try {
       const payload = await api(`/api/file?path=${encodeURIComponent(path)}`);
       state.activePath = payload.path;
@@ -166,11 +196,11 @@
       await renderActiveFile();
       renderContents();
       renderNotes();
-      setSaveStatus('已加载', 'saved');
+      setSaveStatus(T('statusLoaded'), 'saved');
       elements.sidebar.classList.remove('open');
       window.scrollTo({ top: 0 });
     } catch (error) {
-      setSaveStatus('加载失败', 'error');
+      setSaveStatus(T('statusLoadFailed'), 'error');
       toast(error.message);
     }
   }
@@ -192,7 +222,7 @@
       .filter((heading) => matchesQuery(heading.textContent));
     if (!headings.length) {
       elements.conceptsList.className = 'concepts-list empty-list';
-      elements.conceptsList.textContent = state.activePath ? '当前文档没有小节标题' : '尚未打开文档';
+      elements.conceptsList.textContent = state.activePath ? T('conceptsNoHeadings') : T('noDocumentOpen');
       return;
     }
     elements.conceptsList.className = 'concepts-list';
@@ -222,7 +252,7 @@
         const details = document.createElement('details');
         details.className = 'mermaid-error';
         const summary = document.createElement('summary');
-        summary.textContent = 'Diagram failed to render (expand to view source)';
+        summary.textContent = T('vizRenderFailed');
         const sourceBlock = document.createElement('pre');
         sourceBlock.className = 'mermaid-error';
         sourceBlock.textContent = source;
@@ -297,7 +327,7 @@
         mark.dataset.word = hit.annotation.word;
         mark.dataset.note = hit.annotation.userNoteRaw || hit.annotation.note || '';
         if (hit.isPrimary) mark.dataset.primary = 'true';
-        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || '高亮';
+        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || T('highlightTooltip');
         mark.textContent = text.slice(hit.localStart, hit.localEnd);
         mark.addEventListener('click', () => openExistingNote(hit.annotation.id));
         fragment.append(mark);
@@ -321,7 +351,7 @@
     if (!headings.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-toc';
-      empty.textContent = state.activePath ? '当前文档没有标题' : '尚未打开文档';
+      empty.textContent = state.activePath ? T('tocNoHeadings') : T('noDocumentOpen');
       elements.tocList.append(empty);
       return;
     }
@@ -360,7 +390,7 @@
       .filter((note) => matchesQuery(note.word, note.userNoteRaw, note.note));
     if (!notes.length) {
       elements.notesList.className = 'notes-list empty-list';
-      elements.notesList.textContent = '暂无注释';
+      elements.notesList.textContent = T('notesEmpty');
       return;
     }
     elements.notesList.className = 'notes-list';
@@ -371,9 +401,9 @@
     for (const note of notes) {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'note-item';
-      const strong = document.createElement('strong'); strong.textContent = note.word || '内容总结';
+      const strong = document.createElement('strong'); strong.textContent = note.word || T('noteSummaryFallback');
       const small = document.createElement('small');
-      small.textContent = `${note.userNoteRaw || note.note || '仅高亮'}${showAll ? ` · ${note.file}` : ''}`;
+      small.textContent = `${note.userNoteRaw || note.note || T('noteHighlightOnly')}${showAll ? ` · ${note.file}` : ''}`;
       button.append(strong, small);
       button.addEventListener('click', async () => {
         if (note.file && note.file !== state.activePath) await loadFile(note.file);
@@ -396,7 +426,7 @@
       || (note && marks.find((mark) => mark.textContent.trim().toLowerCase() === String(note.word).toLowerCase()));
 
     if (!target) {
-      toast('这条注释已与正文对不上 —— 锚点失效。');
+      toast(T('toastAnchorStale'));
       return;
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -461,7 +491,7 @@
     if (!note) return;
     state.editingNoteId = id;
     state.pendingSelection = null;
-    elements.noteWord.textContent = note.word || '内容总结';
+    elements.noteWord.textContent = note.word || T('noteSummaryFallback');
     elements.noteText.value = note.userNoteRaw ?? note.note ?? '';
     elements.deleteNote.hidden = false;
     elements.noteDialog.showModal();
@@ -497,7 +527,7 @@
     await renderActiveFile();
     renderNotes();
     switchTab('notes');
-    toast('Note 已保存');
+    toast(T('toastNoteSaved'));
   }
 
   async function deleteCurrentNote() {
@@ -507,7 +537,7 @@
     elements.noteDialog.close();
     await renderActiveFile();
     renderNotes();
-    toast('Note 已删除');
+    toast(T('toastNoteDeleted'));
   }
 
   elements.reader.addEventListener('input', (event) => {
@@ -597,15 +627,16 @@
     if (localStorage.getItem('ltm_toc_collapsed') === 'false') {
       elements.tocSidebar?.classList.remove('collapsed');
     }
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ 新 → 旧' : '↑ 旧 → 新';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? T('sortDesc') : T('sortAsc');
   }
+  applyStaticStrings();
   restorePreferences();
 
   (async () => {
     await refreshNotes();
     await refreshFiles({ selectFirst: true });
   })().catch((error) => {
-    setSaveStatus('初始化失败', 'error');
+    setSaveStatus(T('statusInitFailed'), 'error');
     toast(error.message);
   });
 })();

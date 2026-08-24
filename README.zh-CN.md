@@ -73,6 +73,7 @@ git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
 | :--- | :--- |
 | **Step 0** | **装环境**：检查并安装 Node.js 20+、跑 `npm install`、确认本平台的启动脚本（本分支是 `start.bat`）、冒烟测试阅读器能打开 |
 | **Step 1–4** | **采集**：问你科目、可检验目标、当前水平、已知内容、弱项、兴趣、时间、**主要解释语言**、学习内容语言、学习模态预设（T/M/H/C），以及 **§内容形态偏好**（配图密度、图示档位、便利贴旁注类型，以及单选/多选/填空/问答/判断等题型取舍）。输出确认卡等你回复「确认」，然后写入 `knowledge/` 与 `state/`，并跑 `npm test` + `verify_reader.js` |
+| **Step 5.5** | **界面本地化**：把阅读器界面文案（`ui-strings.js`）翻成你的主要解释语言 —— 之后每次打开浏览器都是你的母语 |
 | **Step 5–6** | **改造**：把 `AGENT.md` 从通用模板改成你这个科目的项目，向 `state/log.md` 写入 `Initialized …` 标记 |
 
 > 即使你学的是英语，**主要解释语言**仍是 AI 讲解难点、纠错和反馈时用的语言，和学习内容
