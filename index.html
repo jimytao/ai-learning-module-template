@@ -23,23 +23,23 @@
 <body>
   <header class="app-header">
     <div class="header-left">
-      <button id="sidebarToggle" class="icon-button" type="button" aria-label="Collapse or expand the sidebar" title="Toggle left sidebar">☰</button>
-      <div id="documentTitle" class="document-title">Select a document</div>
+      <button id="sidebarToggle" class="icon-button" type="button" data-i18n-aria="sidebarToggleAria" data-i18n-title="sidebarToggleTitle" aria-label="Collapse or expand the sidebar" title="Toggle left sidebar">☰</button>
+      <div id="documentTitle" class="document-title" data-i18n="documentTitleEmpty">Select a document</div>
     </div>
     <div class="header-actions">
-      <button id="themeButton" class="pill-button" type="button" aria-label="Toggle theme" title="Toggle theme">
-        <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label">Light Mode</span>
+      <button id="themeButton" class="pill-button" type="button" data-i18n-aria="themeAria" data-i18n-title="themeTitle" aria-label="Toggle theme" title="Toggle theme">
+        <span class="pill-icon" aria-hidden="true">☀</span><span class="pill-label" data-i18n="themeLabel">Light Mode</span>
       </button>
       <!-- Save-state indicator: both a status read-out and the manual save button (frontend_spec §6.3) -->
       <button id="saveStatus" class="save-status" type="button" data-state="idle"
-              title="Save state — click to save now (⌘S / Ctrl+S)" aria-label="Save state: click to save now" aria-live="polite">
-        <span class="save-icon" aria-hidden="true">○</span><span class="save-label">Ready</span>
+              data-i18n-title="saveStatusTitle" data-i18n-aria="saveStatusAria" title="Save state — click to save now (⌘S / Ctrl+S)" aria-label="Save state: click to save now" aria-live="polite">
+        <span class="save-icon" aria-hidden="true">○</span><span class="save-label" data-i18n="statusIdle">Ready</span>
       </button>
-      <button id="tocToggle" class="pill-button" type="button" aria-label="Toggle chapter navigation" title="Toggle the right-hand chapter navigation">
-        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label">Contents</span>
+      <button id="tocToggle" class="pill-button" type="button" data-i18n-aria="tocToggleAria" data-i18n-title="tocToggleTitle" aria-label="Toggle chapter navigation" title="Toggle the right-hand chapter navigation">
+        <span class="pill-icon" aria-hidden="true">🧭</span><span class="pill-label" data-i18n="tocToggleLabel">Contents</span>
       </button>
       <button id="exportButton" class="pill-button primary" type="button" disabled>
-        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label">Export</span>
+        <span class="pill-icon" aria-hidden="true">⬇</span><span class="pill-label" data-i18n="exportLabel">Export</span>
       </button>
     </div>
   </header>
@@ -54,33 +54,33 @@
         </div>
       </div>
 
-      <nav class="tabs" aria-label="Reader sidebar">
-        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span>Contents</button>
-        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span>Concepts</button>
-        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span>Notes</button>
+      <nav class="tabs" data-i18n-aria="sidebarAria" aria-label="Reader sidebar">
+        <button class="tab active" type="button" data-tab="contents"><span aria-hidden="true">📖</span><span data-i18n="tabContents">Contents</span></button>
+        <button class="tab" type="button" data-tab="concepts"><span aria-hidden="true">🗂</span><span data-i18n="tabConcepts">Concepts</span></button>
+        <button class="tab" type="button" data-tab="notes"><span aria-hidden="true">📝</span><span data-i18n="tabNotes">Notes</span></button>
       </nav>
 
       <div class="sidebar-search">
-        <input id="sidebarSearch" type="search" placeholder="🔍 Search documents, concepts, notes…" autocomplete="off" aria-label="Search the sidebar">
+        <input id="sidebarSearch" type="search" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchAria" placeholder="🔍 Search documents, concepts, notes…" autocomplete="off" aria-label="Search the sidebar">
       </div>
 
       <section id="contentsPanel" class="tab-panel active" data-panel="contents">
         <div class="panel-toolbar">
-          <span class="panel-label">Curriculum</span>
-          <button id="sortButton" type="button">↑ Old → New</button>
-          <button id="refreshButton" type="button" aria-label="Refresh" title="Refresh the list">⟳</button>
+          <span class="panel-label" data-i18n="panelLabel">Curriculum</span>
+          <button id="sortButton" type="button" data-i18n="sortAsc">↑ Old → New</button>
+          <button id="refreshButton" type="button" data-i18n-aria="refreshAria" data-i18n-title="refreshTitle" aria-label="Refresh" title="Refresh the list">⟳</button>
         </div>
         <div id="contentsList" class="contents-list"></div>
       </section>
 
       <section id="conceptsPanel" class="tab-panel" data-panel="concepts">
-        <p class="panel-hint">Pulled from the current document’s headings; click one to jump.</p>
-        <div id="conceptsList" class="concepts-list empty-list">No document open yet</div>
+        <p class="panel-hint" data-i18n="conceptsHint">Pulled from the current document’s headings; click one to jump.</p>
+        <div id="conceptsList" class="concepts-list empty-list" data-i18n="noDocumentOpen">No document open yet</div>
       </section>
 
       <section id="notesPanel" class="tab-panel" data-panel="notes">
-        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> Show notes from every document</label>
-        <div id="notesList" class="notes-list empty-list">No notes yet</div>
+        <label class="toggle-row"><input id="showAllNotes" type="checkbox"> <span data-i18n="showAllNotesLabel">Show notes from every document</span></label>
+        <div id="notesList" class="notes-list empty-list" data-i18n="notesEmpty">No notes yet</div>
       </section>
     </aside>
 
@@ -88,9 +88,9 @@
       <article id="reader" class="reader" aria-live="polite">
         <div class="welcome-card">
           <div class="welcome-icon" aria-hidden="true">📄</div>
-          <p class="eyebrow">UNIVERSAL READER</p>
-          <h1>Your learning content appears here</h1>
-          <p>Finish Phase 0 first, then drop the generated Markdown into <code>content/magazines</code> or <code>content/units</code>.</p>
+          <p class="eyebrow" data-i18n="welcomeEyebrow">UNIVERSAL READER</p>
+          <h1 data-i18n="welcomeTitle">Your learning content appears here</h1>
+          <p data-i18n-html="welcomeBody">Finish Phase 0 first, then drop the generated Markdown into <code>content/magazines</code> or <code>content/units</code>.</p>
         </div>
       </article>
     </main>
@@ -98,31 +98,31 @@
     <!-- Collapsible right-hand table of contents -->
     <aside id="tocSidebar" class="toc-sidebar collapsed">
       <div class="toc-header">
-        <span>🧭 Navigation</span>
+        <span data-i18n="tocHeader">🧭 Navigation</span>
       </div>
       <div class="toc-scroll-area">
         <div id="tocList" class="toc-list">
-          <p class="empty-toc">No document open yet</p>
+          <p class="empty-toc" data-i18n="noDocumentOpen">No document open yet</p>
         </div>
       </div>
     </aside>
   </div>
 
-  <button id="addNoteButton" class="selection-action" type="button" hidden>＋ Note</button>
+  <button id="addNoteButton" class="selection-action" type="button" data-i18n="addNoteLabel" hidden>＋ Note</button>
 
   <dialog id="noteDialog" class="note-dialog">
     <form id="noteForm" method="dialog">
       <div class="dialog-heading">
-        <div><small>Selected text</small><strong id="noteWord"></strong></div>
-        <button id="closeNoteDialog" class="icon-button" type="button" aria-label="Close">×</button>
+        <div><small data-i18n="noteDialogSelected">Selected text</small><strong id="noteWord"></strong></div>
+        <button id="closeNoteDialog" class="icon-button" type="button" data-i18n-aria="noteDialogCloseAria" aria-label="Close">×</button>
       </div>
-      <label for="noteText">Your note</label>
-      <textarea id="noteText" rows="6" placeholder="Jot down a question, an explanation, or a +explicit query…"></textarea>
+      <label for="noteText" data-i18n="noteDialogLabel">Your note</label>
+      <textarea id="noteText" rows="6" data-i18n-placeholder="noteDialogPlaceholder" placeholder="Jot down a question, an explanation, or a +explicit query…"></textarea>
       <div class="dialog-actions">
-        <button id="deleteNoteButton" class="danger" type="button" hidden>Delete</button>
+        <button id="deleteNoteButton" class="danger" type="button" data-i18n="noteDialogDelete" hidden>Delete</button>
         <span class="dialog-spacer"></span>
-        <button id="cancelNoteButton" type="button">Cancel</button>
-        <button class="primary" type="submit">Save</button>
+        <button id="cancelNoteButton" type="button" data-i18n="noteDialogCancel">Cancel</button>
+        <button class="primary" type="submit" data-i18n="noteDialogSave">Save</button>
       </div>
     </form>
   </dialog>
@@ -132,6 +132,7 @@
   <script src="/vendor/marked.js"></script>
   <script src="/vendor/purify.js"></script>
   <script src="/vendor/mermaid.js"></script>
+  <script src="/ui-strings.js"></script>
   <script src="/reader-core.js"></script>
   <script src="/app.js"></script>
 </body>

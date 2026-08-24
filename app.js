@@ -23,6 +23,38 @@
     toast: $('#toast'), search: $('#sidebarSearch'), tocSidebar: $('#tocSidebar'), tocList: $('#tocList'), tocToggle: $('#tocToggle'),
   };
 
+  // --- UI language pack (frontend_spec §13) -------------------------------
+  // Every user-facing string comes from ui-strings.js, so the whole interface can
+  // be switched to the user's own language after Phase 0. The fallbacks here only
+  // surface if the pack is missing a key.
+  const UI = window.UI_STRINGS || {};
+  const T = (key) => (typeof UI[key] === 'string' ? UI[key] : key);
+
+  function applyStaticStrings() {
+    if (UI.lang) document.documentElement.lang = UI.lang;
+    if (UI.pageTitle) document.title = UI.pageTitle;
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      const value = UI[el.dataset.i18n];
+      if (typeof value === 'string') el.textContent = value;
+    }
+    // Only keys that need inline <code>, like welcomeBody, go through the HTML
+    // channel, and they are sanitized — the pack is a trusted local file, but this
+    // means stray markup pasted in while translating still cannot do harm.
+    for (const el of document.querySelectorAll('[data-i18n-html]')) {
+      const value = UI[el.dataset.i18nHtml];
+      if (typeof value === 'string') el.innerHTML = window.DOMPurify.sanitize(value);
+    }
+    const attrs = [['data-i18n-title', 'i18nTitle', 'title'],
+                   ['data-i18n-aria', 'i18nAria', 'aria-label'],
+                   ['data-i18n-placeholder', 'i18nPlaceholder', 'placeholder']];
+    for (const [selector, dataKey, attribute] of attrs) {
+      for (const el of document.querySelectorAll(`[${selector}]`)) {
+        const value = UI[el.dataset[dataKey]];
+        if (typeof value === 'string') el.setAttribute(attribute, value);
+      }
+    }
+  }
+
   window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
   window.marked.setOptions({ gfm: true, breaks: false });
 
@@ -70,8 +102,8 @@
 
   function renderContents() {
     elements.contentsList.replaceChildren();
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
-    const labels = { magazines: 'Magazines', units: 'Units' };
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? T('sortDesc') : T('sortAsc');
+    const labels = { magazines: T('groupMagazines'), units: T('groupUnits') };
     let count = 0;
     for (const groupName of ['magazines', 'units']) {
       const section = document.createElement('section');
@@ -84,7 +116,7 @@
       if (!files.length) {
         const empty = document.createElement('p');
         empty.className = 'empty-list';
-        empty.textContent = 'Nothing here yet';
+        empty.textContent = T('emptyGroup');
         section.append(empty);
       }
       for (const file of files) {
@@ -102,7 +134,7 @@
       }
       elements.contentsList.append(section);
     }
-    if (!count) elements.contentsList.setAttribute('aria-label', 'This project has no learning content yet');
+    if (!count) elements.contentsList.setAttribute('aria-label', T('contentsEmptyAria'));
   }
 
   async function refreshFiles({ selectFirst = false } = {}) {
@@ -127,28 +159,28 @@
     if (!state.dirty || !state.activePath) {
       // A manual click on a clean document must still answer: silence reads as "did it work?".
       if (manual && state.activePath) {
-        setSaveStatus('Saved', 'saved');
-        toast('No changes — already up to date');
+        setSaveStatus(T('statusSaved'), 'saved');
+        toast(T('toastNoChanges'));
       }
       return;
     }
     const path = state.activePath;
     const content = state.rawMarkdown;
     state.dirty = false;
-    setSaveStatus('Saving…', 'saving');
+    setSaveStatus(T('statusSaving'), 'saving');
     try {
       await api('/api/save', { method: 'POST', body: JSON.stringify({ path, content }) });
-      setSaveStatus('Saved', 'saved');
+      setSaveStatus(T('statusSaved'), 'saved');
     } catch (error) {
       state.dirty = true;
-      setSaveStatus('Save failed', 'error');
+      setSaveStatus(T('statusSaveFailed'), 'error');
       toast(error.message);
     }
   }
 
   function scheduleSave() {
     state.dirty = true;
-    setSaveStatus('Unsaved', 'dirty');
+    setSaveStatus(T('statusDirty'), 'dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(saveCurrentNow, 700);
   }
@@ -156,7 +188,7 @@
   async function loadFile(path) {
     if (path === state.activePath) return;
     await saveCurrentNow();
-    setSaveStatus('Loading…', 'saving');
+    setSaveStatus(T('statusLoading'), 'saving');
     try {
       const payload = await api(`/api/file?path=${encodeURIComponent(path)}`);
       state.activePath = payload.path;
@@ -166,11 +198,11 @@
       await renderActiveFile();
       renderContents();
       renderNotes();
-      setSaveStatus('Loaded', 'saved');
+      setSaveStatus(T('statusLoaded'), 'saved');
       elements.sidebar.classList.remove('open');
       window.scrollTo({ top: 0 });
     } catch (error) {
-      setSaveStatus('Load failed', 'error');
+      setSaveStatus(T('statusLoadFailed'), 'error');
       toast(error.message);
     }
   }
@@ -192,7 +224,7 @@
       .filter((heading) => matchesQuery(heading.textContent));
     if (!headings.length) {
       elements.conceptsList.className = 'concepts-list empty-list';
-      elements.conceptsList.textContent = state.activePath ? 'This document has no section headings' : 'No document open yet';
+      elements.conceptsList.textContent = state.activePath ? T('conceptsNoHeadings') : T('noDocumentOpen');
       return;
     }
     elements.conceptsList.className = 'concepts-list';
@@ -222,7 +254,7 @@
         const details = document.createElement('details');
         details.className = 'mermaid-error';
         const summary = document.createElement('summary');
-        summary.textContent = 'Diagram failed to render (expand to view source)';
+        summary.textContent = T('vizRenderFailed');
         const sourceBlock = document.createElement('pre');
         sourceBlock.className = 'mermaid-error';
         sourceBlock.textContent = source;
@@ -297,7 +329,7 @@
         mark.dataset.word = hit.annotation.word;
         mark.dataset.note = hit.annotation.userNoteRaw || hit.annotation.note || '';
         if (hit.isPrimary) mark.dataset.primary = 'true';
-        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || 'Highlight';
+        mark.title = hit.annotation.userNoteRaw || hit.annotation.note || T('highlightTooltip');
         mark.textContent = text.slice(hit.localStart, hit.localEnd);
         mark.addEventListener('click', () => openExistingNote(hit.annotation.id));
         fragment.append(mark);
@@ -321,7 +353,7 @@
     if (!headings.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-toc';
-      empty.textContent = state.activePath ? 'This document has no headings' : 'No document open yet';
+      empty.textContent = state.activePath ? T('tocNoHeadings') : T('noDocumentOpen');
       elements.tocList.append(empty);
       return;
     }
@@ -360,7 +392,7 @@
       .filter((note) => matchesQuery(note.word, note.userNoteRaw, note.note));
     if (!notes.length) {
       elements.notesList.className = 'notes-list empty-list';
-      elements.notesList.textContent = 'No notes yet';
+      elements.notesList.textContent = T('notesEmpty');
       return;
     }
     elements.notesList.className = 'notes-list';
@@ -371,9 +403,9 @@
     for (const note of notes) {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'note-item';
-      const strong = document.createElement('strong'); strong.textContent = note.word || 'Summary';
+      const strong = document.createElement('strong'); strong.textContent = note.word || T('noteSummaryFallback');
       const small = document.createElement('small');
-      small.textContent = `${note.userNoteRaw || note.note || 'Highlight only'}${showAll ? ` · ${note.file}` : ''}`;
+      small.textContent = `${note.userNoteRaw || note.note || T('noteHighlightOnly')}${showAll ? ` · ${note.file}` : ''}`;
       button.append(strong, small);
       button.addEventListener('click', async () => {
         if (note.file && note.file !== state.activePath) await loadFile(note.file);
@@ -396,7 +428,7 @@
       || (note && marks.find((mark) => mark.textContent.trim().toLowerCase() === String(note.word).toLowerCase()));
 
     if (!target) {
-      toast('This note no longer lines up with the text — its anchor is stale.');
+      toast(T('toastAnchorStale'));
       return;
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -461,7 +493,7 @@
     if (!note) return;
     state.editingNoteId = id;
     state.pendingSelection = null;
-    elements.noteWord.textContent = note.word || 'Summary';
+    elements.noteWord.textContent = note.word || T('noteSummaryFallback');
     elements.noteText.value = note.userNoteRaw ?? note.note ?? '';
     elements.deleteNote.hidden = false;
     elements.noteDialog.showModal();
@@ -497,7 +529,7 @@
     await renderActiveFile();
     renderNotes();
     switchTab('notes');
-    toast('Note saved');
+    toast(T('toastNoteSaved'));
   }
 
   async function deleteCurrentNote() {
@@ -507,7 +539,7 @@
     elements.noteDialog.close();
     await renderActiveFile();
     renderNotes();
-    toast('Note deleted');
+    toast(T('toastNoteDeleted'));
   }
 
   elements.reader.addEventListener('input', (event) => {
@@ -597,15 +629,16 @@
     if (localStorage.getItem('ltm_toc_collapsed') === 'false') {
       elements.tocSidebar?.classList.remove('collapsed');
     }
-    elements.sortButton.textContent = state.sortOrder === 'desc' ? '↓ New → Old' : '↑ Old → New';
+    elements.sortButton.textContent = state.sortOrder === 'desc' ? T('sortDesc') : T('sortAsc');
   }
+  applyStaticStrings();
   restorePreferences();
 
   (async () => {
     await refreshNotes();
     await refreshFiles({ selectFirst: true });
   })().catch((error) => {
-    setSaveStatus('Init failed', 'error');
+    setSaveStatus(T('statusInitFailed'), 'error');
     toast(error.message);
   });
 })();

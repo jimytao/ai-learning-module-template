@@ -42,6 +42,7 @@
 ```
 AGENT.md                          ← entry router (this file; rewritten after Phase 0)
 SETUP.md                          ← first run: environment prep + Phase 0 intake + rewrite of this file (kept)
+ui-strings.js                     ← reader UI language pack (sole source of copy; Step 5.5 translates it)
 start.command                     ← one-click macOS browser + local server start
 │
 ├── protocols/
