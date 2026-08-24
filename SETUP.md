@@ -41,6 +41,9 @@ Instead, jump straight to the single step that matches what the user actually wa
 | The environment is broken and nothing runs | **Step 0** of this file — fix the environment only, **do not touch the profile** |
 | Start a **completely new subject** | The archive flow in `protocols/project_lifecycle.md`, **not** a re-run of this file |
 
+> The full "I want to change X → where to find it" index is the **"Settings index"**
+> section of `AGENT.md`.
+
 When the request is ambiguous, ask this before doing anything:
 
 > "This project is already set up for **[subject]**. Do you want to change a few fields,
