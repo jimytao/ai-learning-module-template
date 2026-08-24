@@ -216,6 +216,6 @@
 待确认 / TBD：…  
 ```
 
-用户回复「确认」后 → 执行写入 + `p0_bootstrap.md` 后续步骤 + **AGENT 改造**（见 `AGENT.md`「Bootstrap 后改造」）。
+用户回复「确认」后 → 执行写入 + `p0_bootstrap.md` 后续步骤 + **AGENT 改造**（见 `SETUP.md` Step 5）。
 
-确认后的主要解释语言属于个人画像信息。模板清理只删除这段前期访谈 prompt，不得删除 `knowledge/profile.md` 中保存的语言偏好；以后通过「更新画像」修改，无需重跑完整 Phase 0。
+确认后的主要解释语言属于个人画像信息，保存在 `knowledge/profile.md` 中，任何后续操作都不得清空它；以后通过「更新画像」修改，无需重跑完整 Phase 0。

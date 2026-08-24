@@ -3,17 +3,17 @@
 > **唯一入口**。任何任务开始前先读本文件，按路由表决定加载哪些文件。  
 > **禁止**在未确认任务类型前全量加载 `knowledge/` 下的大文件。  
 >  
-> **生命周期**：本文件有两种形态——  
-> 1. **空白模板态**（当前）：指导 Phase 0 采集与改造。  
-> 2. **科目项目态**（Phase 0 确认后）：由 AI 按下方「Bootstrap 后改造」改写本文件，去掉模板套话，写入本科目路由与状态。
+> **生命周期**：本文件有两种形态——
+> 1. **空白模板态**（当前）：首次运行请读根目录 **`SETUP.md`**（环境准备 → Phase 0 采集 → 改造本文件）。
+> 2. **科目项目态**（Phase 0 确认后）：由 AI 按 `SETUP.md` Step 5 改写本文件，去掉模板套话，写入本科目路由与状态。
 
 ---
 
 ## 当前项目状态（每次 Phase 结束后必须更新）
 
 **当前状态**: `Phase 0 就绪 — 等待科目引导` | Subject: _(未设定)_ | 模态预设: _(未选)_ | YYYY-MM-DD
-> 下一步: 用户说「初始化 / 我要学…」→ 加载 `protocols/intake_checklist.md` 做确认采集  
-> 完成后: 执行「Bootstrap 后改造」→ 说「今天学什么」进入 **Phase 1**
+> 下一步: 用户说「初始化 / 我要学…」→ 读根目录 `SETUP.md`，从 Step 0 环境准备开始
+> 完成后: 按 `SETUP.md` Step 5 改造本文件 → 说「今天学什么」进入 **Phase 1**
 
 ---
 
@@ -21,7 +21,7 @@
 
 | 用户指令关键词 | 触发 Phase | 必须加载 | 按需加载 |
 | :--- | :--- | :--- | :--- |
-| "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 —— **仅限本项目尚未初始化时；见黄金规则 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
+| "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 —— **仅限本项目尚未初始化时；见黄金规则 18** | **Phase 0** | **`SETUP.md`**（根目录，含环境准备）+ `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
 | "修改解释语言" / "用我的母语解释" | **Phase 0 · 补丁** | `intake_checklist.md`（只问语言槽）+ `profile.md` | — |
 | "改配图" / "改题型" / "多点图" / "不要开放题" / "改排版偏好" | **Phase 0 · 补丁** | `intake_checklist.md`（只问 §H 槽）+ `knowledge/profile.md` §内容形态偏好 | `visual_arsenal` / `tech_spec` |
@@ -37,78 +37,16 @@
 
 ---
 
-<!-- TEMPLATE_BOOTSTRAP_START -->
-## Bootstrap 后改造（空白模板 → 本科目学习项目）
-
-> Phase 0 用户确认卡通过后，AI **必须**改写本 `AGENT.md`，让仓库从「通用模板」变成「该科目的学习项目」。  
-> 该改造分**两道闸**执行（见 `protocols/p0_bootstrap.md` Step 4）：  
-> **闸 A** —— 下方的改写，确认卡一通过就做。闸 A 完成前不得进入 Phase 2 生成正文。  
-> **闸 B** —— 模板清理，推迟到阅读器验收通过后再做。闸 B 不阻塞任何事：未清理的 Bootstrap 区块只是惰性提示文本，**绝不能让用户等它**。
-
-### 必须改写的部分
-
-| 位置 | 改成什么 |
-| :--- | :--- |
-| 标题 H1 | `AI Learning Coach — [科目名]` |
-| 顶部「当前状态」 | Subject、模态预设（T/M/H/C）、Phase 1 就绪、日期 |
-| 开篇说明 | 删除「空白模板」套话；改为本科目一句话目标（来自 profile） |
-| 文件地图中的 content 说明 | 可注明本科目主模态（例如「以 Magazine 为主」） |
-| 黄金规则第 8 条 | 模板态的「不得预填个人信息」改为：「画像以 profile 为准；勿编造未提供信息」 |
-
-> [!IMPORTANT]
-> **闸 B —— 清理**：本分支**自带可用的阅读器**，因此 `p0_bootstrap.md` **Step 3.5** 是校验它而不是构建它。当 `start.command` 能启动、`npm test` 通过、且 `node scripts/verify_reader.js` 无 FAIL 后，AI 才加载 `protocols/cleanup_template.md`，执行模板清理，并让它**自我删除**。尚未完成校验时，用一句话说明并继续进入 Phase 1；**不得在前置条件未满足时执行清理**。
-
-> [!NOTE]
-> **初始化痕迹**：本改造清单位于清理时会被删除的区块内，因此无法记录自身的完成状态。清理在删除任何内容之前，必须先向 `state/log.md` 追加一行 `Initialized …` 并更新状态栏。那一行——而非本清单——才是项目已初始化的持久证据，也是阻止后续会话重跑 Phase 0 的幂等标记。
-
-### 可以精简 / 归档的部分
-
-| 动作 | 说明 |
-| :--- | :--- |
-| 保留 `intake_checklist.md` | 以后「补问槽位 / 重做画像」仍可用；但路由表可把 Phase 0 标为「仅补全 TBD 时」 |
-| 保留 `modality_presets.md` | 切换模态仍依赖 |
-| 保留 `DESIGN.md` | 设计说明；**不要**放进阅读器目录 |
-| 不必删除 protocols | 规则层继续用；若某科目永不使用 Magazine，可在状态区注明「本科目禁用 Mag」，而不是删文件 |
-| `templates/` | 保留作生成骨架 |
-
-### 改造后路由表建议形态
-
-- Phase 0 行改为：仅当 profile 有 `TBD` 或用户说「更新画像」时触发。  
-- 默认欢迎语 / 下一步：指向 Phase 1。  
-- 若模态为 **T**：Phase 1 说明默认提案 Unit。  
-- 若模态为 **M**：Phase 1 说明默认提案 Magazine。  
-
-### 改造完成检查
-
-**闸 A（阻塞项 —— 进入 Phase 2 前必须完成）：**
-
-- [ ] 标题含科目名  
-- [ ] 状态区无「未设定」  
-- [ ] 模态预设已写  
-- [ ] Phase 0 路由已收窄为「补全 TBD / 更新画像」，并已加入重入护栏（黄金规则 18）  
-- [ ] 用户确认卡已存档痕迹（profile / desire / gaps / calendar / domain_map 已非全 TBD）  
-- [ ] `profile.md` 已分别确认主要解释语言与学习内容语言
-- [ ] `profile.md` §内容形态偏好已写入（配图密度 / 图示档位 / 便利贴 / 题型取舍）  
-- [ ] 下一步指向 Phase 1  
-
-**闸 B（推迟项 —— 不阻塞任何事）：**
-
-- [ ] 自带阅读器已校验：`start.command` 可启动、`npm test` 通过、`verify_reader.js` 无 FAIL  
-- [ ] 已加载 `protocols/cleanup_template.md` 并执行模板冗余清理（`Initialized …` 行已写入 `state/log.md`；该清理文件已被自动删除）  
-<!-- TEMPLATE_BOOTSTRAP_END -->
-
----
-
 ## 项目文件地图
 
 ```
-AGENT.md                          ← 入口路由（本文件；Bootstrap 后会改写）
-start.command                     ← macOS 浏览器与本地服务器一键启动脚本
+AGENT.md                          ← 入口路由（本文件；Phase 0 后会改写）
+SETUP.md                          ← 首次运行：环境准备 + Phase 0 采集 + 本文件改造（长期保留）
+start.bat                         ← Windows 浏览器与本地服务器一键启动脚本
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0：采集确认清单（强制）
-│   ├── p0_bootstrap.md           ← Phase0：写入与 AGENT 改造流程
-│   ├── cleanup_template.md       ← Phase0：一次性模板清理与精简协议（执行后自毁）
+│   ├── p0_bootstrap.md           ← Phase0：写入细则（字段、domain_map、calendar 初始化）
 │   ├── project_lifecycle.md      ← 复制新科目 / 归档 / 母模板升级
 │   ├── p1_propose.md
 │   ├── p2_generate.md
@@ -175,9 +113,9 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 5. **notes 字段边界**：AI 只写允许字段；保留 `context`；不覆盖用户原始注释。  
 6. **严谨评估、禁止吹捧**：MCQ/T-F 全对 ≠ 能应用。  
 7. **模态预设驱动**：Phase 1/2 遵守 `profile` 中的 T/M/H/C；改模态需用户明示或确认。  
-8. **空白模板纪律（仅模板态）**：不得预填真实个人信息；Phase 0 确认后本条改为「以 profile 为准、不编造」。确认后的主要解释语言是持久画像数据：清理只删除访谈 prompt，不删除已保存偏好。
+8. **空白模板纪律（仅模板态）**：不得预填真实个人信息；Phase 0 确认后本条改为「以 profile 为准、不编造」。确认后的主要解释语言是持久画像数据，任何后续操作都不得清空它。
 9. **订正后再出题必须先问**：未获明确同意禁止出新题。  
-10. **采集必须确认**：Phase 0 必须走 `intake_checklist` 确认卡；未确认不得生成正文、不得提前改写本 AGENT 为科目态。  
+10. **采集必须确认**：Phase 0 必须走 `SETUP.md` 全流程与 `intake_checklist` 确认卡；未确认不得生成正文、不得提前改写本 AGENT 为科目态。  
 11. **前端细节不丢**：迁入/调试阅读器时以 `frontend_spec.md` 为准（排序、侧栏 Notes、整句 context 定位、多文档隔离、**图示渲染契约**）。  
 12. **不猜测意图**：用户指令不在路由表中时，先问清楚再加载文件，禁止自行开写。  
 13. **来源可核验**：推荐视频/播客/文献/数据前须检索确认真实存在；禁止伪造引用。不确定标「需核验」。  
@@ -196,7 +134,7 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 ## 完整学习闭环
 
 ```
-Phase 0  intake 清单采集 → 确认卡 → 写入画像 → 改造 AGENT 为科目项目
+Phase 0  SETUP.md：环境准备 → intake 采集 → 确认卡 → 写入画像 → 改造 AGENT 为科目项目
    ↓
 Phase 1  按模态预设排期提案
    ↓ 用户确认
