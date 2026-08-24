@@ -23,7 +23,8 @@
 | :--- | :--- | :--- | :--- |
 | "我要学…" / "初始化" / "设定科目" / "Bootstrap" / 首次使用 —— **仅限本项目尚未初始化时；见黄金规则 18** | **Phase 0** | **`SETUP.md`**（根目录，含环境准备）+ `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | "更新画像" / "补全 TBD" / "改目标/弱项/时间" | **Phase 0 · 补丁** | `intake_checklist.md`（只问变更槽）+ `profile.md` | 相关 state/knowledge |
-| "修改解释语言" / "用我的母语解释" | **Phase 0 · 补丁** | `intake_checklist.md`（只问语言槽）+ `profile.md` | — |
+| "修改解释语言" / "用我的母语解释" / "改内容语言" | **Phase 0 · 补丁** | `intake_checklist.md`（只问 E3 / E4）+ `profile.md` | — |
+| "改界面语言" / "按钮改成中文" / "浏览器里的字" —— **改的是界面，不是画像** | **Phase 0 · 补丁** | **`ui-strings.js`**（根目录）+ `SETUP.md` **Step 5.5** | `frontend_spec.md` §13 |
 | "改配图" / "改题型" / "多点图" / "不要开放题" / "改排版偏好" | **Phase 0 · 补丁** | `intake_checklist.md`（只问 §H 槽）+ `knowledge/profile.md` §内容形态偏好 | `visual_arsenal` / `tech_spec` |
 | "改成 textbook / magazine / 混合" / "改模态" | **模态切换** | `knowledge/modality_presets.md` + `knowledge/profile.md` + 本文件状态区 | — |
 | "开新科目" / "复制模板" / "新增轨道" / "怎么归档" | **Lifecycle** | `protocols/project_lifecycle.md` + 必要时 `domain_map.md` | `intake_checklist`（只补新轨道槽） |
@@ -34,6 +35,37 @@
 | "再出题" / "加练" / "要"（仅在批改后被询问且用户同意时） | **Phase 3 · 加练** | 同上；**必须已获用户明确同意**，禁止批改后自动出题 | 当期错点 / `gaps` |
 | "调试" / "图片broken" / "渲染出错" / "侧栏/跳转/注释定位" | **Tech Debug** | `protocols/tech_spec.md` + `protocols/frontend_spec.md` | 错误信息 |
 | "查看进度" / "我掌握了什么" / "日历" | **Progress Check** | `knowledge/calendar.md` + `state/log.md` + `state/gaps.md` | `desire` |
+
+---
+
+## 用户设置索引（「我想改 X」→ 去哪找）
+
+> 用户改主意是最高频的一类请求，也最容易改错地方。**本节是索引，不是细则** ——
+> 先在这里定位，再去对应文件按细则改。
+>
+> 全部属于 **Phase 0 · 补丁**：只改用户指名的那几项，**禁止重跑完整采集**（黄金规则 18）。
+
+| 用户想改什么 | 存在哪个文件 | 按什么细则改 |
+| :--- | :--- | :--- |
+| 科目 / 可检验目标 | `knowledge/profile.md` | `intake_checklist.md` §A |
+| 当前水平 / 已知内容 | `knowledge/profile.md` | `intake_checklist.md` §B |
+| 弱项 / 卡点 | `state/gaps.md` | `intake_checklist.md` §C |
+| 兴趣 / 想覆盖的主题 | `knowledge/desire.md` | `intake_checklist.md` §D |
+| 时间与约束 | `knowledge/profile.md` | `intake_checklist.md` §E |
+| **讲解语言**（AI 解释、批改、反馈用什么语言） | `knowledge/profile.md` | `intake_checklist.md` **E3** |
+| **学习内容语言**（课文正文用什么语言） | `knowledge/profile.md` | `intake_checklist.md` **E4** |
+| **界面语言**（按钮、侧栏、提示、弹窗） | **`ui-strings.js`**（根目录） | **`SETUP.md` Step 5.5** —— 只改值不改键，改完跑 `verify_reader.js` |
+| 学习模态 T / M / H / C | `knowledge/profile.md` + 本文件状态区 | `knowledge/modality_presets.md` |
+| 配图密度 / 图示档位 / 便利贴 / 题型取舍 | `knowledge/profile.md` §内容形态偏好 | `intake_checklist.md` §H |
+| 阅读器排序 / Notes 显示范围 / 亮暗主题 | 浏览器 `localStorage`（用户自己在界面上点） | 不用改文件；持久化契约见 `frontend_spec.md` §2.1 |
+| 排期 / 日历 / 下一期学什么 | `knowledge/calendar.md` | Phase 1（`protocols/p1_propose.md`） |
+| 换一个**全新科目** | —— | `protocols/project_lifecycle.md` 归档流程，**不是**重跑 Phase 0 |
+
+> [!IMPORTANT]
+> **「语言」有三处，不要混：**
+> 讲解语言与内容语言存在 `profile.md`，改它们**不会**动浏览器界面；
+> 界面语言在 `ui-strings.js`，改它**不会**动课文。
+> 用户只说「改成中文」时，**先问清是哪一个**，或者确认后三处一起改。
 
 ---
 
@@ -91,6 +123,7 @@ start.bat                         ← Windows 浏览器与本地服务器一键�
 | **`state/log.md`** | 复盘与概念台账 | 复盘权威 |
 | **`notes.json`** | 标注 + AI 批注（含 context） | 微观信号 |
 | **`protocols/frontend_spec.md`** | 阅读器行为验收 | 前端权威 |
+| **`ui-strings.js`** | 阅读器界面全部文案（换界面语言只改这一个文件） | 界面文案权威 |
 
 ### 排期信息流
 
