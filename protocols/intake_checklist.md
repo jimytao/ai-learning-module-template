@@ -137,6 +137,6 @@ See `protocols/frontend_spec.md`. Before the frontend is migrated, still write t
 Pending / TBD: …  
 ```
 
-After user says “confirm” → write + continue `p0_bootstrap.md` + **AGENT rewrite** (see `AGENT.md` “Post-Bootstrap rewrite”).
+After user says “confirm” → write + continue `p0_bootstrap.md` + **AGENT rewrite** (see `SETUP.md` Step 5).
 
-The confirmed explanation-language preference is personal profile data. Template cleanup removes this interview prompt, but must retain the saved value in `knowledge/profile.md`; later changes use the “update profile” route rather than rerunning all of Phase 0.
+The confirmed explanation-language preference is personal profile data, stored in `knowledge/profile.md`, and must never be cleared by a later step; later changes use the “update profile” route rather than rerunning all of Phase 0.

@@ -3,17 +3,17 @@
 > **Sole entrypoint**. Before any task, read this file and use the routing table to decide which files to load.  
 > **Do not** bulk-load large files under `knowledge/` before the task type is confirmed.  
 >  
-> **Lifecycle**: this file has two forms —  
-> 1. **Blank template mode** (current): guides Phase 0 intake and conversion.  
-> 2. **Subject project mode** (after Phase 0 confirm): AI rewrites this file per “Post-Bootstrap rewrite” below, removes template boilerplate, and writes subject routing + status.
+> **Lifecycle**: this file has two forms —
+> 1. **Blank template mode** (current): on a first run, read **`SETUP.md`** in the repository root (environment prep → Phase 0 intake → rewrite of this file).
+> 2. **Subject project mode** (after Phase 0 confirm): AI rewrites this file per `SETUP.md` Step 5, removes template boilerplate, and writes subject routing + status.
 
 ---
 
 ## Current project status (must update after every Phase)
 
 **Current status**: `Phase 0 ready — awaiting subject intake` | Subject: _(unset)_ | Modality preset: _(not chosen)_ | YYYY-MM-DD
-> Next: user says “bootstrap / I want to learn…” → load `protocols/intake_checklist.md` for confirmed intake  
-> After that: run “Post-Bootstrap rewrite” → say “what should I study today” to enter **Phase 1**
+> Next: user says “bootstrap / I want to learn…” → read `SETUP.md` in the repository root, starting at Step 0 (environment prep)
+> After that: rewrite this file per `SETUP.md` Step 5 → say “what should I study today” to enter **Phase 1**
 
 ---
 
@@ -21,7 +21,7 @@
 
 | User command keywords | Triggers Phase | Must load | On demand |
 | :--- | :--- | :--- | :--- |
-| “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
+| “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | **`SETUP.md`** (repo root, includes environment prep) + `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
 | “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
 | “change images” / “change question types” / “more diagrams” / “no open Q&A” / “change layout preferences” | **Phase 0 · patch** | `intake_checklist.md` (section H only) + `knowledge/profile.md` §Content format preferences | `visual_arsenal` / `tech_spec` |
@@ -37,77 +37,16 @@
 
 ---
 
-<!-- TEMPLATE_BOOTSTRAP_START -->
-## Post-Bootstrap rewrite (blank template → this subject’s learning project)
-
-> After the Phase 0 confirmation card passes, the AI **must** rewrite this `AGENT.md` so the repo becomes “this subject’s learning project” instead of a generic template.  
-> This happens in **two gates** (see `protocols/p0_bootstrap.md` Step 4):  
-> **Gate A** — the rewrite below; run it immediately after confirmation. Phase 2 body generation is blocked until Gate A is done.  
-> **Gate B** — template cleanup; deferred until the reader is verified. Gate B blocks nothing: an uncleaned Bootstrap block is inert text, so **never** make the user wait on it.
-
-### Must rewrite
-
-| Location | Change to |
-| :--- | :--- |
-| H1 title | `AI Learning Coach — [Subject name]` |
-| Top “Current status” | Subject, modality preset (T/M/H/C), Phase 1 ready, date |
-| Opening blurb | Remove “blank template” boilerplate; one-line subject goal from profile |
-| content note in file map | May note primary modality (e.g. “Magazine-primary”) |
-| Golden rule #8 | Replace template-mode “do not prefill personal info” with: “Profile is authoritative; do not invent unprovided info” |
-
-> [!IMPORTANT]
-> **Gate B — cleanup**: this branch **ships a working reader**, so `p0_bootstrap.md` **Step 3.5** verifies it rather than building it. Once `start.command` runs, `npm test` passes, and `node scripts/verify_reader.js` reports no FAIL, the AI loads `protocols/cleanup_template.md`, runs its template cleanup, and lets it **self-delete**. If verification has not been done, say so in one line and continue to Phase 1; do not run cleanup with unmet preconditions.
-
-> [!NOTE]
-> **Initialization trace**: this checklist lives inside the block that cleanup deletes, so it cannot record its own completion. Before deleting anything, cleanup appends one `Initialized …` line to `state/log.md` and stamps the status bar. That line — not this checklist — is the durable proof the project was bootstrapped, and the idempotence marker that stops a later session from re-running Phase 0.
-
-### May slim / archive
-
-| Action | Note |
-| :--- | :--- |
-| Keep `intake_checklist.md` | Still useful for “fill slots / redo profile”; routing may mark Phase 0 as “only when filling TBD” |
-| Keep `modality_presets.md` | Still needed for modality switches |
-| Keep `DESIGN.md` | Design notes; **do not** put in the reader TOC |
-| Do not delete protocols | Rules layer stays; if a subject never uses Magazine, note “Mag disabled” in status — don’t delete files |
-| `templates/` | Keep as generation skeletons |
-
-### Suggested routing shape after rewrite
-
-- Phase 0 row: only when profile has `TBD` or user says “update profile”.  
-- Default welcome / next step: Phase 1.  
-- If modality is **T**: Phase 1 notes default Unit proposals.  
-- If modality is **M**: Phase 1 notes default Magazine proposals.  
-
-### Rewrite done checklist
-
-**Gate A (blocking — finish before Phase 2):**
-
-- [ ] Title includes subject name  
-- [ ] Status area has no “unset”  
-- [ ] Modality preset written  
-- [ ] Phase 0 routing row narrowed to “fill TBD / update profile”, re-entry guard in place (golden rule 18)  
-- [ ] Confirmation card left traces (profile / desire / gaps / calendar / domain_map no longer all TBD)  
-- [ ] Primary explanation language and learning-content language are confirmed separately in `profile.md`
-- [ ] Next step points to Phase 1  
-
-**Gate B (deferred — blocks nothing):**
-
-- [ ] Shipped reader verified: `start.command` runs, `npm test` passes, `verify_reader.js` reports no FAIL  
-- [ ] Loaded `protocols/cleanup_template.md` and ran template cleanup (`Initialized …` line written to `state/log.md`; cleanup file auto-deleted)  
-<!-- TEMPLATE_BOOTSTRAP_END -->
-
----
-
 ## Project file map
 
 ```
-AGENT.md                          ← entry router (this file; rewritten after Bootstrap)
-start.command                     ← one-click macOS browser + local server start
+AGENT.md                          ← entry router (this file; rewritten after Phase 0)
+SETUP.md                          ← first run: environment prep + Phase 0 intake + rewrite of this file (kept)
+start.bat                         ← one-click Windows browser + local server start
 │
 ├── protocols/
 │   ├── intake_checklist.md       ← Phase0: intake confirmation checklist (mandatory)
-│   ├── p0_bootstrap.md           ← Phase0: write + AGENT rewrite flow
-│   ├── cleanup_template.md       ← Phase0: one-shot template cleanup (self-deletes)
+│   ├── p0_bootstrap.md           ← Phase0: write-in detail (fields, domain_map, calendar init)
 │   ├── project_lifecycle.md      ← copy new subject / archive / mother-template upgrade
 │   ├── p1_propose.md
 │   ├── p2_generate.md
@@ -174,9 +113,9 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
 5. **notes field boundaries**: AI writes only allowed fields; keep `context`; never overwrite user raw notes.  
 6. **Rigorous assessment, no praise inflation**: all MCQ/T-F correct ≠ can apply.  
 7. **Modality-preset driven**: Phase 1/2 obey T/M/H/C in `profile`; changing modality needs explicit user request or confirm.  
-8. **Blank-template discipline (template mode only)**: do not prefill real personal info; after Phase 0 confirm, this becomes “profile is authoritative; do not invent”. Confirmed explanation language is durable profile data: cleanup removes the intake prompt, not the saved preference.
+8. **Blank-template discipline (template mode only)**: do not prefill real personal info; after Phase 0 confirm, this becomes “profile is authoritative; do not invent”. Confirmed explanation language is durable profile data and must never be cleared by any later step.
 9. **Extra drills after correction require asking first**: no new items without clear consent.  
-10. **Intake must confirm**: Phase 0 must use `intake_checklist` confirmation card; no body generation and no AGENT subject rewrite before confirm.  
+10. **Intake must confirm**: Phase 0 must follow `SETUP.md` end to end and use the `intake_checklist` confirmation card; no body generation and no AGENT subject rewrite before confirm.  
 11. **Frontend details must not be lost**: when migrating/debugging the reader, follow `frontend_spec.md` (sort, Notes sidebar, full-sentence context locate, multi-doc isolation, **diagram render contract**).  
 12. **Do not guess intent**: if the user’s command is not in the routing table, ask first — never start writing files unilaterally.  
 13. **Verifiable sources**: before recommending videos/podcasts/papers/data, search to confirm they exist; never fabricate citations. If unsure, mark “needs verification”.  
@@ -195,7 +134,7 @@ Phase 2 generates → Phase 3 grades (extra drills require asking first)
 ## Full learning loop
 
 ```
-Phase 0  intake checklist → confirmation card → write profile → rewrite AGENT as subject project
+Phase 0  SETUP.md: environment prep → intake → confirmation card → write profile → rewrite AGENT as subject project
    ↓
 Phase 1  schedule proposal by modality preset
    ↓ user confirms

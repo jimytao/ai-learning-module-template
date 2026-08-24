@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * verify_reader.js — acceptance harness for the reader built in p0_bootstrap Step 3.5.
+ * verify_reader.js — acceptance harness for the bundled reader (SETUP.md Step 4 /
+ * p0_bootstrap Step 3.5).
  *
  * Checks the hard contracts in protocols/frontend_spec.md that can be verified without a browser:
  * locked names, theme mechanism, annotation anchoring, excluded features, and the internal
@@ -91,9 +92,9 @@ const htmlPath = HTML_CANDIDATES.find((p) => read(p) !== null);
 if (!serverPath && !htmlPath) {
   console.log('SKIP — no reader found (looked for %s).', [...SERVER_CANDIDATES, ...HTML_CANDIDATES].join(', '));
   console.log('');
-  console.log('This is the expected state of a fresh template. Build the reader in');
-  console.log('p0_bootstrap.md Step 3.5, then re-run. Cleanup (Gate B) stays blocked until this');
-  console.log('passes — unless the user explicitly declined a reader, which profile.md must record.');
+  console.log('This is the expected state of a fresh template. Set the environment up per');
+  console.log('SETUP.md Step 0, then re-run — unless the user explicitly declined a reader,');
+  console.log('which profile.md must record.');
   process.exit(0);
 }
 
@@ -391,8 +392,7 @@ for (const r of results) {
 
 console.log(`\n${counts.PASS} passed · ${counts.WARN} warnings · ${counts.FAIL} failed`);
 if (counts.FAIL) {
-  console.log('\nReader is NOT accepted. Fix the FAIL items above (see protocols/frontend_spec.md).');
-  console.log('p0_bootstrap Step 3.5 is incomplete, and cleanup (Gate B) must not run.');
+  console.log('\nReader is NOT accepted (SETUP.md Step 4). Fix the FAIL items above (see protocols/frontend_spec.md).');
   process.exit(1);
 }
-console.log('\nReader accepted. Step 3.5 satisfied — Gate B cleanup may proceed.');
+console.log('\nReader accepted (SETUP.md Step 4 satisfied).');

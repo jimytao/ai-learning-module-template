@@ -165,9 +165,9 @@ Accept against that file — and against `scripts/verify_reader.js`, which mecha
         ↓
 Phase 0  intake checklist → confirmation card → write profile/modality
         ↓
-   Gate A  rewrite AGENT as subject project  →  learning is unblocked here
-   Step 3.5  build the reader from templates/reader_skeleton.html → verify_reader.js
-   Gate B  template cleanup (deferred; never blocks studying)
+   Step 0  environment prep (Node 20+ / npm install / launcher match) — see SETUP.md
+   Step 4  reader acceptance: npm test + verify_reader.js
+   Step 5  rewrite AGENT as subject project  →  learning is unblocked here
         ↓
 Phase 1  propose by T/M/H/C + gaps/notes
         ↓ confirm

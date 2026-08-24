@@ -4,20 +4,19 @@
 
 | Branch | Language | Who it’s for |
 | :--- | :--- | :--- |
-| **`macos-english`** (this branch) | Fully English template + complete macOS reader | English-primary macOS users |
-| **`English`** | Fully English documentation baseline | English-primary users |
+| **`Chinese`** | Chinese-primary template + Windows reader | Chinese-primary Windows users |
+| **`English`** (this branch) | Fully English template + Windows reader | English-primary Windows users |
+| **`macos-chinese`** | Chinese-primary template + complete macOS reader | Chinese-primary macOS users |
+| **`macos-english`** | Fully English template + complete macOS reader | English-primary macOS users |
 | **`Chinese`** | Chinese-primary docs (may mix some English terms) | Chinese-primary users |
 | **`macos-chinese`** | Chinese-primary template + complete macOS reader | Chinese-primary macOS users |
 
 ```bash
-# Complete English macOS reader (this branch)
-git clone -b macos-english https://github.com/jimytao/ai-learning-module-template.git
-
-# Chinese docs
-git clone -b Chinese https://github.com/jimytao/ai-learning-module-template.git
+# This branch
+git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-Or after cloning: `git checkout macos-english` / `git checkout macos-chinese`.
+Or after cloning: `git checkout <branch>`.
 
 ---
 
@@ -34,7 +33,7 @@ Distilled from battle-tested textbook and magazine learning systems: routing, sc
 
 This is a folder-based learning system for an AI coding agent. The AI reads `AGENT.md`, learns your goals and preferences, proposes a sequence, writes lessons as Markdown, and later grades your answers and uses your notes to plan review. Your profile, progress, content, and annotations remain as readable files in this project.
 
-It is **not** a prewritten course or a model/API subscription. You bring an AI agent with permission to read and edit this folder. The macOS branches also include a local web reader; the Windows baseline branches keep their existing Windows workflow.
+It is **not** a prewritten course or a model/API subscription. You bring an AI agent with permission to read and edit this folder. Every branch ships the same local web reader; the branches differ only in documentation language and which one-click launcher they carry.
 
 The learning loop has four phases:
 
@@ -49,17 +48,65 @@ Works for Digital Health, music theory, professional courses, and more. Related 
 
 ## First-time setup
 
-1. Clone this repo (prefer the branch for your language), or copy the folder (keep a clean mother template if you like).  
-2. Open the **whole folder** in Cursor, Codex, Claude Code, Devin, Hermes Agent, Antigravity, or another file-editing agent. Do not paste only one Markdown file into a normal chatbot.
-3. Tell the agent:
+### 1. Get an AI coding agent
 
-```text
-Read AGENT.md first and run Phase 0 / bootstrap. Do not generate lessons until I confirm the intake card.
+You need an agent that can read and edit local files — Cursor, Claude Code, Codex, Devin,
+Hermes Agent, or Antigravity all work (see [Choose an AI coding agent](#choose-an-ai-coding-agent)).
+Do **not** paste a single Markdown file into an ordinary chatbot; it cannot edit your files.
+
+### 2. Clone the repository
+
+```bash
+git clone -b English https://github.com/jimytao/ai-learning-module-template.git
 ```
 
-4. The AI interviews you about the subject, testable goal, current level, known material, gaps, interests, time, **primary explanation language**, learning-content language, Textbook/Magazine/Hybrid modality, and **§Content Format Preferences (image density, visual diagram tier, sticky note types, exercise types: MCQ, MSQ, blanks, open Q&A, T/F)**. Review the confirmation card and reply `confirm` when accurate. These preferences are saved in `knowledge/profile.md` for Phase 2 generation.
-5. After confirmation, the AI writes the accepted information to `knowledge/profile.md` and other knowledge/state files, and rewrites `AGENT.md` into your subject's project. **You can already start learning at this point.** Removing the one-time bootstrap prompt through `protocols/cleanup_template.md` happens later, once the reader is verified; your saved preferences and re-entry guards are strictly retained.
-6. Install Node.js 20+, then double-click **`start.command`** (or `start.bat` on Windows). On first run it installs local dependencies and opens the web reader. Then run `npm test` and `node scripts/verify_reader.js` — both must pass before the cleanup step above may run.
+Or hand the repository URL to your agent and let it clone. Then open the **whole folder**
+in the agent.
+
+### 3. First thing you say: point it at SETUP.md
+
+```text
+Read SETUP.md and start from Step 0. Do not generate any lessons until I confirm the intake card.
+```
+
+[`SETUP.md`](SETUP.md) is the single entrypoint for a first run. The AI works through it in
+three stages:
+
+| Step | What the AI does |
+| :--- | :--- |
+| **Step 0** | **Set up the environment**: check for and install Node.js 20+, run `npm install`, confirm this platform's launcher (`start.bat` on this branch), and smoke-test that the reader opens |
+| **Steps 1–4** | **Intake**: asks about your subject, testable goal, current level, known material, gaps, interests, time budget, **primary explanation language**, learning-content language, learning modality (T/M/H/C), and **§Content Format Preferences** (image density, visual diagram tier, sticky-note types, and exercise mix across MCQ, MSQ, blanks, open Q&A, T/F). It prints a confirmation card, waits for you to reply `confirm`, writes to `knowledge/` and `state/`, then runs `npm test` + `verify_reader.js` |
+| **Steps 5–6** | **Convert the project**: rewrites `AGENT.md` from a generic template into your subject's project and appends an `Initialized …` marker to `state/log.md` |
+
+> Even if the subject you are studying is English, the **primary explanation language** is the
+> one the AI uses to explain hard points, corrections, and feedback — it is confirmed separately
+> from the learning-content language. These preferences live in `knowledge/profile.md` and are
+> read on every Phase 2 generation.
+
+`SETUP.md` **stays in place** and never deletes itself, so you can go back to it later to fill in
+slots, change languages, or change preferences. What stops a later session from re-running
+initialization is the `Initialized …` line in `state/log.md`, not the absence of a file.
+
+### 4. Every session after that
+
+Once Step 6 finishes, the entrypoint moves from `SETUP.md` to `AGENT.md`. From then on, open
+every new session with:
+
+```text
+Read AGENT.md first, then <what you want>
+```
+
+For example: `Read AGENT.md first, then tell me what to study today`, or `Read AGENT.md first,
+I want to plan next month's revision`, or `Read AGENT.md first, I want to learn X — fit it into
+the plan`. The AI decides which Phase to enter and which files to load, shows you an outline,
+and only generates once you approve.
+
+To launch the reader, double-click **`start.bat`** (the first run installs dependencies and
+opens the browser), or run `npm start` and open <http://127.0.0.1:4173> yourself.
+
+> This branch targets **Windows**. If you are on macOS, use the matching branch that
+> ships `start.command`.
+
 
 ---
 
@@ -164,13 +211,14 @@ See [`protocols/project_lifecycle.md`](protocols/project_lifecycle.md).
 ## Repository layout
 
 ```
-AGENT.md                 # Sole AI router / entrypoint (Bootstrap post-cleanup removes setup guides)
-start.command            # macOS first-run install, server launch, and browser open
+AGENT.md                 # Sole AI router / entrypoint (rewritten into your subject at Step 5)
+SETUP.md                 # First-run: environment prep + Phase 0 intake + AGENT rewrite
+start.bat                # Windows first-run install, server launch, and browser open
 server.js                # Local files, autosave, and Notes Smart Merge backend
 index.html / app.js      # Universal Magazine + Unit web reader
 reader-core.js           # Interactive exercise parsing and Markdown write-back
 DESIGN.md                # Design rationale
-protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec, cleanup_template…
+protocols/               # Phase 0–3, tech_spec, visual_arsenal, frontend_spec…
 knowledge/               # profile / desire / calendar / domain_map / modalities
 state/                   # log / gaps / warehouse
 content/magazines/       # Long-form rich input
@@ -183,8 +231,8 @@ review.md                # Grading retrospectives archive
 
 | Path | Role |
 | :--- | :--- |
+| [`SETUP.md`](SETUP.md) | First-run entrypoint: environment prep, Phase 0 intake, AGENT rewrite (kept permanently) |
 | [`protocols/intake_checklist.md`](protocols/intake_checklist.md) | Phase 0 intake confirmation checklist |
-| [`protocols/cleanup_template.md`](protocols/cleanup_template.md) | One-time post-initialization cleanup instructions (deletes itself) |
 | [`scripts/verify_reader.js`](scripts/verify_reader.js) | Reader acceptance harness — checks the `frontend_spec.md` contract |
 | [`templates/reader_skeleton.html`](templates/reader_skeleton.html) | Reference reader shell, kept for porting the UI to other branches |
 | [`protocols/visual_arsenal.md`](protocols/visual_arsenal.md) | Hard syntax for flow / tree / blocks / SVG-lite… |
@@ -197,8 +245,8 @@ review.md                # Grading retrospectives archive
 ## Scripts
 
 ```bash
-# One-click macOS launch (or double-click start.command)
-./start.command
+# One-click launch (or double-click start.bat)
+start.bat
 
 # Reader acceptance: unit tests, then the frontend_spec contract check
 npm test

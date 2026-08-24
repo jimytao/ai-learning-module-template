@@ -411,8 +411,9 @@ FOUC 守卫、偏好持久化、侧边栏标签/搜索/排序/折叠，以及 §
 
 ## 9. 验收清单（前端 Ready 的定义）
 
-> 本清单中可机检的部分请运行 `node scripts/verify_reader.js`。它必须通过，`p0_bootstrap.md`
-> Step 3.5 才算完成，闸 B 的清理才允许执行。
+> Run `node scripts/verify_reader.js` for the machine-checkable part of this list. It must
+> pass before the reader acceptance in `SETUP.md` Step 4 / `p0_bootstrap.md` Step 3.5 counts
+> as done.
 
 - [ ] `node scripts/verify_reader.js` 无 FAIL  
 - [ ] 亮色与暗色都可用；切换可持久化；**暗色下重新加载不得白屏闪烁**  
