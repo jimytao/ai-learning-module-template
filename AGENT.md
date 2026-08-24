@@ -124,7 +124,7 @@ Phase 2 生成 → Phase 3 批改（再出题必须先问）
 15. **项目组织余量**：单科 / 同项目多轨道（相近课）/ 复制文件夹（不相近课）均可，见 `project_lifecycle.md`。Digital Health 这类可先同项目多轨道，画像清晰后再加 Track。  
 16. **图示只用武器库**：Phase 2 只使用 `visual_arsenal.md` 登记的 Type；禁止自创语法导致渲染不一致或崩坏。  
 17. **填空与开放题互斥**：同一题禁止同时使用行内 `___` / `__已填__` 与 `**[Your Answer]**`（双重输入框会导致批改读错）。生成遵守 tech_spec §1.1；批改优先读行内填空（见 `p3_review.md` §1.1）；`validate_content.js` 会报 dual input。
-18. **Phase 0 重入护栏 —— 禁止静默重跑初始化**：执行 Phase 0 前先判断本项目是否已初始化。满足**任一**条件即视为已初始化：`state/log.md` 含 `Initialized …` 行、状态栏已写入科目、或 `knowledge/profile.md` 的科目与模态不是 `TBD`。  
+18. **Phase 0 重入护栏 —— 禁止静默重跑初始化**：执行 Phase 0 前先判断本项目是否已初始化。根目录 `SETUP.md` 开头自带同一道护栏，两边判据一致；**即使本文件因为任何原因漏掉了这条规则，`SETUP.md` 也会自己拦下来**。满足**任一**条件即视为已初始化：`state/log.md` 含 `Initialized …` 行、状态栏已写入科目、或 `knowledge/profile.md` 的科目与模态不是 `TBD`。  
     * **已初始化** → Phase 0 降级为**仅补丁**。只补 `TBD` 槽位和用户指名要改的内容。**禁止**覆盖已确认值、清空 `desire` / `gaps` / `calendar` / `domain_map`，也禁止在未明说「本项目已经是**[科目]**了，你是想改几个字段，还是开一个全新科目？」并得到答复前重跑完整访谈。同一文件夹换新科目走 `project_lifecycle.md` 的归档流程，不是重跑 Phase 0。  
     * **未初始化** → 正常执行 Phase 0。  
     * 已初始化的项目里用户说「我要学 X」，绝大多数是 Phase 1 请求而非重新初始化。先问，别猜。
