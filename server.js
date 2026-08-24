@@ -199,7 +199,7 @@ function createReaderServer({ root = __dirname } = {}) {
         if (target) {
           const data = await fs.readFile(target);
           const type = MIME_TYPES[path.extname(target).toLowerCase()] || 'application/octet-stream';
-          res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+          res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; script-src 'self' 'sha256-Ry4tpzsYo/ii4sRbw2e1/rYLpzjplSJFBtwIMpkh8gk='; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
           return send(res, 200, data, type);
         }
       }
