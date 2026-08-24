@@ -23,7 +23,8 @@
 | :--- | :--- | :--- | :--- |
 | “I want to learn…” / “bootstrap” / “set subject” / “Bootstrap” / first use — **only when this project is not yet initialized; see golden rule 18** | **Phase 0** | **`SETUP.md`** (repo root, includes environment prep) + `protocols/p0_bootstrap.md` + **`protocols/intake_checklist.md`** + `knowledge/modality_presets.md` + `knowledge/profile.md` + `protocols/project_lifecycle.md` | `desire` / `domain_map` / `calendar` / `gaps` |
 | “update profile” / “fill TBD” / “change goals/gaps/time” | **Phase 0 · patch** | `intake_checklist.md` (changed slots only) + `profile.md` | related state/knowledge |
-| “change explanation language” / “use my strongest language for explanations” | **Phase 0 · patch** | `intake_checklist.md` (language slots only) + `profile.md` | — |
+| “change explanation language” / “use my strongest language for explanations” / “change the content language” | **Phase 0 · patch** | `intake_checklist.md` (E3 / E4 only) + `profile.md` | — |
+| “change the interface language” / “put the buttons in Spanish” / “the words in the browser” — **this is the interface, not the profile** | **Phase 0 · patch** | **`ui-strings.js`** (repo root) + `SETUP.md` **Step 5.5** | `frontend_spec.md` §13 |
 | “change images” / “change question types” / “more diagrams” / “no open Q&A” / “change layout preferences” | **Phase 0 · patch** | `intake_checklist.md` (section H only) + `knowledge/profile.md` §Content format preferences | `visual_arsenal` / `tech_spec` |
 | “switch to textbook / magazine / hybrid” / “change modality” | **Modality switch** | `knowledge/modality_presets.md` + `knowledge/profile.md` + this file’s status area | — |
 | “new subject” / “copy template” / “add track” / “how to archive” | **Lifecycle** | `protocols/project_lifecycle.md` + `domain_map.md` if needed | `intake_checklist` (new-track slots only) |
@@ -34,6 +35,41 @@
 | “more drills” / “extra practice” / “yes” (only when asked after grading and user agrees) | **Phase 3 · extra drills** | same as above; **must already have clear user consent** — never auto-generate drills after grading | current mistakes / `gaps` |
 | “debug” / “broken images” / “render error” / “sidebar / jump / note locate” | **Tech Debug** | `protocols/tech_spec.md` + `protocols/frontend_spec.md` | error messages |
 | “check progress” / “what have I mastered” / “calendar” | **Progress Check** | `knowledge/calendar.md` + `state/log.md` + `state/gaps.md` | `desire` |
+
+---
+
+## Settings index ("I want to change X" → where to find it)
+
+> Changing their mind is the most frequent kind of request a user makes, and the easiest
+> one to act on in the wrong place. **This section is an index, not the detail** — locate
+> it here, then follow the rules in the file it points to.
+>
+> All of these are **Phase 0 · patch**: change only the items the user named, and
+> **never re-run the full intake** (golden rule 18).
+
+| What the user wants to change | Which file holds it | Which rules to follow |
+| :--- | :--- | :--- |
+| Subject / testable goal | `knowledge/profile.md` | `intake_checklist.md` §A |
+| Current level / known material | `knowledge/profile.md` | `intake_checklist.md` §B |
+| Gaps / sticking points | `state/gaps.md` | `intake_checklist.md` §C |
+| Interests / topics to cover | `knowledge/desire.md` | `intake_checklist.md` §D |
+| Time and constraints | `knowledge/profile.md` | `intake_checklist.md` §E |
+| **Explanation language** (what the AI explains, grades and gives feedback in) | `knowledge/profile.md` | `intake_checklist.md` **E3** |
+| **Learning-content language** (what the lesson body is written in) | `knowledge/profile.md` | `intake_checklist.md` **E4** |
+| **Interface language** (buttons, sidebar, status text, dialogs) | **`ui-strings.js`** (repo root) | **`SETUP.md` Step 5.5** — values only, never keys; re-run `verify_reader.js` after |
+| Learning modality T / M / H / C | `knowledge/profile.md` + this file's status block | `knowledge/modality_presets.md` |
+| Image density / diagram tier / sticky notes / exercise mix | `knowledge/profile.md` §content format preferences | `intake_checklist.md` §H |
+| Reader sort order / Notes scope / light-dark theme | The browser's `localStorage` (the user clicks these themselves) | No file to edit; the persistence contract is `frontend_spec.md` §2.1 |
+| Schedule / calendar / what comes next | `knowledge/calendar.md` | Phase 1 (`protocols/p1_propose.md`) |
+| Start a **completely new subject** | — | The archive flow in `protocols/project_lifecycle.md`, **not** a Phase 0 re-run |
+
+> [!IMPORTANT]
+> **There are three "languages" here — do not conflate them:**
+> The explanation and content languages live in `profile.md`, and changing them does
+> **not** touch the browser interface; the interface language lives in `ui-strings.js`,
+> and changing it does **not** touch the lesson text.
+> When the user only says "make it Spanish", **ask which one they mean** — or confirm and
+> change all three.
 
 ---
 
@@ -91,6 +127,7 @@ start.bat                         ← one-click Windows browser + local server s
 | **`state/log.md`** | Retrospectives and concept ledger | Retro authority |
 | **`notes.json`** | Annotations + AI reviews (with context) | Micro signals |
 | **`protocols/frontend_spec.md`** | Reader behavior acceptance | Frontend authority |
+| **`ui-strings.js`** | Every user-facing string in the reader (changing the interface language means editing only this file) | Interface copy authority |
 
 ### Scheduling information flow
 
