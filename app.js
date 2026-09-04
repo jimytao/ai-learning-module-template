@@ -53,7 +53,23 @@
     }
   }
 
-  window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict', maxTextSize: 50000 });
+  window.mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    maxTextSize: 50000,
+    themeVariables: {
+      fontSize: '14px',
+      fontFamily: 'Outfit, "Noto Sans TC", system-ui, -apple-system, sans-serif'
+    },
+    flowchart: {
+      htmlLabels: true,
+      curve: 'basis',
+      nodeSpacing: 25,
+      rankSpacing: 35,
+      padding: 12
+    }
+  });
   window.marked.setOptions({ gfm: true, breaks: false });
 
   async function api(url, options = {}) {
@@ -237,6 +253,20 @@
     }
   }
 
+  // §mermaid label centering — mermaid renders each node label as
+  // <foreignObject><div style="...">...<span><p>text</p></span></div></foreignObject>.
+  // DOMPurify enforces HTML namespace-integration rules BEFORE consulting
+  // ADD_TAGS/ADD_ATTR: by default only <annotation-xml> (MathML) is treated as
+  // an "HTML integration point", so any <div>/<span>/<p> living inside an SVG
+  // <foreignObject> is considered impossible per spec and is stripped
+  // entirely — no amount of ADD_TAGS/ADD_ATTR can save it. That silently
+  // deleted the label wrapper div (and its centering-relevant inline style),
+  // leaving bare text at the foreignObject's default top-left position, which
+  // is why the centering CSS in scripts/viz.css never had anything to act on.
+  // Passing HTML_INTEGRATION_POINTS: { foreignobject: true } fixes the root
+  // cause; ADD_TAGS/ADD_ATTR/style are still needed so the div/span/p elements
+  // and their attributes/inline style survive the tag & attribute allowlists.
+
   async function renderMermaid() {
     const blocks = [...elements.reader.querySelectorAll('pre > code.language-mermaid')];
     for (const [index, code] of blocks.entries()) {
@@ -246,7 +276,32 @@
         const result = await window.mermaid.render(`reader-mermaid-${Date.now()}-${index}`, source);
         const host = document.createElement('div');
         host.className = 'mermaid';
-        host.innerHTML = DOMPurify.sanitize(result.svg, { USE_PROFILES: { svg: true, svgFilters: true }, FORBID_TAGS: ['script', 'foreignObject'] });
+        host.innerHTML = DOMPurify.sanitize(result.svg, {
+          USE_PROFILES: { svg: true, svgFilters: true, html: true },
+          ADD_TAGS: ['foreignObject', 'style', 'div', 'span', 'p'],
+          HTML_INTEGRATION_POINTS: { foreignobject: true },
+          ADD_ATTR: [
+            'dominant-baseline',
+            'text-anchor',
+            'alignment-baseline',
+            'fill',
+            'stroke',
+            'stroke-width',
+            'font-size',
+            'font-family',
+            'font-weight',
+            'marker-end',
+            'marker-start',
+            'class',
+            'rx', 'ry',
+            'x1', 'y1', 'x2', 'y2',
+            'xmlns',
+            'style'
+          ],
+          FORBID_ATTR: [],
+
+          FORBID_TAGS: ['script']
+        });
         pre.replaceWith(host);
       } catch (error) {
         const details = document.createElement('details');
